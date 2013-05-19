@@ -29,7 +29,7 @@ try
 	$connections[1] -> setData("charset2", "ASCII");
 
 	$connections['session_3'] -> setData("lang3", "chinese");
-	$connections['session_3'] ->setData("charset3", "CHINESE LANG");
+	$connections['session_3'] -> setData("charset3", "CHINESE LANG");
 
 	echo "<pre>";
 

@@ -3,7 +3,7 @@
 class DB
 {
 	private $_adapter,$_dbName,$_username,$_password,$_host;
-        
+
 	private $_dbh = null;
 	
 	/**
@@ -15,16 +15,16 @@ class DB
 	 * @param type $host
 	 * @return boolean
 	 */
-        public function setDB($adapter, $dbName, $username, $password, $host = "localhost")
+	public function setDB($adapter, $dbName, $username, $password, $host = "localhost")
 	{
 		$this -> _adapter = $adapter;
 		$this -> _username = $username;
 		$this -> _password = $password;
 		$this -> _dbName = $dbName;
 		$this -> _host = $host;
-                
-                if ($this -> _adapter == "mysql")
-                {
+
+		if ($this -> _adapter == "mysql")
+		{
 			try
 			{
 				$this -> _dbh = new PDO("mysql:host={$host};dbname={$dbName}", "{$username}", "{$password}");
@@ -36,11 +36,11 @@ class DB
 			{
 				return FALSE;
 			}
-                }
-                else
-                {
+		}
+		else
+		{
 			return FALSE;
-                }
+		}
 	}
 	
 	/**
