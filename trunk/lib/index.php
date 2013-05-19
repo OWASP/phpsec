@@ -2,6 +2,7 @@
 
 ini_set('display_errors', 'On');
 
+$config = require('../config/config.php');
 require('Session.class.php');
 
 try
@@ -14,9 +15,9 @@ try
 	
 	$connections = array();
 
-	$connections[0] = new Session($user1, "mysql", "OWASP", "root", "testing");
-	$connections[1] = new Session($user1, "mysql", "OWASP", "root", "testing");
-	$connections['session_3'] = new Session($user2, "mysql", "OWASP", "root", "testing");
+	$connections[0] = new Session($user1, "mysql", $config['DB_NAME'], $config['DB_USER'], $config['DB_PASS']);
+	$connections[1] = new Session($user1, "mysql", $config['DB_NAME'], $config['DB_USER'], $config['DB_PASS']);
+	$connections['session_3'] = new Session($user2, "mysql", $config['DB_NAME'], $config['DB_USER'], $config['DB_PASS']);
 
 	//this shows that if value of same key is changed from several concurrent sessions, only once copy is changed.
 	$connections[0] -> setData("lang1", "eng");
