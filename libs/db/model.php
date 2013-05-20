@@ -25,9 +25,16 @@
 			$args = func_get_args ();
 			array_shift ($args);
 			$statement = $this->prepare ($query);
-			if (count ($args) >= 1)
-				call_user_func_array (array ($statement, "bindAll"), $args);
-			$statement->execute ();
+			if (!empty ($args[0])) {
+				if (is_array ($args[0]))
+					$statement->execute ($args[0]);
+				else if (count ($args) >= 1) {
+					call_user_func_array (array ($statement, "bindAll"), $args);
+					$statement->execute ();
+				}
+			}
+			else
+				$statement->execute ();
 			$type = substr (trim (strtoupper ($query)), 0, 3);
 			if ($type == "INS") {
 				$res = $this->LastInsertId ();
@@ -102,13 +109,11 @@
 		}
 
 		public function execute () {
-			if (func_num_args () >= 1) {
-				$params = func_get_args ();
-				call_user_func_array (array ($this, "bindAll"), $params);
-			}
-			$params = array_merge (array ($this->query),func_get_args());
-			$result = $this->statement->execute ();
-			return $result;
+			$args = func_get_args ();
+			if (!empty ($args[0]) && is_array ($args[0]))
+				return $this->statement->execute ($args[0]);
+			else
+				return $this->statement->execute ();
 		}
 
 		public function rowCount () {
