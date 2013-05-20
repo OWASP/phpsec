@@ -1,23 +1,17 @@
 <?php
 
 	/**
+	 * This class is not being used currently.
+	 * Might be needed later for the framework.
+	 * Just include this file and use as following
+	 * $a = DatabaseManager::connect (new DatabaseConfig('pdo_mysql','owasp','root','password'));
+	 * $b = $a->SQL('SELECT * FROM SESSION');
+	 */
+
+	/**
 	 * Abstraction layer for accessing database using several adapters.
 	 * Intended support for pdo_mysql, pdo_sqlite, pdo_pgsql for now.
 	 */
-
-	class DatabaseConfig {
-
-		public $adapter, $dbname, $username, $password, $host;
-
-		function __construct ($adapter, $dbname, $username, $password, $host="localhost") {
-			$this->adapter = $adapter;
-			$this->dbname = $dbname;
-			$this->username = $username;
-			$this->password = $password;
-			$this->host = $host;
-		}
-
-	}
 
 	require (__DIR__ . '/model.php');
 

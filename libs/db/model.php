@@ -1,6 +1,25 @@
 <?php
 
 	/**
+	 * DatabaseConfig class
+	 * A single object for all database configuration options
+	 */
+
+	class DatabaseConfig {
+
+		public $adapter, $dbname, $username, $password, $host;
+
+		function __construct ($adapter, $dbname, $username, $password, $host="localhost") {
+			$this->adapter = $adapter;
+			$this->dbname = $dbname;
+			$this->username = $username;
+			$this->password = $password;
+			$this->host = $host;
+		}
+
+	}
+
+	/**
 	 * DatabaseModel class.
 	 * Intended as parent for all database wrapper classes.
 	 */
@@ -11,7 +30,7 @@
 
 		public $dbh;
 
-		public function __construct (DatabaseConfig $dbConfig) {
+		public function __construct ($dbConfig) {
 			$this->dbConfig = $dbConfig;
 		}
 
@@ -22,6 +41,10 @@
 		}
 
 		public function SQL ($query) {
+			if ($this->dbh === NULL) {
+				echo "You need to initialize database object properly first.";
+				return false;
+			}
 			$args = func_get_args ();
 			array_shift ($args);
 			$statement = $this->prepare ($query);
