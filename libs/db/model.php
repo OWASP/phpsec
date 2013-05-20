@@ -1,5 +1,7 @@
 <?php
 
+	namespace phpsec;
+
 	/**
 	 * DatabaseConfig class
 	 * A single object for all database configuration options

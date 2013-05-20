@@ -1,5 +1,7 @@
 <?php
 
+    namespace phpsec;
+
 	/**
 	 * This class is not being used currently.
 	 * Might be needed later for the framework.

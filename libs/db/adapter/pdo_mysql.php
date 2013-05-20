@@ -1,5 +1,7 @@
 <?php
 
+	namespace phpsec;
+
 	require (__DIR__ . "/../model.php");
 
 	/**
