@@ -47,6 +47,26 @@ PDO_MySQL wrapper class. Extends the DatabaseModel class.
 
 PDO_MySQL prepared statement wrapper class. Extends the DatabaseStatementModel class.
 
+###adapter/pdo_pgsql.php
+
+####Database_pdo_pgsql class
+
+PDO_PostgreSQL wrapper class. Extends the DatabaseModel class.
+
+####DatabaseStatement_pdo_pgsql
+
+PDO_PostgreSQL prepared statement wrapper class. Extends the DatabaseStatementModel class.
+
+###adapter/pdo_sqlite.php
+
+####Database_pdo_sqlite class
+
+PDO_SQLite wrapper class. Extends the DatabaseModel class.
+
+####DatabaseStatement_pdo_sqlite
+
+PDO_SQLite prepared statement wrapper class. Extends the DatabaseStatementModel class.
+
 ###db.php
 
 ####DatabaseManager class

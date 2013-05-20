@@ -5,21 +5,21 @@
 	require (__DIR__ . "/../model.php");
 
 	/**
-	 * PDO_MySQL wrapper class.
+	 * PDO_PostgreSQL wrapper class.
 	 * Extends the parent DatabaseModel class.
 	 */
 
-	class Database_pdo_mysql extends DatabaseModel {
+	class Database_pdo_pgsql extends DatabaseModel {
 
 		public function __construct () {
 			$args = func_get_args ();
 			if (!isset($args[0]))
 				return false;
 			if (count($args) > 1) {
-				$dbConfig = new DatabaseConfig ('pdo_mysql',$args[0],$args[1],$args[2]);
+				$dbConfig = new DatabaseConfig ('pdo_pgsql',$args[0],$args[1],$args[2]);
 				parent::__construct ($dbConfig);
 				try {
-					$this->dbh = new \PDO ("mysql:dbname={$dbConfig->dbname};host={$dbConfig->host};",$dbConfig->username,$dbConfig->password);
+					$this->dbh = new \PDO ("pgsql:dbname={$dbConfig->dbname};host={$dbConfig->host};",$dbConfig->username,$dbConfig->password);
 				}
 				catch (PDOException $e) {
 					echo $e->getMessage();
@@ -39,19 +39,19 @@
 		}
 
 		function prepare ($query) {
-			return new DatabaseStatement_pdo_mysql ($this, $query);
+			return new DatabaseStatement_pdo_pgsql ($this, $query);
 		}
 
 	}
 
 	/**
-	 * PDO_MySQL prepared statements class.
+	 * PDO_PostgreSQL prepared statements class.
 	 * Extends the parent DatabaseStatementModel class.
 	 */
 
-	class DatabaseStatement_pdo_mysql extends DatabaseStatementModel {
+	class DatabaseStatement_pdo_pgsql extends DatabaseStatementModel {
 
-		public function __construct (Database_pdo_mysql $db, $query) {
+		public function __construct (Database_pdo_pgsql $db, $query) {
 			parent::__construct ($db, $query);
 		}
 
