@@ -27,16 +27,19 @@ class Session
 		}
 	}
 	
+	public function checkHTTPS()
+	{
+		if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443)
+		{
+			return TRUE;
+		}
+		else
+			return FALSE;
+	}
+	
 	private function _sessionGenerator()
 	{
-		try
-		{
-			return Rand :: generateRandom();
-		}
-		catch(Exception $e)
-		{
-			throw new Exception($e -> getMessage());
-		}
+		return Rand :: generateRandom();
 	}
 	
 	private function _newSession()
@@ -109,41 +112,29 @@ class Session
 			throw new Exception("DB is not set properly.");
 	}
 	
-	/**
-	 * This function is not complete yet. Possibly it will be done after the "rollingSession" function is done.
-	 * @throws Exception
-	 */
 	public function destroySession()
 	{
 		if ($this -> _handler != null)
 		{
-			$allSessions = $this -> getAllSessions();
-			
-			if ( count($allSessions) == 1)
+			$query = "DELETE FROM SESSION_DATA WHERE `SESSION_ID` = ?";
+			$args = array("{$this -> _session}");
+			$count = $this -> _handler -> prepare($query, $args);
+
+			if ($count > 0)
 			{
-				$query = "DELETE FROM SESSION_DATA WHERE `SESSION_ID` = ?";
+				$query = "DELETE FROM SESSION WHERE `SESSION_ID` = ?";
 				$args = array("{$this -> _session}");
 				$count = $this -> _handler -> prepare($query, $args);
 
-				if ($count == 1)
-				{
-					$query = "DELETE FROM SESSION WHERE `SESSION_ID` = ?";
-					$args = array("{$this -> _session}");
-					$count = $this -> _handler -> prepare($query, $args);
-
-					if ($count != 1)
-						throw new Exception ("Session ID not deleted.");
-					else
-						$this -> _updateTotalNoOfSessions();
-				}
+				if ($count != 1)
+					throw new Exception ("Session ID not deleted.");
 				else
-				{
-					throw new Exception("Session data and Session ID, both not deleted.");
-				}
+					$this -> _session = null;
+					$this -> _updateTotalNoOfSessions();
 			}
-			elseif ( count($allSessions) > 1)
+			else
 			{
-				//more stuff to add here.
+				throw new Exception("Session data and Session ID, both not deleted.");
 			}
 		}
 		else
@@ -168,7 +159,7 @@ class Session
 				if ( count( $prevSession = $this -> getData($key) ) > 0 )
 				{
 					$query = "UPDATE SESSION_DATA SET `VALUE` = ? WHERE `KEY` = ? AND SESSION_ID = ?";
-					$args = array($value, $key, $prevSession[0][1]);
+					$args = array($value, $key, "{$this -> session}");
 					$count = $this -> _handler -> prepare($query, $args);
 					
 					if ($count != 1)
@@ -202,26 +193,11 @@ class Session
 		{
 			if ($this -> _session != null)
 			{
-				$query = "SELECT `SESSION_ID` FROM SESSION WHERE `USERID` = ?";
-				$args = array("{$this -> _userID}");
-				$result = $this -> _handler -> prepare($query, $args);
-				
-				$finalResult = array();
-				
-				foreach ($result as $session)
-				{
-					$query = "SELECT `KEY`, `VALUE` FROM SESSION_DATA WHERE `SESSION_ID` = ? and `KEY` = ?";
-					$args = array("{$session['SESSION_ID']}", $key);
-					$result = $this -> _handler -> prepare($query, $args);
-					
-					if ( count($result) > 0)
-					{
-						array_push($result, $session['SESSION_ID']);
-						array_push($finalResult, $result);
-					}
-				}
-				
-				return $finalResult;
+				$query = "SELECT `KEY`, `VALUE` FROM SESSION_DATA WHERE `SESSION_ID` = ? and `KEY` = ?";
+				$args = array("{$this -> session}", $key);
+				$result = $this -> handler -> prepare($query, $args);
+
+				return $result;
 			}
 			else
 				throw new Exception("Session is not set properly.");
@@ -369,17 +345,36 @@ class Session
 	 */
 	public function rollSession()
 	{
-		if ($this -> _handler != null && $this -> _session != null)
+		if ($this -> _handler != null)
 		{
-			if ($this -> destroySession())
+			if ($this -> _session == null)
 			{
-				return $this -> _newSession();
+				try
+				{
+					return $this -> _newSession();
+				}
+				catch(Exception $e)
+				{
+					throw new Exception($e -> getMessage());
+				}
 			}
 			else
-				return FALSE;
+			{
+				$query = "SELECT `KEY`, `VALUE` FROM SESSION_DATA WHERE SESSION_ID = ?";
+				$args = array("{$this -> _session}");
+				$result = $this -> _handler -> prepare($query, $args);
+				
+				$this -> destroySession();
+				$this -> rollSession();
+				
+				foreach( $result as $arg )
+				{
+					$this -> setData($arg['KEY'], $arg['VALUE']);
+				}
+			}
 		}
-		
-		return FALSE;
+		else
+			throw new Exception("DB is not set properly.");
 	}
 }
 
