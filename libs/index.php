@@ -1,17 +1,17 @@
 <?php
+namespace phpsec;
 
 ini_set('display_errors', 'On');
 
 $config = require('../config/config.php');
 require('Session.class.php');
 
+Time::resetTime();
+
 try
 {
-	$user1 = new User();
-	$user2 = new User();
-	
-	$user1 -> setUserID(1234);
-	$user2 -> setUserID(12);
+	$user1 = new User( Rand::generateRandom( 10 ) );
+	$user2 = new User( Rand::generateRandom( 10 ) );
 	
 	$connections = array();
 
