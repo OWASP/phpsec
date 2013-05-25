@@ -1,11 +1,11 @@
 <?php
 namespace phpsec;
 
-require_once "../../../libs/db/adapter/pdo_mysql.php";
-require_once "../../../libs/core/Rand.class.php";	//at later time you won't need this.
-require_once "../../../libs/core/Exception.class.php";
-require_once "../../../libs/auth/User.class.php";
-require_once "/var/www/phpsec/libs/session/Session.class.php";	//STRANGE...RELATIVE PATH DOESN'T WORK HERE. HOWEVER ABSOLUTE PATH WORKS. WHY??????
+require_once __DIR__ . "/../../../libs/db/adapter/pdo_mysql.php";
+require_once __DIR__ . "/../../../libs/core/Rand.class.php";	//at later time you won't need this.
+require_once __DIR__ . "/../../../libs/core/Exception.class.php";
+require_once __DIR__ . "/../../../libs/auth/User.class.php";
+require_once __DIR__ . "/../../../libs/session/Session.class.php";
 
 class SessionTest extends \PHPUnit_Framework_TestCase
 {
