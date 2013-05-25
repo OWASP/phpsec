@@ -21,9 +21,9 @@
 				try {
 					$this->dbh = new \PDO ("sqlite::memory:");
 				}
-				catch (PDOException $e) {
+				catch (\PDOException $e) {
 					echo $e->getMessage();
-					return false;
+					die();
 				}
 			}
 			$this->dbh->setAttribute (\PDO::ATTR_ERRMODE, \PDO::ERRMODE_SILENT);
