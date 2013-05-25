@@ -29,7 +29,7 @@ class Time
 	
 	public static function setTime($time)
 	{
-		if( gettype( $time != "integer" ) || strlen( (string)$time ) != 10 )
+		if( ( gettype($time) != "integer" ) || strlen( (string)$time ) != 10 )
 			throw new IntegerNotFoundException("<BR>ERROR: Integer is required to generate UNIX Timestamp. " . gettype($time) . " was found.<BR>");
 		
 		Time::$_currentTime = $time;
@@ -42,7 +42,7 @@ class Time
 	
 	public static function moveTime($difference)
 	{
-		if( gettype( $difference != "integer" ) )
+		if( gettype($difference) != "integer" )
 			throw new IntegerNotFoundException("<BR>ERROR: Integer is required to generate UNIX Timestamp. " . gettype($difference) . " was found.<BR>");
 		
 		Time::$_currentTime = (int)\time() - (int)$difference;

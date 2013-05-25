@@ -34,6 +34,11 @@ class Session
 		}
 	}
 	
+	public function getSessionID()
+	{
+		return $this -> _session;
+	}
+	
 	private function _getUserID($user)
 	{
 		return $user->getUserID();
