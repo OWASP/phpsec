@@ -21,9 +21,9 @@
 				try {
 					$this->dbh = new \PDO ("mysql:dbname={$dbConfig->dbname};host={$dbConfig->host};",$dbConfig->username,$dbConfig->password);
 				}
-				catch (PDOException $e) {
+				catch (\PDOException $e) {
 					echo $e->getMessage();
-					return false;
+					die();
 				}
 			}
 			else if (get_class($args[0]) === "PDO") {
