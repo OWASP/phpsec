@@ -13,7 +13,7 @@ chdir($presentDirectory);
 class Session
 {
 	private $_session = null;
-	private $_userID = null;
+	private $_userID = null;	//for a session to present, there has to be a user. Without a user, a session cannot exist. So you have to create users in such a way that by the userID, the system can differentiate between a guest-user and a priviledged-user. Because you would need this distinction in RBAC.
 	private $_handler = null;
 	
 	private static $_inactivityMaxTime = 1800;	//30 min.
@@ -288,7 +288,8 @@ class Session
 		{
 			try
 			{
-				return $this -> _newSession();
+				$this -> _newSession();
+				return TRUE;
 			}
 			catch(DBQueryNotExecutedError $e)
 			{
@@ -305,9 +306,9 @@ class Session
 			{
 				if($this->inactivityTimeout() || $this->expireTimeout())
 				{
-					echo "<BR>Session Timeout.<BR>";
-					$this->refreshSession();
-					return;
+					echo "<BR>Session Timeout.!!!!<BR>";
+					$this -> _newSession();
+					return TRUE;
 				}
 				
 				$currentTime = Time::time();
@@ -315,6 +316,8 @@ class Session
 				$query = "UPDATE SESSION SET `DATE_CREATED` = ? , `LAST_ACTIVITY` = ? WHERE SESSION_ID = ?";
 				$args = array($currentTime, $currentTime, "{$this -> _session}");
 				$count = $this -> _handler -> SQL($query, $args);
+				
+				return TRUE;
 			}
 			catch(\Exception $e)
 			{
@@ -362,7 +365,7 @@ class Session
 			if($this->inactivityTimeout() || $this->expireTimeout())
 			{
 				echo "<BR>Session Timeout.<BR>";
-				$this->refreshSession();
+				$this -> _newSession();
 				return TRUE;
 			}
 			
