@@ -192,11 +192,18 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		{
 			Time::$realTime = true;
 			
+			$key = "PHP";
+			$value = "library";
+			$this->session[0]->setData($key, $value);
+			
 			$oldSession = $this->session[0]->getSessionID();
 			$this->session[0]->rollSession();
 			$newSession = $this->session[0]->getSessionID();
 			
-			$this -> assertTrue( $oldSession != $newSession );
+			$result = $this->session[0]->getData($key);	//to check if after rolling session, we get the same data or not.
+			$valueAccessed = $result[0]['VALUE'];
+			
+			$this -> assertTrue( ($oldSession != $newSession) && ($valueAccessed == $value) );
 		}
 		catch(\Exception $e)
 		{
@@ -240,6 +247,54 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 			$this->session[0]->destroySession();
 			
 			$this -> assertTrue( $this->session[0]->getSessionID() === null );
+		}
+		catch(\Exception $e)
+		{
+			echo $e->getLine();
+			echo $e -> getMessage();
+		}
+	}
+	
+	public function testDestroyAllSessions()
+	{
+		try
+		{
+			Time::$realTime = true;
+			
+			$this->session[0]->destroyAllSessions();
+			
+			$query = "SELECT TOTAL_SESSIONS FROM USER WHERE USERID = ?";
+			$args = array( "{$this -> session[0] ->getUserID()}" );
+			$result = $this -> conn -> SQL($query, $args);
+			$totalSessions = $result[0]['TOTAL_SESSIONS'];
+			
+			$this -> assertTrue( $totalSessions == 0 );
+			
+		}
+		catch(\Exception $e)
+		{
+			echo $e->getLine();
+			echo $e -> getMessage();
+		}
+	}
+	
+	public function tearDown()
+	{
+		try
+		{
+			Time::$realTime = true;
+			
+			if ($this->session[0]->getSessionID() != null)
+				$this->session[0] ->destroySession();
+			if ($this->session[1]->getSessionID() != null)
+				$this->session[1] ->destroySession();
+			if ($this->session[2]->getSessionID() != null)
+				$this->session[2] ->destroySession();
+			
+			$this->user[0] ->deleteUser();
+			$this->user[1] ->deleteUser();
+			
+			$this->conn = null;
 		}
 		catch(\Exception $e)
 		{

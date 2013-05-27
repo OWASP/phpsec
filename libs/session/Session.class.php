@@ -39,6 +39,11 @@ class Session
 		return $this -> _session;
 	}
 	
+	public function getUserID()
+	{
+		return $this -> _userID;
+	}
+	
 	private function _getUserID($user)
 	{
 		return $user->getUserID();
@@ -340,14 +345,38 @@ class Session
 			$query = "DELETE FROM SESSION WHERE `SESSION_ID` = ?";
 			$args = array("{$this -> _session}");
 			$count = $this -> _handler -> SQL($query, $args);
+			
+			$this -> _session = null;
+			$this -> _updateTotalNoOfSessions();
+		}
+		catch(\Exception $e)
+		{
+			throw new \Exception($e -> getMessage());	//probably the DB class will throw PDOExceptions
+		}
+	}
+	
+	public function destroyAllSessions()
+	{
+		try
+		{
+			$allSessions = $this->getAllSessions();
 
-			if ($count == 0)
-				throw new DBQueryNotExecutedError("<BR>WARNING: Session ID not deleted for this session while destroying session.<BR>");
-			else
+			foreach ($allSessions as $args)
 			{
-				$this -> _session = null;
-				$this -> _updateTotalNoOfSessions();
+				$sess = $args['SESSION_ID'];
+				
+				$query = "DELETE FROM SESSION_DATA WHERE `SESSION_ID` = ?";
+				$args = array("{$sess}");
+				$count = $this -> _handler -> SQL($query, $args);
+
+				$query = "DELETE FROM SESSION WHERE `SESSION_ID` = ?";
+				$args = array("{$sess}");
+				$count = $this -> _handler -> SQL($query, $args);
 			}
+			
+			$this->_session = null;
+			$this -> _updateTotalNoOfSessions();
+			return TRUE;
 		}
 		catch(\Exception $e)
 		{

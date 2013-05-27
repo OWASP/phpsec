@@ -6,6 +6,7 @@ chdir(  dirname(__FILE__) );
 
 require_once ('../core/Time.class.php');
 require_once ('../core/Exception.class.php');
+require_once ('../session/Session.class.php');
 
 chdir($presentDirectory);
 
@@ -56,6 +57,33 @@ class User
 	public function getUserID()
 	{
 		return $this->_userID;
+	}
+	
+	public function deleteUser()
+	{
+		try
+		{
+			$session = new Session($this, $this->_handler);
+			
+			if( $session->destroyAllSessions() )
+			{
+				$query = "DELETE FROM USER WHERE USERID = ?";
+				$args = array("{$this->_userID}");
+				$count = $this->_handler -> SQL($query, $args);
+			}
+		}
+		catch(NoUserFoundException $e)
+		{
+			throw new NoUserFoundException($e->getMessage());
+		}
+		catch(DBQueryNotExecutedError $e)
+		{
+			throw new DBQueryNotExecutedError($e->getMessage());
+		}
+		catch(\Exception $e)
+		{
+			throw new \Exception($e->getMessage());
+		}
 	}
 }
 
