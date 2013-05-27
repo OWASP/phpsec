@@ -1,14 +1,9 @@
 <?php
 namespace phpsec;
 
-$presentDirectory = getcwd();
-chdir(  dirname(__FILE__) );
-
-require_once ('../core/Time.class.php');
-require_once ('../core/Exception.class.php');
-require_once ('../session/Session.class.php');
-
-chdir($presentDirectory);
+require_once (__DIR__ . '/../core/Time.class.php');
+require_once (__DIR__ . '/../core/Exception.class.php');
+require_once (__DIR__ . '/../session/Session.class.php');
 
 class User
 {

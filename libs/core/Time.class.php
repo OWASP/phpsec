@@ -1,12 +1,7 @@
 <?php
 namespace phpsec;
 
-$presentDirectory = getcwd();
-chdir(  dirname(__FILE__) );
-
-require_once ('Exception.class.php');
-
-chdir($presentDirectory);
+require_once (__DIR__ . '/Exception.class.php');
 
 class Time
 {
