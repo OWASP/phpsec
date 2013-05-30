@@ -29,6 +29,8 @@ class SessionException extends \Exception {}
 
 class UserException extends \Exception {}
 
+class PasswordException extends \Exception {}
+
 class IntegerNotFoundException extends \Exception {}
 
 
@@ -43,5 +45,9 @@ class DBQueryNotExecutedError extends DBException {}
 class SessionNotFoundException extends SessionException {}
 
 class NoUserFoundException extends SessionException {}
+
+
+
+class InvalidHashException extends PasswordException {}
 
 ?>
