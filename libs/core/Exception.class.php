@@ -23,14 +23,14 @@ class ErrorHandler
 }
 
 //core exceptions
-class DBException extends \Exception {}
+//class DBException extends \Exception {}
 
-class IntegerNotFoundException extends \Exception {}
+//class IntegerNotFoundException extends \Exception {}
 
 
 
 //derived exceptions
-class DBConnectionNotFoundException extends DBException {}
-class DBQueryNotExecutedError extends DBException {}
+//class DBConnectionNotFoundException extends DBException {}
+//class DBQueryNotExecutedError extends DBException {}
 
 ?>

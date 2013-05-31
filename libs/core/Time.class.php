@@ -1,8 +1,6 @@
 <?php
 namespace phpsec;
 
-require_once (__DIR__ . '/Exception.class.php');
-
 class Time
 {
 	public static $realTime = true;
@@ -25,7 +23,7 @@ class Time
 	public static function setTime($time)
 	{
 		if( ( gettype($time) != "integer" ) || strlen( (string)$time ) != 10 )
-			throw new IntegerNotFoundException("<BR>ERROR: Integer is required to generate UNIX Timestamp. " . gettype($time) . " was found.<BR>");
+			throw new \Exception("<BR>ERROR: Integer is required to generate UNIX Timestamp. " . gettype($time) . " was found.<BR>");
 		
 		Time::$_currentTime = $time;
 	}
@@ -38,7 +36,7 @@ class Time
 	public static function moveTime($difference)
 	{
 		if( gettype($difference) != "integer" )
-			throw new IntegerNotFoundException("<BR>ERROR: Integer is required to generate UNIX Timestamp. " . gettype($difference) . " was found.<BR>");
+			throw new \Exception("<BR>ERROR: Integer is required to generate UNIX Timestamp. " . gettype($difference) . " was found.<BR>");
 		
 		Time::$_currentTime = (int)\time() - (int)$difference;
 	}

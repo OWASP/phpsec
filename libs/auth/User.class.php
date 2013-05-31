@@ -2,11 +2,12 @@
 namespace phpsec;
 
 require_once (__DIR__ . '/../core/Time.class.php');
-require_once (__DIR__ . '/../session/Session.class.php');
 
 class UserException extends \Exception {}
 
-class User extends DBException
+class DBHandlerForUserNotSetException extends UserException {}
+
+class User
 {
 	private $_handler = null;
 	
@@ -20,7 +21,7 @@ class User extends DBException
 		
 		if ($this->_handler == null)
 		{
-			throw new DBConnectionNotFoundException("<BR>ERROR: Connection to DB was not found.<BR>");
+			throw new DBHandlerForUserNotSetException("<BR>ERROR: Connection to DB was not found.<BR>");
 		}
 		else
 		{
@@ -35,13 +36,6 @@ class User extends DBException
 				$query = "INSERT INTO USER (`USERID`, `DATE_CREATED`, `TOTAL_SESSIONS`, `FIRST_NAME`, `LAST_NAME`) VALUES (?, ?, ?, ?, ?)";
 				$args = array("{$this->_userID}", $time, 0, "{$this->_firstName}", "{$this->_lastName}");
 				$count = $this->_handler -> SQL($query, $args);
-				
-				if ($count == 0)
-					throw new DBQueryNotExecutedError("<BR>ERROR: Unable to insert new User data in DB.<BR>");
-			}
-			catch(IntegerNotFoundException $e)
-			{
-				throw $e;
 			}
 			catch(\Exception $e)
 			{
@@ -59,22 +53,9 @@ class User extends DBException
 	{
 		try
 		{
-			$session = new Session($this, $this->_handler);
-			
-			if( $session->destroyAllSessions() )
-			{
-				$query = "DELETE FROM USER WHERE USERID = ?";
-				$args = array("{$this->_userID}");
-				$count = $this->_handler -> SQL($query, $args);
-			}
-		}
-		catch(NoUserFoundException $e)
-		{
-			throw $e;
-		}
-		catch(DBQueryNotExecutedError $e)
-		{
-			throw $e;
+			$query = "DELETE FROM USER WHERE USERID = ?";
+			$args = array("{$this->_userID}");
+			$count = $this->_handler -> SQL($query, $args);
 		}
 		catch(\Exception $e)
 		{

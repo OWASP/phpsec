@@ -5,10 +5,12 @@ require_once (__DIR__ . '/../core/Rand.class.php');
 require_once (__DIR__ . '/../core/Time.class.php');
 
 class SessionException extends \Exception {}
+
 class SessionNotFoundException extends SessionException {}
 class NoUserFoundException extends SessionException {}
+class DBHandlerForSessionNotSetException extends SessionException {}
 
-class Session extends DBException
+class Session
 {
 	private $_session = null;
 	private $_userID = null;	//for a session to present, there has to be a user. Without a user, a session cannot exist. So you have to create users in such a way that by the userID, the system can differentiate between a guest-user and a priviledged-user. Because you would need this distinction in RBAC.
@@ -17,13 +19,14 @@ class Session extends DBException
 	private static $_inactivityMaxTime = 1800;	//30 min.
 	private static $_expireMaxTime = 604800;	//1 week.
 	
+	
 	public function __construct($user, $dbConn)
 	{
 		$this -> _handler = $dbConn;
 		
 		if ($this -> _handler == null)
 		{
-			throw new DBConnectionNotFoundException("<BR>ERROR: Connection to DB was not found.<BR>");
+			throw new DBHandlerForSessionNotSetException("<BR>ERROR: Connection to DB was not found.<BR>");
 		}
 		else
 		{
@@ -62,16 +65,11 @@ class Session extends DBException
 
 			$count = $this -> _handler -> SQL($query, $args);
 
-			if ($count == 0)
-				throw new DBQueryNotExecutedError("<BR>ERROR: Unable to insert new Session data in DB.<BR>");
-			else
-			{
-				$this -> _updateTotalNoOfSessions();
-			}
+			$this -> _updateTotalNoOfSessions();
 		}
 		catch(\Exception $e)
 		{
-			throw new \Exception($e -> getMessage());	//probably the DB class will throw PDOExceptions
+			throw $e;	//probably the DB class will throw PDOExceptions
 		}
 	}
 	
@@ -94,7 +92,7 @@ class Session extends DBException
 		}
 		catch(\Exception $e)
 		{
-			throw new \Exception($e -> getMessage());	//probably the DB class will throw PDOExceptions
+			throw $e;	//probably the DB class will throw PDOExceptions
 		}
 	}
 	
@@ -110,7 +108,7 @@ class Session extends DBException
 		}
 		catch(\Exception $e)
 		{
-			throw new \Exception($e -> getMessage());	//probably the DB class will throw PDOExceptions
+			throw $e;	//probably the DB class will throw PDOExceptions
 		}
 	}
 	
@@ -154,14 +152,11 @@ class Session extends DBException
 				$query = "INSERT INTO SESSION_DATA (`SESSION_ID`, `KEY`, `VALUE`) VALUES (?, ?, ?)";
 				$args = array("{$this -> _session}", $key, $value);
 				$count = $this -> _handler -> SQL($query, $args);
-
-				if ($count == 0)
-					throw new DBQueryNotExecutedError("<BR>ERROR: Unable to insert the new {$key}/{$value} pair in the DB.<BR>");
 			}
 		}
 		catch(\Exception $e)
 		{
-			throw new \Exception($e -> getMessage());	//probably the DB class will throw PDOExceptions
+			throw $e;	//probably the DB class will throw PDOExceptions
 		}
 	}
 	
@@ -191,7 +186,7 @@ class Session extends DBException
 		}
 		catch(\Exception $e)
 		{
-			throw new \Exception($e -> getMessage());	//probably the DB class will throw PDOExceptions
+			throw $e;	//probably the DB class will throw PDOExceptions
 		}
 	}
 	
@@ -199,7 +194,7 @@ class Session extends DBException
 	{
 		if (gettype($seconds) != "integer" || $seconds <= 0)
 		{
-			throw new IntegerNotFoundException("<BR>ERROR: Integer is required to set \"Inactivity Time\". " . gettype($difference) . " was found.<BR>");
+			throw new \Exception("<BR>ERROR: Integer is required to set \"Inactivity Time\". " . gettype($difference) . " was found.<BR>");
 		}
 		else
 			Session::$_inactivityMaxTime = $seconds;
@@ -236,7 +231,7 @@ class Session extends DBException
 		}
 		catch(\Exception $e)
 		{
-			throw new \Exception($e -> getMessage());	//probably the DB class will throw PDOExceptions
+			throw $e;	//probably the DB class will throw PDOExceptions
 		}
 	}
 	
@@ -244,7 +239,7 @@ class Session extends DBException
 	{
 		if (gettype($seconds) != "integer" || $seconds <= 0)
 		{
-			throw new IntegerNotFoundException("<BR>ERROR: Integer is required to set \"Expiry Time\". " . gettype($difference) . " was found.<BR>");
+			throw new \Exception("<BR>ERROR: Integer is required to set \"Expiry Time\". " . gettype($difference) . " was found.<BR>");
 		}
 		else
 			Session::$_expireMaxTime = $seconds;
@@ -281,7 +276,7 @@ class Session extends DBException
 		}
 		catch(\Exception $e)
 		{
-			throw new \Exception($e -> getMessage());	//probably the DB class will throw PDOExceptions
+			throw $e;	//probably the DB class will throw PDOExceptions
 		}
 	}
 	
@@ -294,13 +289,9 @@ class Session extends DBException
 				$this -> _newSession();
 				return TRUE;
 			}
-			catch(DBQueryNotExecutedError $e)
-			{
-				throw new DBQueryNotExecutedError($e->getMessage());
-			}
 			catch(\Exception $e)
 			{
-				throw new \Exception($e -> getMessage());
+				throw $e;	//probably the DB class will throw PDOExceptions
 			}
 		}
 		else
@@ -324,7 +315,7 @@ class Session extends DBException
 			}
 			catch(\Exception $e)
 			{
-				throw new \Exception($e -> getMessage());
+				throw $e;	//probably the DB class will throw PDOExceptions
 			}
 		}
 	}
@@ -349,7 +340,7 @@ class Session extends DBException
 		}
 		catch(\Exception $e)
 		{
-			throw new \Exception($e -> getMessage());	//probably the DB class will throw PDOExceptions
+			throw $e;	//probably the DB class will throw PDOExceptions
 		}
 	}
 	
@@ -378,7 +369,7 @@ class Session extends DBException
 		}
 		catch(\Exception $e)
 		{
-			throw new \Exception($e -> getMessage());	//probably the DB class will throw PDOExceptions
+			throw $e;	//probably the DB class will throw PDOExceptions
 		}
 	}
 	
@@ -410,17 +401,9 @@ class Session extends DBException
 			
 			return TRUE;
 		}
-		catch(SessionNotFoundException $e)
-		{
-			throw new SessionNotFoundException($e->getMessage());
-		}
-		catch(DBQueryNotExecutedError $e)
-		{
-			throw new DBQueryNotExecutedError($e->getMessage());
-		}
 		catch(\Exception $e)
 		{
-			throw new \Exception($e -> getMessage());	//probably the DB class will throw PDOExceptions
+			throw $e;	//probably the DB class will throw PDOExceptions
 		}
 	}
 }

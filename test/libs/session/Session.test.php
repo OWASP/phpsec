@@ -43,7 +43,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		}
 		catch(\Exception $e)
 		{
-			echo $e->getLine();
+			echo "Line Number is: " . $e->getLine() . "\n";
 			echo $e -> getMessage();
 		}
 	}
@@ -65,7 +65,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		}
 		catch(\Exception $e)
 		{
-			echo $e->getLine();
+			echo "Line Number is: " . $e->getLine() . "\n";
 			echo $e -> getMessage();
 		}
 	}
@@ -93,7 +93,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		}
 		catch(\Exception $e)
 		{
-			echo $e->getLine();
+			echo "Line Number is: " . $e->getLine() . "\n";
 			echo $e -> getMessage();
 		}
 	}
@@ -116,7 +116,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		}
 		catch(\Exception $e)
 		{
-			echo $e->getLine();
+			echo "Line Number is: " . $e->getLine() . "\n";
 			echo $e -> getMessage();
 		}
 	}
@@ -148,7 +148,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		}
 		catch(\Exception $e)
 		{
-			echo $e->getLine();
+			echo "Line Number is: " . $e->getLine() . "\n";
 			echo $e -> getMessage();
 		}
 	}
@@ -164,7 +164,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		}
 		catch(\Exception $e)
 		{
-			echo $e->getLine();
+			echo "Line Number is: " . $e->getLine() . "\n";
 			echo $e -> getMessage();
 		}
 	}
@@ -180,7 +180,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		}
 		catch(\Exception $e)
 		{
-			echo $e->getLine();
+			echo "Line Number is: " . $e->getLine() . "\n";
 			echo $e -> getMessage();
 		}
 	}
@@ -206,7 +206,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		}
 		catch(\Exception $e)
 		{
-			echo $e->getLine();
+			echo "Line Number is: " . $e->getLine() . "\n";
 			echo $e -> getMessage();
 		}
 	}
@@ -232,7 +232,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		}
 		catch(\Exception $e)
 		{
-			echo $e->getLine();
+			echo "Line Number is: " . $e->getLine() . "\n";
 			echo $e -> getMessage();
 		}
 	}
@@ -249,7 +249,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		}
 		catch(\Exception $e)
 		{
-			echo $e->getLine();
+			echo "Line Number is: " . $e->getLine() . "\n";
 			echo $e -> getMessage();
 		}
 	}
@@ -272,7 +272,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		}
 		catch(\Exception $e)
 		{
-			echo $e->getLine();
+			echo "Line Number is: " . $e->getLine() . "\n";
 			echo $e -> getMessage();
 		}
 	}
@@ -297,7 +297,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		}
 		catch(\Exception $e)
 		{
-			echo $e->getLine();
+			echo "Line Number is: " . $e->getLine() . "\n";
 			echo $e -> getMessage();
 		}
 	}
