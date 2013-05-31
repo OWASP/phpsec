@@ -43,6 +43,74 @@
 			}
 		}
 
+		/**
+		 * Returns the current URL
+		 * @return  string URL
+		 */
+		static function URL ()
+		{
+			if (php_sapi_name() === "cli")
+				return NULL;
+			return (self::Protocol()."://".self::ServerName().self::PortReadable().self::RequestURI());
+		}
+
+		/**
+		 * Returns name of the server host
+		 * @return  string ServerName
+		 */
+		static function ServerName ()
+		{
+			return isset ($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '';
+		}
+
+		/**
+		 * Returns protocol of the client connection, HTTP/HTTPS
+		 * @return string Protocol
+		 */
+		static function Protocol ()
+		{
+			if (php_sapi_name() === "cli")
+				return 'cli';
+			$x = (isset($_SERVER['HTTPS'])) ? $_SERVER['HTTPS'] : '';
+			if ($x == "off" or $x == "")
+				return "http";
+			else
+				return "https";
+		}
+
+		/**
+		 * Returns port of client connection
+		 * @return string Port
+		 */
+		static function Port ()
+		{
+			if (php_sapi_name() === "cli")
+				return NULL;
+			return isset ($_SERVER['SERVER_PORT']) ? $_SERVER['SERVER_PORT'] : "";
+		}
+
+		static function PortReadable ()
+		{
+			$port = self::Port();
+			if ($port=="80" && strtolower(self::Protocol())=="http")
+				$port="";
+			else if ($port=="443" && strtolower(self::Protocol())=="https")
+				$port="";
+			else
+				$port=":".$port;
+		}
+
+		/**
+		 * Returns the URI for current script
+		 * @return  string RequestURI
+		 */
+		static function RequestURI ()
+		{
+			if (php_sapi_name() === "cli")
+				return NULL;
+			return isset ($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+		}
+
 	}
 
 ?>
