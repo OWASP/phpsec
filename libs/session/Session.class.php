@@ -3,9 +3,12 @@ namespace phpsec;
 
 require_once (__DIR__ . '/../core/Rand.class.php');
 require_once (__DIR__ . '/../core/Time.class.php');
-require_once (__DIR__ . '/../core/Exception.class.php');
 
-class Session
+class SessionException extends \Exception {}
+class SessionNotFoundException extends SessionException {}
+class NoUserFoundException extends SessionException {}
+
+class Session extends DBException
 {
 	private $_session = null;
 	private $_userID = null;	//for a session to present, there has to be a user. Without a user, a session cannot exist. So you have to create users in such a way that by the userID, the system can differentiate between a guest-user and a priviledged-user. Because you would need this distinction in RBAC.

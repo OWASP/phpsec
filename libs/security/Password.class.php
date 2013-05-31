@@ -1,9 +1,10 @@
 <?php
 namespace phpsec;
 
-require_once __DIR__ . '/Salt.class.php';
-require_once __DIR__ . '/../core/Exception.class.php';
 require_once __DIR__ . '/../core/Rand.class.php';
+
+class PasswordException extends \Exception {}
+class InvalidHashException extends PasswordException {}
 
 class Password
 {

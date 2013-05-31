@@ -2,10 +2,11 @@
 namespace phpsec;
 
 require_once (__DIR__ . '/../core/Time.class.php');
-require_once (__DIR__ . '/../core/Exception.class.php');
 require_once (__DIR__ . '/../session/Session.class.php');
 
-class User
+class UserException extends \Exception {}
+
+class User extends DBException
 {
 	private $_handler = null;
 	
@@ -40,11 +41,11 @@ class User
 			}
 			catch(IntegerNotFoundException $e)
 			{
-				throw new IntegerNotFoundException($e->getMessage());
+				throw $e;
 			}
 			catch(\Exception $e)
 			{
-				throw new \Exception($e->getMessage());
+				throw $e;
 			}
 		}
 	}
@@ -69,15 +70,15 @@ class User
 		}
 		catch(NoUserFoundException $e)
 		{
-			throw new NoUserFoundException($e->getMessage());
+			throw $e;
 		}
 		catch(DBQueryNotExecutedError $e)
 		{
-			throw new DBQueryNotExecutedError($e->getMessage());
+			throw $e;
 		}
 		catch(\Exception $e)
 		{
-			throw new \Exception($e->getMessage());
+			throw $e;
 		}
 	}
 }

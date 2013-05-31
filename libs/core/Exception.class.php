@@ -25,29 +25,12 @@ class ErrorHandler
 //core exceptions
 class DBException extends \Exception {}
 
-class SessionException extends \Exception {}
-
-class UserException extends \Exception {}
-
-class PasswordException extends \Exception {}
-
 class IntegerNotFoundException extends \Exception {}
 
 
 
 //derived exceptions
 class DBConnectionNotFoundException extends DBException {}
-
 class DBQueryNotExecutedError extends DBException {}
-
-
-
-class SessionNotFoundException extends SessionException {}
-
-class NoUserFoundException extends SessionException {}
-
-
-
-class InvalidHashException extends PasswordException {}
 
 ?>
