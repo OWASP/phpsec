@@ -65,25 +65,6 @@ class SaltTest extends \PHPUnit_Framework_TestCase
 		}
 	}
 	
-	public function testCommitPasswordToDB()
-	{
-		try
-		{
-			$this->obj->commitPasswordToDB();
-			
-			$query = "SELECT HASH FROM PASSWORD WHERE USERID = ?";
-			$args = array("{$this->_username}");
-			$result = $this->conn -> SQL($query, $args);
-			
-			$this->assertTrue($result[0]['HASH'] == $this->obj->getHashedPassword());
-		}
-		catch(\Exception $e)
-		{
-			echo $e->getLine();
-			echo $e -> getMessage();
-		}
-	}
-	
 	public function testValidatePassword()
 	{
 		try
@@ -100,8 +81,46 @@ class SaltTest extends \PHPUnit_Framework_TestCase
 		}
 	}
 	
+	public function testResetPassword()
+	{
+		try
+		{
+//			$query = "SELECT HASH FROM PASSWORD WHERE USERID = ?";
+//			$args = array("{$this->_username}");
+//			$result = $this->conn -> SQL($query, $args);
+//			print_r($result);
+			
+			$firstTest = $this->obj->resetPassword("resting", "owaspphp");
+			$secondTest = $this->obj->resetPassword("testing", "owaspphp");
+			
+//			$query = "SELECT HASH FROM PASSWORD WHERE USERID = ?";
+//			$args = array("{$this->_username}");
+//			$result = $this->conn -> SQL($query, $args);
+//			print_r($result);echo strlen($result[0]['HASH']);
+			
+			$this->assertTrue(!$firstTest && $secondTest);
+		}
+		catch(\Exception $e)
+		{
+			echo $e->getLine();
+			echo $e -> getMessage();
+		}
+	}
+	
 	public function tearDown()
 	{
+		try
+		{
+			$query = "DELETE FROM PASSWORD WHERE USERID = ?";
+			$args = array("{$this->_username}");
+			$count = $this->conn -> SQL($query, $args);
+		}
+		catch(\Exception $e)
+		{
+			echo $e->getLine();
+			echo $e -> getMessage();
+		}
+		
 		$this->_username = null;
 		$this->_rawPassword = null;
 		$this->_hashAlgo = null;

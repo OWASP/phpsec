@@ -27,8 +27,8 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 
 		try
 		{
-			$this->user[0] = new User($this->conn, \phpsec\Rand::generateRandom(10));
-			$this->user[1] = new User($this->conn, \phpsec\Rand::generateRandom(10));
+			$this->user[0] = new User($this->conn, \phpsec\Rand::generateRandom(10), "testing", "rahul300chaudhary400@gmail.com");
+			$this->user[1] = new User($this->conn, \phpsec\Rand::generateRandom(10), "spiderman", "rac130@pitt.edu");
 		}
 		catch(\Exception $e)
 		{
