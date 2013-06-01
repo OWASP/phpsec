@@ -2,12 +2,17 @@
 namespace phpsec;
 
 require_once __DIR__ . '/../core/Rand.class.php';
+require_once __DIR__ . '/../core/Time.class.php';
 
 class PasswordException extends \Exception {}
+
 class InvalidHashException extends PasswordException {}
+class DBHandlerForPasswordNotSetException extends PasswordException {}
+class PasswordAlreadySetException extends PasswordException {}
 
 class Password
 {
+	private $_handler = "";
 	private $_username = "";
 	private $_rawPassword = "";
 	
@@ -18,8 +23,9 @@ class Password
 	
 	public static $hashAlgo = "";
 	
-	public function __construct($user, $pass, $dynamicSalt = "", $algo = "")
+	public function __construct($dbConn, $user, $pass, $dynamicSalt = "", $algo = "")
 	{
+		$this->_handler = $dbConn;
 		$this->_username = $user;
 		$this->_rawPassword = $pass;
 		$this->_dynamicSalt = $dynamicSalt;
@@ -60,6 +66,58 @@ class Password
 			$algo = "sha512";
 		
 		return hash($algo, strtolower($user . $dynamicSalt . $pass . Password::$_staticSalt));
+	}
+	
+	public function commitPasswordToDB()
+	{
+		if ($this->_handler == null)
+		{
+			throw new DBHandlerForPasswordNotSetException("<BR>ERROR: Connection to DB was not found.<BR>");
+		}
+		
+		try
+		{
+			$hashPassword = $this->getHashedPassword();
+			$time = Time::time();
+
+			$query = "INSERT INTO PASSWORD (`HASH`, `DYNAMIC_SALT`, `ALGO`, `DATE_CREATED`, `USERID`) VALUES (?, ?, ?, ?, ?)";
+			$args = array("{$hashPassword}", "{$this->getDynamiSalt()}", Password::$hashAlgo, $time, "{$this->_username}");
+			$count = $this->_handler -> SQL($query, $args);
+			
+			if($count == 0)
+			{
+				throw new PasswordAlreadySetException("<BR>ERROR: Password for this user is already set. Cannot set duplicate password for 1 user. To change the password use function \"resetPassword\"<BR>");
+			}
+		}
+		catch(\Exception $e)
+		{
+			throw $e;
+		}
+	}
+	
+	public function validatePassword($password)
+	{
+		try
+		{
+			$query = "SELECT `HASH`, `DYNAMIC_SALT`, `ALGO` FROM PASSWORD WHERE `USERID` = ?";
+			$args = array("{$this->_username}");
+			$result = $this->_handler -> SQL($query, $args);
+			
+			$hash = $result[0]['HASH'];
+			$dynamicSalt = $result[0]['DYNAMIC_SALT'];
+			$algo = $result[0]['ALGO'];
+			
+			$newHash = $this->hashPassword($this->_username, $password, $dynamicSalt, $algo);
+			
+			if ($hash == $newHash)
+				return TRUE;
+			else
+				return FALSE;
+		}
+		catch(\Exception $e)
+		{
+			throw $e;
+		}
 	}
 }
 
