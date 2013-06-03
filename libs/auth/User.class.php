@@ -119,7 +119,7 @@ class BasicPasswordManagement
 			return FALSE;
 	}
 	
-	function containDoubledWords($string)	//such as crabcrab, stopstop, treetree, passpass, etc.
+	public static function containDoubledWords($string)	//such as crabcrab, stopstop, treetree, passpass, etc.
 	{
 		$firstHalf = substr($string, 0, (strlen($string) / 2));
 		$secondHalf = substr($string, (strlen($string) / 2), strlen($string));
