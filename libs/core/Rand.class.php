@@ -39,16 +39,20 @@ class Rand
 		return $random32bit;
 	}
 	
-	private static function length($min=0,$max=null)
+	public static function randLen($min=0,$max=null)
 	{
 		if ($max===null)
 			$max=1<<31;
-		return Rand::Random()%($max-$min)+$min;
+		
+		if ($min < 0)
+			return Rand::Random()%($max-$min)+$min;
+		else
+			return abs(Rand::Random()%($max-$min)+$min);
 	}
 	
 	public static function generateRandom($Length=32)
 	{
-		return substr(hash("sha512",  Rand::length()),0,$Length);
+		return substr(hash("sha512",  Rand::randLen()),0,$Length);
 	}
 }
 

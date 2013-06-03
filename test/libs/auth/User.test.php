@@ -24,6 +24,9 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		$this->obj = User::newUserObject($this->_handler, "rash", "testing", "rahul300chaudhary400@gmail.com");
 	}
 	
+	//--------------------------------------------------------------------------------------------------------------------------------------
+	//for class User.
+	
 	public function testSetOptionalFields()
 	{
 		$this->obj->setOptionalFields("Rahul", "Chaudhary");
@@ -118,6 +121,69 @@ class UserTest extends \PHPUnit_Framework_TestCase
 			echo $e->getLine();
 			echo $e -> getMessage();
 		}
+	}
+	
+	//--------------------------------------------------------------------------------------------------------------------------------------
+	//for class BasicPasswordManagement
+	
+	public function testGetStaticSalt()
+	{
+		$this->assertTrue(strlen(BasicPasswordManagement::getStaticSalt()) > 1);
+	}
+	
+	public function testEntropy()
+	{
+		$this->assertTrue(BasicPasswordManagement::Entropy( "OWASP PHP") > 1);
+	}
+	
+	public function testHasOrderedCharacters()
+	{
+		$this->assertTrue(BasicPasswordManagement::hasOrderedCharacters( "abcd", 3 ) && BasicPasswordManagement::hasOrderedCharacters( "dcba", 3 ) && !BasicPasswordManagement::hasOrderedCharacters( "abed", 3 ));
+	}
+	
+	public function testHasKeyboardOrderedCharacters()
+	{
+		$this->assertTrue(BasicPasswordManagement::hasKeyboardOrderedCharacters( "qwert", 3 ) && BasicPasswordManagement::hasKeyboardOrderedCharacters( "trewq", 3 ) && !BasicPasswordManagement::hasKeyboardOrderedCharacters( "trwwQz", 3 ));
+	}
+	
+	public function testIsPhoneNumber()
+	{
+		$this->assertTrue(BasicPasswordManagement::isPhoneNumber( "4125199634") && BasicPasswordManagement::isPhoneNumber("+14125199634") && !BasicPasswordManagement::isPhoneNumber("412-519-9634"));
+	}
+	
+	public function testContainsPhoneNumber()
+	{
+		$this->assertTrue(BasicPasswordManagement::containsPhoneNumber("rash4125199634") && BasicPasswordManagement::containsPhoneNumber("+14125199634rahul") && !BasicPasswordManagement::isPhoneNumber("412-519-9634"));
+	}
+	
+	public function testIsDate()
+	{
+		$this->assertTrue(BasicPasswordManagement::isDate("23-May 2012") && BasicPasswordManagement::isDate("may/21-1990") && BasicPasswordManagement::isDate("2021 FeB.13") && !BasicPasswordManagement::isPhoneNumber("rash21-May-rash"));
+	}
+	
+	public function testContainsDate()
+	{
+		$this->assertTrue(BasicPasswordManagement::containsDate("ra23-May 2012aa") && BasicPasswordManagement::containsDate("may/21-90aqw") && BasicPasswordManagement::containsDate("qw21 FeB.13") && !BasicPasswordManagement::isPhoneNumber("23/01//13"));
+	}
+	
+	public function testContainsDoubledWords()
+	{
+		$this->assertTrue(BasicPasswordManagement::containDoubledWords( "dogdog") && !BasicPasswordManagement::containDoubledWords( "dogdogs"));
+	}
+	
+	public function testContainsString()
+	{
+		$this->assertTrue(BasicPasswordManagement::containsString( "this is a sTring", "sTRinG") && !BasicPasswordManagement::containsString( "my string is this", "rash"));
+	}
+	
+	public function testStrength()
+	{
+		$this->assertTrue((BasicPasswordManagement::strength("ABCDEFGH") < 0.1) && (BasicPasswordManagement::strength("Tes\$ing") > 0.5) && (BasicPasswordManagement::strength("Tes\$ingTes\$ing") < 0.5));
+	}
+	
+	public function testGenerate()
+	{
+		$this->assertTrue((strlen(BasicPasswordManagement::generate(0.1)) == 4) && (strlen(BasicPasswordManagement::generate(0.4)) == 8) && (strlen(BasicPasswordManagement::generate(0.8)) == 16));
 	}
 	
 	public function tearDown()

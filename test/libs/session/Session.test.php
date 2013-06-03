@@ -27,8 +27,8 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 
 		try
 		{
-			$this->user[0] = new User($this->conn, \phpsec\Rand::generateRandom(10), "testing", "rahul300chaudhary400@gmail.com");
-			$this->user[1] = new User($this->conn, \phpsec\Rand::generateRandom(10), "spiderman", "rac130@pitt.edu");
+			$this->user[0] = User::existingUserObject($this->conn, "honey", "testing");
+			$this->user[1] = User::newUserObject($this->conn, \phpsec\Rand::generateRandom(10), "resting", "rac130@pitt.edu");
 		}
 		catch(\Exception $e)
 		{
@@ -290,7 +290,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 			if ($this->session[2]->getSessionID() != null)
 				$this->session[2] ->destroySession();
 			
-			$this->user[0] ->deleteUser();
+			//$this->user[0] ->deleteUser();
 			$this->user[1] ->deleteUser();
 			
 			$this->conn = null;
