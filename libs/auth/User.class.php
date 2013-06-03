@@ -118,6 +118,27 @@ class BasicPasswordManagement
 		else
 			return FALSE;
 	}
+	
+	function containDoubledWords($string)	//such as crabcrab, stopstop, treetree, passpass, etc.
+	{
+		$firstHalf = substr($string, 0, (strlen($string) / 2));
+		$secondHalf = substr($string, (strlen($string) / 2), strlen($string));
+		
+		if ($firstHalf == $secondHalf)
+			return TRUE;
+		else
+			return FALSE;
+	}
+	
+	public static function containsString($hay, $needle)	//used for checking for usernames, firstname, lastname etc.
+	{
+		preg_match_all("/(" . $needle . ")/i", $hay, $matches);
+		
+		if (count($matches[0]) >= 1)
+			return TRUE;
+		else
+			return FALSE;
+	}
 }
 
 
