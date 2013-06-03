@@ -21,7 +21,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 			echo $e->getMessage();
 		}
 		BasicPasswordManagement::$hashAlgo = "haval256,5";
-		$this->obj = new User($this->_handler, "rash", "testing", "rahul300chaudhary400@gmail.com");
+		$this->obj = User::newUserObject($this->_handler, "rash", "testing", "rahul300chaudhary400@gmail.com");
 	}
 	
 	public function testSetOptionalFields()
@@ -45,9 +45,9 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	
 	public function testHashPassword()
 	{
-		$hash = BasicPasswordManagement::hashPassword("password", Rand::generateRandom(64), "sha1");
+		$hash = BasicPasswordManagement::hashPassword("password", Rand::generateRandom(64), "sha512");
 		
-		$this->assertTrue(strlen($hash) > 1);
+		$this->assertTrue(strlen($hash) == 128);
 	}
 	
 	public function testGetHashedPassword()
@@ -73,6 +73,45 @@ class UserTest extends \PHPUnit_Framework_TestCase
 			$secondTest = BasicPasswordManagement::validatePassword("resting", $this->obj->getHashedPassword(), $this->obj->getDynamiSalt(), BasicPasswordManagement::$hashAlgo);
 			
 			$this->assertTrue($firstTest && !$secondTest);
+		}
+		catch(\Exception $e)
+		{
+			echo $e->getLine();
+			echo $e -> getMessage();
+		}
+	}
+	
+	public function testExistingUser()
+	{
+		try
+		{
+			$this->obj = null;
+			$this->obj = User::existingUserObject($this->_handler, "rash", "testing");
+			
+			$test = BasicPasswordManagement::validatePassword("testing", $this->obj->getHashedPassword(), $this->obj->getDynamiSalt(), BasicPasswordManagement::$hashAlgo);
+			$this->assertTrue($test);
+		}
+		catch(\Exception $e)
+		{
+			echo $e->getLine();
+			echo $e -> getMessage();
+		}
+	}
+	
+	public function testResetPassword()
+	{
+		try
+		{
+			$newPassword = "resting";
+			$oldPassword = "testing";
+			
+			$oldHash = $this->obj->getHashedPassword();
+			
+			$this->obj->resetPassword($oldPassword, $newPassword);
+			
+			$newHash = $this->obj->getHashedPassword();
+			
+			$this->assertTrue($oldHash != $newHash);
 		}
 		catch(\Exception $e)
 		{

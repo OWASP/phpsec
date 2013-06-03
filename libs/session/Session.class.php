@@ -406,6 +406,13 @@ class Session
 			throw $e;	//probably the DB class will throw PDOExceptions
 		}
 	}
+	
+	public function __destruct()
+	{
+		$this->_session = null;
+		$this->_handler = null;
+		$this->_userID = null;
+	}
 }
 
 ?>

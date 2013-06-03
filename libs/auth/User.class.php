@@ -7,6 +7,10 @@ require_once (__DIR__ . '/../core/Rand.class.php');
 
 class BasicPasswordManagement
 {
+	/**
+	 * Changing this salt in application, would invalidate all previous passwords, because their static salt would change.
+	 * @var type 
+	 */
 	protected static $_staticSalt = "7d2cdb76dcc3c97fc55bff3dafb35724031f3e4c47512d4903b6d1fb914774405e74539ea70a49fbc4b52ededb1f5dfb7eebef3bcc89e9578e449ed93cfb2103";
 	public static $hashAlgo = "sha512";
 	
@@ -43,48 +47,86 @@ class UserException extends \Exception {}
 
 class DBHandlerForUserNotSetException extends UserException {}
 class InvalidHashException extends UserException {}
+class WrongPasswordException extends UserException {}
 class UserExistsException extends UserException {}
+class UserObjectNotReturnedException extends UserException {}
 
 class User
 {
 	private $_handler = null;
 	
 	private $_userID = null;
-	private $_firstName = null;
-	private $_lastName = null;
-	private $_email = null;
 	
-	private $_rawPassword = "";
 	private $_hashedPassword = "";
 	private $_dynamicSalt = "";
 	
-	public function __construct($dbConn, $id, $pass, $email)
+	public static function newUserObject($dbConn, $id, $pass, $email)
 	{
-		$this->_handler = $dbConn;
+		$obj = new User();
 		
-		if ($this->_handler == null)
+		$obj->_handler = $dbConn;
+		
+		if ($obj->_handler == null)
 		{
 			throw new DBHandlerForUserNotSetException("<BR>ERROR: Connection to DB was not found.<BR>");
 		}
 		else
 		{
-			$this->_userID = $id;
-			$this->_rawPassword = $pass;
-			$this->_email = $email;
+			$obj->_userID = $id;
 			
 			try
 			{
 				$time = Time::time();
 				
-				$this->_dynamicSalt = hash("sha512", Rand::generateRandom(64));
-				$this->_hashedPassword = BasicPasswordManagement::hashPassword($this->_rawPassword, $this->_dynamicSalt, BasicPasswordManagement::$hashAlgo);
+				$obj->_dynamicSalt = hash("sha512", Rand::generateRandom(64));
+				$obj->_hashedPassword = BasicPasswordManagement::hashPassword($pass, $obj->_dynamicSalt, BasicPasswordManagement::$hashAlgo);
 
 				$query = "INSERT INTO USER (`USERID`, `HASH`, `DATE_CREATED`, `TOTAL_SESSIONS`, `EMAIL`, `ALGO`, `DYNAMIC_SALT`) VALUES (?, ?, ?, ?, ?, ?, ?)";
-				$args = array("{$this->_userID}", $this->_hashedPassword, $time, 0, $this->_email, BasicPasswordManagement::$hashAlgo, $this->_dynamicSalt);
-				$count = $this->_handler -> SQL($query, $args);
+				$args = array("{$obj->_userID}", $obj->_hashedPassword, $time, 0, $email, BasicPasswordManagement::$hashAlgo, $obj->_dynamicSalt);
+				$count = $obj->_handler -> SQL($query, $args);
 				
 				if ($count == 0)
 					throw new UserExistsException("<BR>ERROR: This User already exists in the DB.<BR>");
+				
+				return $obj;
+			}
+			catch(\Exception $e)
+			{
+				throw $e;
+			}
+		}
+	}
+	
+	public static function existingUserObject($dbConn, $id, $pass)
+	{
+		$obj = new User();
+		
+		$obj->_handler = $dbConn;
+		
+		if ($obj->_handler == null)
+		{
+			throw new DBHandlerForUserNotSetException("<BR>ERROR: Connection to DB was not found.<BR>");
+		}
+		else
+		{
+			try
+			{
+				$query = "SELECT `HASH`, `ALGO`, `DYNAMIC_SALT` FROM USER WHERE `USERID` = ?";
+				$args = array($id);
+				$result = $obj->_handler -> SQL($query, $args);
+				
+				if (count($result) < 1)
+					throw new UserObjectNotReturnedException("<BR>ERROR: User Object not returned.<BR>");
+
+				if (!BasicPasswordManagement::validatePassword( $pass, $result[0]['HASH'], $result[0]['DYNAMIC_SALT'], $result[0]['ALGO']))
+					throw new WrongPasswordException("<BR>ERROR: Wrong Password. User Object not returned.<BR>");
+
+				$obj->_userID = $id;
+				$obj->_dynamicSalt = $result[0]['DYNAMIC_SALT'];
+				$obj->_hashedPassword = $result[0]['HASH'];
+				BasicPasswordManagement::$hashAlgo = $result[0]['ALGO'];
+
+				return $obj;
 			}
 			catch(\Exception $e)
 			{
@@ -95,13 +137,10 @@ class User
 	
 	public function setOptionalFields($firstName = "", $lastName = "")
 	{
-		$this->_firstName = $firstName;
-		$this->_lastName = $lastName;
-		
 		try
 		{
 			$query = "UPDATE USER SET FIRST_NAME = ?, LAST_NAME = ? WHERE USERID = ?";
-			$args = array($this->_firstName, $this->_lastName, "{$this->_userID}");
+			$args = array($firstName, $lastName, "{$this->_userID}");
 			$count = $this->_handler -> SQL($query, $args);
 		}
 		catch(\Exception $e)
@@ -128,6 +167,23 @@ class User
 		return $this->_dynamicSalt;
 	}
 	
+	public function resetPassword($oldPassword, $newPassword)
+	{
+		if (! BasicPasswordManagement::validatePassword( $oldPassword, $this->_hashedPassword, $this->_dynamicSalt, BasicPasswordManagement::$hashAlgo))
+			throw new WrongPasswordException("<BR>ERROR: Wrong Password provided!!<BR>");
+		
+		$this->_dynamicSalt = hash("sha512", Rand::generateRandom(64));
+		$newHash = BasicPasswordManagement::hashPassword($newPassword, $this->getDynamiSalt(), BasicPasswordManagement::$hashAlgo);
+		
+		$query = "UPDATE PASSWORD SET `HASH` = ?, `DYNAMIC_SALT` = ?, `ALGO` = ? WHERE `USERID` = ?";
+		$args = array($newHash, $this->_dynamicSalt, BasicPasswordManagement::$hashAlgo, $this->_userID);
+		$count = $this->_handler -> SQL($query, $args);
+		
+		$this->_hashedPassword = $newHash;
+
+		return TRUE;
+	}
+	
 	public function deleteUser()
 	{
 		try
@@ -140,6 +196,14 @@ class User
 		{
 			throw $e;
 		}
+	}
+	
+	public function __destruct()
+	{
+		$this->_handler = null;
+		$this->_userID = null;
+		$this->_dynamicSalt = null;
+		$this->_hashedPassword = null;
 	}
 }
 
