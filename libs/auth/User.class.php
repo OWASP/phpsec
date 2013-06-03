@@ -40,6 +40,84 @@ class BasicPasswordManagement
 		else
 			return FALSE;
 	}
+	
+	//taken from http://stackoverflow.com/questions/3198005/help-with-the-calculation-and-usefulness-of-password-entropy
+	public static function Entropy($string)
+	{
+		$h=0;
+		$size = strlen($string);
+		foreach (count_chars($string, 1) as $v)
+		{
+			$p = $v/$size;
+			$h -= $p*log($p)/log(2);
+		}
+		return $h;
+	}
+	
+	//taken from jframework
+	public static function hasOrderedCharacters($string, $length) {
+		$length=(int)$length;
+		$i = 0;
+		$j = strlen($string);
+		$str = implode('', array_map(function($m) use (&$i, &$j) {
+			return chr((ord($m[0]) + $j--) % 256) . chr((ord($m[0]) + $i++) % 256);
+		}, str_split($string, 1)));
+		return preg_match('#(.)(.\1){' . ($length - 1) . '}#', $str)==true;
+	}
+	
+	//taken from jframework
+	public static function hasKeyboardOrderedCharacters($string, $length) {
+		$length=(int)$length;
+		$i = 0;
+		$j = strlen($string);
+		$str = implode('', array_map(function($m) use (&$i, &$j) {
+			$keyboardSet="1234567890qwertyuiopasdfgklzxcvbnm";
+			return ((strpos($keyboardSet,$m[0]) + $j--) ) . ((strpos($keyboardSet,$m[0]) + $i++) );
+		}, str_split($string, 1)));
+		return preg_match('#(.)(.\1){' . ($length - 1) . '}#', $str)==true;
+	}
+	
+	public static function isPhoneNumber($string)
+	{
+		preg_match_all ("/^(\+)?\d{6,13}$/i", $string, $matches);
+		
+		if (count($matches[0])>=1)
+			return TRUE;
+		else
+			return FALSE;
+	}
+	
+	public static function containsPhoneNumber($string)
+	{
+		preg_match_all ("/(\+)?\d{6,13}/i", $string, $matches);
+		
+		if (count($matches[0])>=1)
+			return TRUE;
+		else
+			return FALSE;
+	}
+	
+	public static function isDate($string)
+	{
+		preg_match_all ("/^(0?[1-9]|[12][0-9]|3[01])[.\-\/\s]?(0?[1-9]|1[012])[.\-\/\s]?((19|20)?\d\d)$/i", $string, $matches1);
+		preg_match_all ("/^(0?[1-9]|[12][0-9]|3[01])[.\-\/\s]?(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[.\-\/\s]?((19|20)?\d\d)$/i", $string, $matches2);
+		
+		if (count($matches1[0])>=1 || count($matches2[0])>=1)
+			return TRUE;
+		else
+			return FALSE;
+	}
+	
+	public static function containsDate($string)
+	{
+		preg_match_all ("/(0?[1-9]|[12][0-9]|3[01])[.\-\/\s]?(0?[1-9]|1[012])[.\-\/\s]?((19|20)?\d\d)/i", $string, $matches1);
+		preg_match_all ("/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i", $string, $matches2);
+		
+		if (count($matches1[0])>=1 || count($matches2[0])>=1)
+			return TRUE;
+		else
+			return FALSE;
+	}
 }
 
 
