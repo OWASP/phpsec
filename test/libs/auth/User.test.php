@@ -123,6 +123,31 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		}
 	}
 	
+	public function testSetStaticSalt()
+	{
+		try
+		{
+			$this->obj2 = User::newUserObject($this->_handler, "rahul", "owasp pass", "rahul300chaudhary400@gmail.com", "qwert");
+			$this->obj2 = null;
+			$this->obj2 = User::existingUserObject($this->_handler, "rahul", "owasp pass");
+			
+			$firstTest = BasicPasswordManagement::validatePassword("owasp pass", $this->obj2->getHashedPassword(), $this->obj2->getDynamiSalt(), BasicPasswordManagement::$hashAlgo);
+			$secondTest = BasicPasswordManagement::validatePassword("other password", $this->obj2->getHashedPassword(), $this->obj2->getDynamiSalt(), BasicPasswordManagement::$hashAlgo);
+			
+			$this->obj2->deleteUser();
+			
+			$this->assertTrue($firstTest && !$secondTest);
+		}
+		catch(\Exception $e)
+		{
+			echo $e->getLine();
+			echo $e -> getMessage();
+		}
+	}
+	
+	
+	
+	
 	//--------------------------------------------------------------------------------------------------------------------------------------
 	//for class BasicPasswordManagement
 	
@@ -185,6 +210,10 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	{
 		$this->assertTrue((strlen(BasicPasswordManagement::generate(0.1)) == 4) && (strlen(BasicPasswordManagement::generate(0.4)) == 8) && (strlen(BasicPasswordManagement::generate(0.8)) == 16));
 	}
+	
+	
+	
+	//Global tear-down function.
 	
 	public function tearDown()
 	{

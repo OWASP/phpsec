@@ -15,7 +15,7 @@ class BasicPasswordManagement
 	 * Changing this salt in application, would invalidate all previous passwords, because their static salt would change.
 	 * @var type 
 	 */
-	protected static $_staticSalt = "7d2cdb76dcc3c97fc55bff3dafb35724031f3e4c47512d4903b6d1fb914774405e74539ea70a49fbc4b52ededb1f5dfb7eebef3bcc89e9578e449ed93cfb2103";
+	public static $_staticSalt = "7d2cdb76dcc3c97fc55bff3dafb35724031f3e4c47512d4903b6d1fb914774405e74539ea70a49fbc4b52ededb1f5dfb7eebef3bcc89e9578e449ed93cfb2103";
 	public static $hashAlgo = "sha512";
 	
 	
@@ -268,6 +268,10 @@ class WrongPasswordException extends UserException {}
 class UserExistsException extends UserException {}
 class UserObjectNotReturnedException extends UserException {}
 
+class ObjectAlreadyPresentInDB extends UserException {}
+
+class SaltAlreadyPresentInDB extends ObjectAlreadyPresentInDB {}
+
 class User
 {
 	private $_handler = null;
@@ -277,7 +281,7 @@ class User
 	private $_hashedPassword = "";
 	private $_dynamicSalt = "";
 	
-	public static function newUserObject($dbConn, $id, $pass, $email)
+	public static function newUserObject($dbConn, $id, $pass, $email, $staticSalt = "")
 	{
 		$obj = new User();
 		
@@ -291,6 +295,9 @@ class User
 		{
 			$obj->_userID = $id;
 			
+			if ($staticSalt != "")
+				$obj->setStaticSalt ( $staticSalt );
+			
 			try
 			{
 				$time = Time::time();
@@ -298,8 +305,8 @@ class User
 				$obj->_dynamicSalt = hash("sha512", Rand::generateRandom(64));
 				$obj->_hashedPassword = BasicPasswordManagement::hashPassword($pass, $obj->_dynamicSalt, BasicPasswordManagement::$hashAlgo);
 
-				$query = "INSERT INTO USER (`USERID`, `HASH`, `DATE_CREATED`, `TOTAL_SESSIONS`, `EMAIL`, `ALGO`, `DYNAMIC_SALT`) VALUES (?, ?, ?, ?, ?, ?, ?)";
-				$args = array("{$obj->_userID}", $obj->_hashedPassword, $time, 0, $email, BasicPasswordManagement::$hashAlgo, $obj->_dynamicSalt);
+				$query = "INSERT INTO USER (`USERID`, `HASH`, `DATE_CREATED`, `TOTAL_SESSIONS`, `EMAIL`, `ALGO`, `DYNAMIC_SALT`, `STATIC_SALT`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+				$args = array("{$obj->_userID}", $obj->_hashedPassword, $time, 0, $email, BasicPasswordManagement::$hashAlgo, $obj->_dynamicSalt, BasicPasswordManagement::$_staticSalt);
 				$count = $obj->_handler -> SQL($query, $args);
 				
 				if ($count == 0)
@@ -328,13 +335,15 @@ class User
 		{
 			try
 			{
-				$query = "SELECT `HASH`, `ALGO`, `DYNAMIC_SALT` FROM USER WHERE `USERID` = ?";
+				$query = "SELECT `HASH`, `ALGO`, `DYNAMIC_SALT`, `STATIC_SALT` FROM USER WHERE `USERID` = ?";
 				$args = array($id);
 				$result = $obj->_handler -> SQL($query, $args);
 				
 				if (count($result) < 1)
 					throw new UserObjectNotReturnedException("<BR>ERROR: User Object not returned.<BR>");
 
+				BasicPasswordManagement::$_staticSalt = $result[0]['STATIC_SALT'];
+				
 				if (!BasicPasswordManagement::validatePassword( $pass, $result[0]['HASH'], $result[0]['DYNAMIC_SALT'], $result[0]['ALGO']))
 					throw new WrongPasswordException("<BR>ERROR: Wrong Password. User Object not returned.<BR>");
 
@@ -349,6 +358,25 @@ class User
 			{
 				throw $e;
 			}
+		}
+	}
+	
+	private function setStaticSalt($newSalt)
+	{
+		BasicPasswordManagement::$_staticSalt = $newSalt;
+		
+		try
+		{
+			$query = "INSERT INTO STATIC_SALT (`STATICSALT`) VALUES (?)";
+			$args = array(BasicPasswordManagement::$_staticSalt);
+			$count = $this->_handler -> SQL($query, $args);
+			
+			if ($count == 0)
+				throw new SaltAlreadyPresentInDB("This static-salt is already present in the DB. Please choose a different salt.");
+		}
+		catch(\Exception $e)
+		{
+			throw $e;
 		}
 	}
 	
