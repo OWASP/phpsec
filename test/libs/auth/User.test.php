@@ -21,7 +21,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 			echo $e->getMessage();
 		}
 		BasicPasswordManagement::$hashAlgo = "haval256,5";
-		$this->obj = User::newUserObject($this->_handler, "rash", "testing", "rahul300chaudhary400@gmail.com");
+		$this->obj = User::newUserObject($this->_handler, "rash", "testing");
 	}
 	
 	//--------------------------------------------------------------------------------------------------------------------------------------
@@ -29,7 +29,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	
 	public function testSetOptionalFields()
 	{
-		$this->obj->setOptionalFields("Rahul", "Chaudhary");
+		$this->obj->setOptionalFields("rahul300chaudhary400@gmail.com", "Rahul", "Chaudhary");
 		
 		try
 		{
@@ -127,7 +127,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	{
 		try
 		{
-			$this->obj2 = User::newUserObject($this->_handler, "rahul", "owasp pass", "rahul300chaudhary400@gmail.com", "qwert");
+			$this->obj2 = User::newUserObject($this->_handler, "rahul", "owasp pass", "qwert");
 			$this->obj2 = null;
 			$this->obj2 = User::existingUserObject($this->_handler, "rahul", "owasp pass");
 			

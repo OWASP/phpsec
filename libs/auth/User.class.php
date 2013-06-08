@@ -11,11 +11,7 @@ require_once (__DIR__ . '/../core/Rand.class.php');
 
 class BasicPasswordManagement
 {
-	/**
-	 * Changing this salt in application, would invalidate all previous passwords, because their static salt would change.
-	 * @var type 
-	 */
-	public static $_staticSalt = "7d2cdb76dcc3c97fc55bff3dafb35724031f3e4c47512d4903b6d1fb914774405e74539ea70a49fbc4b52ededb1f5dfb7eebef3bcc89e9578e449ed93cfb2103";
+	protected static $_staticSalt = "7d2cdb76dcc3c97fc55bff3dafb35724031f3e4c47512d4903b6d1fb914774405e74539ea70a49fbc4b52ededb1f5dfb7eebef3bcc89e9578e449ed93cfb2103";
 	public static $hashAlgo = "sha512";
 	
 	
@@ -272,7 +268,7 @@ class ObjectAlreadyPresentInDB extends UserException {}
 
 class SaltAlreadyPresentInDB extends ObjectAlreadyPresentInDB {}
 
-class User
+class User extends BasicPasswordManagement
 {
 	private $_handler = null;
 	
@@ -281,7 +277,7 @@ class User
 	private $_hashedPassword = "";
 	private $_dynamicSalt = "";
 	
-	public static function newUserObject($dbConn, $id, $pass, $email, $staticSalt = "")
+	public static function newUserObject($dbConn, $id, $pass, $staticSalt = "")
 	{
 		$obj = new User();
 		
@@ -305,8 +301,8 @@ class User
 				$obj->_dynamicSalt = hash("sha512", Rand::generateRandom(64));
 				$obj->_hashedPassword = BasicPasswordManagement::hashPassword($pass, $obj->_dynamicSalt, BasicPasswordManagement::$hashAlgo);
 
-				$query = "INSERT INTO USER (`USERID`, `HASH`, `DATE_CREATED`, `TOTAL_SESSIONS`, `EMAIL`, `ALGO`, `DYNAMIC_SALT`, `STATIC_SALT`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-				$args = array("{$obj->_userID}", $obj->_hashedPassword, $time, 0, $email, BasicPasswordManagement::$hashAlgo, $obj->_dynamicSalt, BasicPasswordManagement::$_staticSalt);
+				$query = "INSERT INTO USER (`USERID`, `HASH`, `DATE_CREATED`, `TOTAL_SESSIONS`, `ALGO`, `DYNAMIC_SALT`, `STATIC_SALT`) VALUES (?, ?, ?, ?, ?, ?, ?)";
+				$args = array("{$obj->_userID}", $obj->_hashedPassword, $time, 0, BasicPasswordManagement::$hashAlgo, $obj->_dynamicSalt, BasicPasswordManagement::$_staticSalt);
 				$count = $obj->_handler -> SQL($query, $args);
 				
 				if ($count == 0)
@@ -380,12 +376,12 @@ class User
 		}
 	}
 	
-	public function setOptionalFields($firstName = "", $lastName = "")
+	public function setOptionalFields($email = "", $firstName = "", $lastName = "")
 	{
 		try
 		{
-			$query = "UPDATE USER SET FIRST_NAME = ?, LAST_NAME = ? WHERE USERID = ?";
-			$args = array($firstName, $lastName, "{$this->_userID}");
+			$query = "UPDATE USER SET FIRST_NAME = ?, LAST_NAME = ?, EMAIL = ? WHERE USERID = ?";
+			$args = array($firstName, $lastName, $email, "{$this->_userID}");
 			$count = $this->_handler -> SQL($query, $args);
 		}
 		catch(\Exception $e)
