@@ -20,7 +20,7 @@ class Session
 	private static $_expireMaxTime = 604800;	//1 week.
 	
 	
-	public function __construct($user, $dbConn)
+	public function __construct($dbConn, $user)
 	{
 		$this -> _handler = $dbConn;
 		
@@ -110,16 +110,6 @@ class Session
 		{
 			throw $e;	//probably the DB class will throw PDOExceptions
 		}
-	}
-	
-	public function checkHTTPS()
-	{
-		if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443)
-		{
-			return TRUE;
-		}
-		else
-			return FALSE;
 	}
 	
 	/**

@@ -27,8 +27,8 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 
 		try
 		{
-			$this->user[0] = User::existingUserObject($this->conn, "honey", "testing");
-			$this->user[1] = User::newUserObject($this->conn, \phpsec\Rand::generateRandom(10), "resting", "rac130@pitt.edu");
+			$this->user[0] = User::newUserObject($this->conn, \phpsec\Rand::generateRandom(10), "resting");
+			$this->user[1] = User::newUserObject($this->conn, \phpsec\Rand::generateRandom(10), "owasp");
 		}
 		catch(\Exception $e)
 		{
@@ -37,9 +37,9 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		
 		try
 		{
-			$this->session[0] = new Session($this->user[0], $this->conn);
-			$this->session[1] = new Session($this->user[0], $this->conn);
-			$this->session[2] = new Session($this->user[1], $this->conn);
+			$this->session[0] = new Session($this->conn, $this->user[0]);
+			$this->session[1] = new Session($this->conn, $this->user[0]);
+			$this->session[2] = new Session($this->conn, $this->user[1]);
 		}
 		catch(\Exception $e)
 		{
@@ -290,7 +290,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 			if ($this->session[2]->getSessionID() != null)
 				$this->session[2] ->destroySession();
 			
-			//$this->user[0] ->deleteUser();
+			$this->user[0] ->deleteUser();
 			$this->user[1] ->deleteUser();
 			
 			$this->conn = null;
