@@ -48,23 +48,35 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 		$this->assertTrue(AdvancedPasswordManagement::getTempPassExpiryTime() == $time);
 	}
 	
-	public function testCheckIfTimeExpired()
+	public function testCheckIfTempPassExpired()
 	{
-		$currentTime = Time::time();
-		
-		$firstTest = AdvancedPasswordManagement::checkIfTimeExpired( $currentTime);
-		
-		Time::$realTime = false;
-		Time::setTime(1370706853);
-		
-		$secondTest = AdvancedPasswordManagement::checkIfTimeExpired( $currentTime);
-		
-		Time::$realTime = true;
-		
-		$this->assertTrue(!$firstTest && $secondTest);
+		try
+		{
+			$query = "UPDATE PASSWORD SET TEMP_TIME = ? WHERE USERID = ?";
+			$args = array(Time::time(), $this->_userID->getUserID());
+			$count = $this->_handler->SQL($query, $args);
+			
+			$firstTest = $this->obj->checkIfTempPassExpired();
+
+			Time::$realTime = false;
+			Time::setTime(1390706853);
+
+			$secondTest = $this->obj->checkIfTempPassExpired();
+			
+			$query = "UPDATE PASSWORD SET TEMP_TIME = ? WHERE USERID = ?";
+			$args = array(0, $this->_userID->getUserID());
+			$count = $this->_handler->SQL($query, $args);
+
+			$this->assertTrue(!$firstTest && $secondTest);
+		}
+		catch (\Exception $e)
+		{
+			echo "\n" . $e->getLine() . "-->";
+			echo $e->getMessage() . "\n";
+		}
 	}
 	
-	public function testForgotPassword()
+	public function testTempPassword()
 	{
 		try
 		{
@@ -72,7 +84,7 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 			
 			AdvancedPasswordManagement::setTempPassExpiryTime(900);
 			
-			$this->obj->forgotPassword();
+			$this->obj->tempPassword();
 			
 			$query = "SELECT TEMP_PASS FROM PASSWORD WHERE USERID = ?";
 			$args = array($this->_userID->getUserID());
@@ -82,14 +94,12 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 			
 			//firstTest
 			Time::setTime($currentTime + 500);
-			$firstTest = $this->obj->forgotPassword("qwert");
+			$firstTest = $this->obj->tempPassword("qwert");
 			
-			//secondTest
+			//secondTesSt
 			Time::setTime($currentTime + 500);
-			$secondTest = $this->obj->forgotPassword($result[0]['TEMP_PASS']);
+			$secondTest = $this->obj->tempPassword($result[0]['TEMP_PASS']);
 			
-			
-			Time::$realTime = true;
 			$this->assertTrue(!$firstTest && $secondTest);
 		}
 		catch (\Exception $e)
@@ -97,6 +107,15 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 			echo "\n" . $e->getLine() . "-->";
 			echo $e->getMessage() . "\n";
 		}
+	}
+	
+	public function tearDown()
+	{
+		$this->_handler = null;
+		$this->_userID = null;
+		$this->obj = null;
+		
+		Time::$realTime = true;
 	}
 }
 

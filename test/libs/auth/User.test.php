@@ -108,13 +108,21 @@ class UserTest extends \PHPUnit_Framework_TestCase
 			$newPassword = "resting";
 			$oldPassword = "testing";
 			
-			$oldHash = $this->obj->getHashedPassword();
+			$query = "SELECT `HASH`, `DYNAMIC_SALT`, `ALGO` FROM USER WHERE USERID = ?";
+			$args = array($this->obj->getUserID());
+			$result = $this->_handler->SQL($query, $args);
+			
+			$firstAttempt = BasicPasswordManagement::validatePassword($newPassword, $result[0]['HASH'], $result[0]['DYNAMIC_SALT'], $result[0]['ALGO']);
 			
 			$this->obj->resetPassword($oldPassword, $newPassword);
 			
-			$newHash = $this->obj->getHashedPassword();
+			$query = "SELECT `HASH`, `DYNAMIC_SALT`, `ALGO` FROM USER WHERE USERID = ?";
+			$args = array($this->obj->getUserID());
+			$result = $this->_handler->SQL($query, $args);
 			
-			$this->assertTrue($oldHash != $newHash);
+			$secondAttempt = BasicPasswordManagement::validatePassword($newPassword, $result[0]['HASH'], $result[0]['DYNAMIC_SALT'], $result[0]['ALGO']);
+			
+			$this->assertTrue(!$firstAttempt && $secondAttempt);
 		}
 		catch(\Exception $e)
 		{
@@ -127,7 +135,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	{
 		try
 		{
-			$this->obj2 = User::newUserObject($this->_handler, "rahul", "owasp pass", "qwert");
+			$this->obj2 = User::newUserObject($this->_handler, "rahul", "owasp pass", hash("sha512", Rand::generateRandom(64)) );
 			$this->obj2 = null;
 			$this->obj2 = User::existingUserObject($this->_handler, "rahul", "owasp pass");
 			
@@ -142,6 +150,25 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		{
 			echo $e->getLine();
 			echo $e -> getMessage();
+		}
+	}
+	
+	public function testCheckIfPasswordExpired()
+	{
+		try
+		{
+			$currentTime = Time::time();
+			
+			User::setPasswordExpiryTime(1000);
+			Time::$realTime = false;
+			Time::setTime($currentTime + 5000);
+			
+			$this->assertTrue($this->obj->checkIfPasswordExpired());
+		}
+		catch (\Exception $e)
+		{
+			echo "\n" . $e->getLine() . "-->";
+			echo $e->getMessage() . "\n";
 		}
 	}
 	

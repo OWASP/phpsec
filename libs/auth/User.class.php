@@ -277,6 +277,8 @@ class User extends BasicPasswordManagement
 	private $_hashedPassword = "";
 	private $_dynamicSalt = "";
 	
+	private static $_passwordExpiryTime = 15552000;	//approx 6 months.
+	
 	public static function newUserObject($dbConn, $id, $pass, $staticSalt = "")
 	{
 		$obj = new User();
@@ -416,8 +418,8 @@ class User extends BasicPasswordManagement
 		$this->_dynamicSalt = hash("sha512", Rand::generateRandom(64));
 		$newHash = BasicPasswordManagement::hashPassword($newPassword, $this->getDynamiSalt(), BasicPasswordManagement::$hashAlgo);
 		
-		$query = "UPDATE PASSWORD SET `HASH` = ?, `DYNAMIC_SALT` = ?, `ALGO` = ? WHERE `USERID` = ?";
-		$args = array($newHash, $this->_dynamicSalt, BasicPasswordManagement::$hashAlgo, $this->_userID);
+		$query = "UPDATE USER SET `HASH` = ?, `DATE_CREATED` = ?, `DYNAMIC_SALT` = ?, `ALGO` = ? WHERE `USERID` = ?";
+		$args = array($newHash, Time::time(), $this->_dynamicSalt, BasicPasswordManagement::$hashAlgo, $this->_userID);
 		$count = $this->_handler -> SQL($query, $args);
 		
 		$this->_hashedPassword = $newHash;
@@ -432,6 +434,40 @@ class User extends BasicPasswordManagement
 			$query = "DELETE FROM USER WHERE USERID = ?";
 			$args = array("{$this->_userID}");
 			$count = $this->_handler -> SQL($query, $args);
+		}
+		catch(\Exception $e)
+		{
+			throw $e;
+		}
+	}
+	
+	public static function setPasswordExpiryTime($time)
+	{
+		if( ( gettype($time) != "integer" ) )
+			throw new \Exception("<BR>ERROR: Integer is required. " . gettype($time) . " was found.<BR>");
+		
+		User::$_passwordExpiryTime = $time;
+	}
+	
+	public static function getPasswordExpiryTime()
+	{
+		return User::$_passwordExpiryTime;
+	}
+	
+	public function checkIfPasswordExpired()
+	{
+		try
+		{
+			$query = "SELECT `DATE_CREATED` FROM USER WHERE `USERID` = ?";
+			$args = array($this->_userID);
+			$result = $this->_handler->SQL($query, $args);
+			
+			$currentTime = Time::time();
+		
+			if ( ($currentTime - $result[0]['DATE_CREATED'])  > User::$_passwordExpiryTime)
+				return TRUE;
+			else
+				return FALSE;
 		}
 		catch(\Exception $e)
 		{

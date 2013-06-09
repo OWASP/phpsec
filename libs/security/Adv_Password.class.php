@@ -16,7 +16,7 @@ class AdvancedPasswordManagement
 	private $_handler = null;
 	private $_user = null;
 	
-	private static $_tempPassExpiryTime = 900;
+	private static $_tempPassExpiryTime = 900;	//15 min
 	
 	public function __construct($dbConn, $user)
 	{
@@ -32,8 +32,8 @@ class AdvancedPasswordManagement
 			{
 				$this->_user = $user;
 
-				$query = "INSERT INTO PASSWORD (`TEMP_PASS`, `USE_FLAG`, `TEMP_TIME`, `LAST_RESET`, `USERID`) VALUES (?, ?, ?, ?, ?)";
-				$args = array("UNSET", 1, 0, 0, $this->_user->getUserID());
+				$query = "INSERT INTO PASSWORD (`TEMP_PASS`, `USE_FLAG`, `TEMP_TIME`, `USERID`) VALUES (?, ?, ?, ?)";
+				$args = array(Rand::generateRandom(10), 1, 0, $this->_user->getUserID());
 				$count = $this->_handler -> SQL($query, $args);
 
 				if ($count == 0)
@@ -59,17 +59,31 @@ class AdvancedPasswordManagement
 		return AdvancedPasswordManagement::$_tempPassExpiryTime;
 	}
 	
-	public static function checkIfTimeExpired($givenTime)
+	public function checkIfTempPassExpired()
 	{
+		$query = "SELECT `TEMP_TIME` FROM PASSWORD WHERE `USERID` = ?";
+		$args = array($this->_user->getUserID());
+		$result = $this->_handler->SQL($query, $args);
+			
 		$currentTime = Time::time();
 		
-		if ( ($currentTime - $givenTime)  > AdvancedPasswordManagement::$_tempPassExpiryTime)
+		if ( ($currentTime - $result[0]['TEMP_TIME'])  >= AdvancedPasswordManagement::$_tempPassExpiryTime)
 			return TRUE;
 		else
 			return FALSE;
 	}
 	
-	public function forgotPassword($tempPass = "")
+	private static function checkIfTimeExpired($givenTime)
+	{
+		$currentTime = Time::time();
+		
+		if ( ($currentTime - $givenTime)  >= AdvancedPasswordManagement::$_tempPassExpiryTime)
+			return TRUE;
+		else
+			return FALSE;
+	}
+	
+	public function tempPassword($tempPass = "")
 	{
 		if ($tempPass == "")
 		{
@@ -97,24 +111,21 @@ class AdvancedPasswordManagement
 				$args = array($this->_user->getUserID());
 				$result = $this->_handler -> SQL($query, $args);
 				
-				if (count($result) < 1)
-					throw new CorruptUserException("<BR>ERROR: Unable to fetch data. Username might be wrong.</BR>");
-				
 				if ( ($result[0]['USE_FLAG'] == 0) && (!AdvancedPasswordManagement::checkIfTimeExpired($result[0]['TEMP_TIME'])))
 				{	
 					if ( $result[0]['TEMP_PASS'] != $tempPass )
 						return FALSE;
 					
-					$query = "DELETE FROM PASSWORD WHERE USERID = ?";
-					$args = array($this->_user->getUserID());
+					$query = "UPDATE PASSWORD SET TEMP_PASS = ?, USE_FLAG = ?, TEMP_TIME = ? WHERE USERID = ?";
+					$args = array(Rand::generateRandom(10), 1, 0, $this->_user->getUserID());
 					$count = $this->_handler -> SQL($query, $args);
 					
 					return TRUE;
 				}
 				else
 				{
-					$query = "DELETE FROM PASSWORD WHERE USERID = ?";
-					$args = array($this->_user->getUserID());
+					$query = "UPDATE PASSWORD SET TEMP_PASS = ?, USE_FLAG = ?, TEMP_TIME = ? WHERE USERID = ?";
+					$args = array(Rand::generateRandom(10), 1, 0, $this->_user->getUserID());
 					$count = $this->_handler -> SQL($query, $args);
 					
 					return FALSE;
