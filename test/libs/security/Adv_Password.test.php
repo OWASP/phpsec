@@ -30,7 +30,7 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 		{
 			BasicPasswordManagement::$hashAlgo = "haval256,5";
 			$this->_userID = User::newUserObject($this->_handler, Rand::generateRandom(10), "testing");
-			$this->obj = new AdvancedPasswordManagement($this->_handler, $this->_userID);
+			$this->obj = new AdvancedPasswordManagement($this->_handler, $this->_userID->getUserID(), "testing");
 		}
 		catch (\Exception $e)
 		{
@@ -106,6 +106,25 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 		{
 			echo "\n" . $e->getLine() . "-->";
 			echo $e->getMessage() . "\n";
+		}
+	}
+	
+	public function testBruteForce()
+	{
+		try
+		{
+			$this->_userID = User::newUserObject($this->_handler, "rash", "testing");
+			
+			for($i = 0; $i < 7; $i++)
+			{
+				$this->obj = new AdvancedPasswordManagement($this->_handler, $this->_userID->getUserID(), "resting", true);
+			}
+
+			$this->assertTrue(false);
+		}
+		catch (\Exception $e)
+		{
+			$this->assertTrue(true);
 		}
 	}
 	

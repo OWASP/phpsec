@@ -270,14 +270,14 @@ class SaltAlreadyPresentInDB extends ObjectAlreadyPresentInDB {}
 
 class User extends BasicPasswordManagement
 {
-	private $_handler = null;
+	protected $_handler = null;
 	
-	private $_userID = null;
+	protected $_userID = null;
 	
-	private $_hashedPassword = "";
-	private $_dynamicSalt = "";
+	protected $_hashedPassword = "";
+	protected $_dynamicSalt = "";
 	
-	private static $_passwordExpiryTime = 15552000;	//approx 6 months.
+	protected static $_passwordExpiryTime = 15552000;	//approx 6 months.
 	
 	public static function newUserObject($dbConn, $id, $pass, $staticSalt = "")
 	{
