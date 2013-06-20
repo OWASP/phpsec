@@ -303,8 +303,8 @@ class User extends BasicPasswordManagement
 				$obj->_dynamicSalt = hash("sha512", Rand::generateRandom(64));
 				$obj->_hashedPassword = BasicPasswordManagement::hashPassword($pass, $obj->_dynamicSalt, BasicPasswordManagement::$hashAlgo);
 
-				$query = "INSERT INTO USER (`USERID`, `HASH`, `DATE_CREATED`, `TOTAL_SESSIONS`, `ALGO`, `DYNAMIC_SALT`, `STATIC_SALT`) VALUES (?, ?, ?, ?, ?, ?, ?)";
-				$args = array("{$obj->_userID}", $obj->_hashedPassword, $time, 0, BasicPasswordManagement::$hashAlgo, $obj->_dynamicSalt, BasicPasswordManagement::$_staticSalt);
+				$query = "INSERT INTO USER (`USERID`, `ACCOUNT_CREATED`, `HASH`, `DATE_CREATED`, `TOTAL_SESSIONS`, `ALGO`, `DYNAMIC_SALT`, `STATIC_SALT`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+				$args = array("{$obj->_userID}", $time, $obj->_hashedPassword, $time, 0, BasicPasswordManagement::$hashAlgo, $obj->_dynamicSalt, BasicPasswordManagement::$_staticSalt);
 				$count = $obj->_handler -> SQL($query, $args);
 				
 				if ($count == 0)
@@ -385,6 +385,22 @@ class User extends BasicPasswordManagement
 			$query = "UPDATE USER SET FIRST_NAME = ?, LAST_NAME = ?, EMAIL = ? WHERE USERID = ?";
 			$args = array($firstName, $lastName, $email, "{$this->_userID}");
 			$count = $this->_handler -> SQL($query, $args);
+		}
+		catch(\Exception $e)
+		{
+			throw $e;
+		}
+	}
+	
+	public function getAccountCreationDate()
+	{
+		try
+		{
+			$query = "SELECT `ACCOUNT_CREATED` FROM USER WHERE USERID = ?";
+			$args = array("{$this->_userID}");
+			$result = $this->_handler -> SQL($query, $args);
+			
+			return $result[0]['ACCOUNT_CREATED'];
 		}
 		catch(\Exception $e)
 		{

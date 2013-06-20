@@ -14,6 +14,7 @@ class AdvancedPasswordManagement extends User
 	private static $_tempPassExpiryTime = 900;	//15 min
 	private static $_bruteForceLockAttempts = 5;	//This tells how many attemps must be considered before brute-force lock.
 	private static $_bruteForceLockTimePeriod = 5;	//5 SEC  - This defines the time-period after which next login attempt must be carried out. E.g if the time is 5 sec, then time-period between two login attempts must minimum be 5 sec, otherwise it will be considered brite-force attack.
+	private static $_automaticLoginTimePeriod = 604800;	//1 week - This defines the "remember me" time. So within one week, if the user does not logs out, he can get into the system without providing their credetials.
 	
 	public function __construct($dbConn, $user, $pass, $bruteLock = false)
 	{
@@ -113,6 +114,45 @@ class AdvancedPasswordManagement extends User
 		}
 	}
 	
+	public static function setBruteForceLockAttempts($no)
+	{
+		if( ( gettype($time) != "integer" ) )
+			throw new \Exception("<BR>ERROR: Integer is required. " . gettype($time) . " was found.<BR>");
+		
+		AdvancedPasswordManagement::$_bruteForceLockAttempts = $no;
+	}
+	
+	public static function getBruteForceLockAttempts()
+	{
+		return AdvancedPasswordManagement::$_bruteForceLockAttempts;
+	}
+	
+	public static function setBruteForceLockTimePeriod($time)
+	{
+		if( ( gettype($time) != "integer" ) )
+			throw new \Exception("<BR>ERROR: Integer is required. " . gettype($time) . " was found.<BR>");
+		
+		AdvancedPasswordManagement::$_bruteForceLockTimePeriod = $time;
+	}
+	
+	public static function getBruteForceLockTimePeriod()
+	{
+		return AdvancedPasswordManagement::$_bruteForceLockTimePeriod;
+	}
+	
+	public static function setAutomaticLoginTimePeriod($time)
+	{
+		if( ( gettype($time) != "integer" ) )
+			throw new \Exception("<BR>ERROR: Integer is required. " . gettype($time) . " was found.<BR>");
+		
+		AdvancedPasswordManagement::$_automaticLoginTimePeriod = $time;
+	}
+	
+	public static function getAutomaticLoginTimePeriod()
+	{
+		return AdvancedPasswordManagement::$_automaticLoginTimePeriod;
+	}
+	
 	public static function setTempPassExpiryTime($time)
 	{
 		if( ( gettype($time) != "integer" ) )
@@ -197,6 +237,72 @@ class AdvancedPasswordManagement extends User
 					
 					return FALSE;
 				}
+			}
+			catch(\Exception $e)
+			{
+				throw $e;
+			}
+		}
+	}
+	
+	public function rememberMe($secure = TRUE, $httpOnly = TRUE)
+	{
+		if ( !isset($_COOKIE['AUTHID']) )
+		{
+			try
+			{
+				$newID = hash("sha512", Rand::generateRandom(64));
+				
+				$query = "INSERT INTO AUTH_STORAGE (`AUTH_ID`, `DATE_CREATED`, `USERID`) VALUES (?, ?, ?)";
+				$args = array($newID, Time::time(), $this->_userObj->getUserID());
+				$count = $this->_userObj->_handler-> SQL($query, $args);
+				
+				if ($secure && $httpOnly)
+					\setcookie("AUTHID", $newID, Time::time ( ) + 29999999, null, null, TRUE, TRUE);	//keep cookie for unlimited time because it doesn't matter. The time that cookie will be present in client's system will be determined from the $_automaticLoginTimePeriod variable. Once this time has passed, the cookie will be cancelled from the server end.
+				elseif (!$secure && !$httpOnly)
+					\setcookie("AUTHID", $newID, Time::time ( ) + 299999999, null, null, FALSE, FALSE);
+				elseif ($secure && !$httpOnly)
+					\setcookie("AUTHID", $newID, Time::time ( ) + 299999999, null, null, TRUE, FALSE);
+				elseif (!$secure && $httpOnly)
+					\setcookie("AUTHID", $newID, Time::time ( ) + 299999999, null, null, FALSE, TRUE);
+				
+				return TRUE;
+			}
+			catch(\Exception $e)
+			{
+				throw $e;
+			}
+		}
+		else
+		{
+			try
+			{
+				$query = "SELECT `AUTH_ID`, `DATE_CREATED` FROM `AUTH_STORAGE` WHERE `USERID` = ?";
+				$args = array($this->_userObj->getUserID());
+				$result = $this->_userObj->_handler-> SQL($query, $args);
+				
+				foreach ($result as $auth)
+				{
+					if ($auth['AUTH_ID'] == $_COOKIE['AUTHID'])
+					{
+						$currentTime = Time::time();
+
+						if ( ($currentTime - $auth['DATE_CREATED']) >= AdvancedPasswordManagement::$_automaticLoginTimePeriod)
+						{
+							$query = "DELETE FROM `AUTH_STORAGE` WHERE USERID = ? AND `AUTH_ID` = ?";
+							$args = array($this->_userObj->getUserID(), $_COOKIE['AUTHID']);
+							$count = $this->_userObj->_handler-> SQL($query, $args);
+
+							setcookie("AUTHID", "");
+
+							return FALSE;
+						}
+						else
+							return TRUE;
+					}
+				}
+				
+				return FALSE;
 			}
 			catch(\Exception $e)
 			{

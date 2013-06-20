@@ -46,6 +46,16 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		}
 	}
 	
+	public function testGetAccountCreationDate()
+	{
+		Time::$realTime = TRUE;
+		
+		$currentTime = Time::time();
+		$creationTime = $this->obj->getAccountCreationDate();
+		
+		$this->assertTrue( ($currentTime >= $creationTime) && (strlen( (string)$creationTime ) == 10) );
+	}
+	
 	public function testHashPassword()
 	{
 		$hash = BasicPasswordManagement::hashPassword("password", Rand::generateRandom(64), "sha512");
