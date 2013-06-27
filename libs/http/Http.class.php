@@ -5,11 +5,98 @@
 	class HttpRequestException extends \Exception {}
 	class HttpRequestInsecureParameterException extends HttpRequestException {}
 
+
+	/**
+	 * Classes for taint checking.
+	 * These should ideally be shifted to a core library
+	 */
+	abstract class Tainted
+	{
+		static public $TaintChecking = true;
+		
+		protected $Tainted = true;
+		
+		static function Is(Tainted $Object)
+		{
+			return $Object->Tainted;
+		}
+		public function decontaminate()
+		{
+			$this->Tainted = false;
+		}
+		public function contaminate()
+		{
+			$this->Tainted = true;
+		}
+	}
+
+	class TaintedString extends Tainted
+	{
+		private $data;
+
+		public function __construct($data=null)
+		{
+			$this->data=$data;
+		}
+		public function __toString()
+		{
+			if (Tainted::$TaintChecking and $this->Tainted)
+				trigger_error("Trying to use tainted variable without decontamination.");
+			return $this->data;
+		}
+	}
+
+	/**
+	 * HttpRequestArray class
+	 * Wraps $_SERVER in an ArrayAccess interface
+	 */
+	class HttpRequestArray implements \ArrayAccess
+	{
+		private $data;
+
+		public function __construct($data = null)
+		{
+			$this->data=$data;
+		}
+
+		public function offsetSet($offset, $value)
+		{
+			if (is_null($offset))
+				$this->data[] = $value;
+			else
+				$this->data[$offset] = $value;
+		}
+
+		public function offsetExists($offset)
+		{
+			return isset($this->data[$offset]);
+		}
+
+		public function offsetUnset($offset)
+		{
+			unset($this->data[$offset]);
+		}
+
+		public function offsetGet($offset)
+		{
+			if (isset($this->data[$offset]))
+			{
+				if (substr($offset,0,4) === 'HTTP')
+					return new TaintedString($this->data[$offset]);
+				else
+					return $this->data[$offset];
+			}
+			else
+				return NULL;
+		}
+	}
+
+	$_SERVER = new HttpRequestArray($_SERVER);
+
 	/**
 	 * HttpRequest class
 	 * Wrapper class to securely process HTTP request parameters
 	 */
-	
 	class HttpRequest
 	{
 		/**
@@ -33,26 +120,6 @@
 			if (self::isCLI())
 				return '127.0.0.1';
 			return $_SERVER['REMOTE_ADDR'];
-		}
-
-		/**
-		 * Returns $_SERVER parameter if secure and throws exception if not.
-		 * Can be forced to return parameter irrespective of security.
-		 * @param  string $param [$_SERVER index]
-		 * @param  boolean $force [to override security check]
-		 * @return string Parameter
-		 */
-		static function getParameter ($param, $force = false)
-		{
-			if ($force === true)
-				return $_SERVER[$param];
-			else
-			{
-				if (substr($param,0,4) === 'HTTP')
-					throw new HttpRequestInsecureParameterException("\$_SERVER['$param'] is an insecure parameter and shouldn't be trusted for sensitive transactions.");
-				else
-					return $_SERVER[$param];
-			}
 		}
 
 		/**
