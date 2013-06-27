@@ -13,14 +13,26 @@
 	class HttpRequest
 	{
 		/**
+		 * Checks if script is being called from command line
+		 * @return boolean
+		 */
+		private static function isCLI()
+		{
+			if (php_sapi_name() === "cli" || !isset($_SERVER['REMOTE_ADDR']))
+				return true;
+			else
+				return false;
+		}
+
+		/**
 		 * Returns IP address of client
 		 * @return  string IP
 		 */
 		static function IP ()
 		{
-			if (php_sapi_name() === "cli")
+			if (self::isCLI())
 				return '127.0.0.1';
-			return isset ($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : NULL;
+			return $_SERVER['REMOTE_ADDR'];
 		}
 
 		/**
@@ -49,7 +61,7 @@
 		 */
 		static function URL ()
 		{
-			if (php_sapi_name() === "cli")
+			if (self::isCLI())
 				return NULL;
 			return (self::Protocol()."://".self::ServerName().self::PortReadable().self::RequestURI());
 		}
@@ -69,7 +81,7 @@
 		 */
 		static function Protocol ()
 		{
-			if (php_sapi_name() === "cli")
+			if (self::isCLI())
 				return 'cli';
 			$x = (isset($_SERVER['HTTPS'])) ? $_SERVER['HTTPS'] : '';
 			if ($x == "off" or $x == "")
@@ -84,7 +96,7 @@
 		 */
 		static function Port ()
 		{
-			if (php_sapi_name() === "cli")
+			if (self::isCLI())
 				return NULL;
 			return isset ($_SERVER['SERVER_PORT']) ? $_SERVER['SERVER_PORT'] : "";
 		}
@@ -106,7 +118,7 @@
 		 */
 		static function RequestURI ()
 		{
-			if (php_sapi_name() === "cli")
+			if (self::isCLI())
 				return NULL;
 			return isset ($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
 		}
