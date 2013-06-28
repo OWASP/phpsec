@@ -4,9 +4,12 @@ namespace phpsec;
 class DownloadManagerException extends \Exception {}
 class InvalidFileModifiedDateException extends DownloadManagerException {}
 
+// This whole class is  just modification from jFramwork.
 class DownloadManager
 {
-	// taken from jFramework.
+	public static $BandwidthLimitInitialSize=10485760; //10MB
+	public static $BandwidthLimitSpeed=1048576; //1MB
+	
 	public static function MIME ($File)
 	{
 		$a=explode('.', $File);
@@ -99,6 +102,170 @@ class DownloadManager
 			header("Last-Modified: $gmdate_mod"); //Set the time this resource is modified
 			header("Cache-Control: must-revalidate"); //Browser should ask me for cache
 		}
+		
+		return true;
+	}
+	
+	//Common example of "Range":      Range: bytes=500-999
+	public static function calculate_HTTP_Range()
+	{
+		if(isset($_SERVER['HTTP_RANGE']))
+		{
+			list($size_unit, $range_orig) = explode('=', $_SERVER['HTTP_RANGE'], 2);
+
+			if ($size_unit == 'bytes')
+			{
+			    //multiple ranges could be specified at the same time, but for simplicity only serve the first range
+			    //http://tools.ietf.org/id/draft-ietf-http-range-retrieval-00.txt
+			    list($range, $extra_ranges) = explode(',', $range_orig, 2);
+			}
+			else
+			{
+			    $range = '';
+			}
+		}
+		else
+		{
+			$range = '';
+		}
+		
+		$extremes = explode('-', $range);
+		
+		return $extremes;
+	}
+	
+	public static function readFromFile($File, $seek_start, $seek_end, $Resumable = FALSE)
+	{
+		$FileSize = filesize($File);
+
+		//Apply Download Limit
+		if (  (DownloadManager::$BandwidthLimitInitialSize > 0) && ($FileSize > DownloadManager::$BandwidthLimitInitialSize) )
+		{
+			$f = fopen($File, "rb");
+			fseek($f, $seek_start);
+			
+			set_time_limit(0);
+			
+			while (ftell($f) <= $seek_end)
+			{
+				$advanceBy = DownloadManager::$BandwidthLimitSpeed;
+				$currentPos = ftell($f);
+				
+				if ( ($advanceBy + $currentPos) > $seek_end )
+					$advanceBy = $seek_end - $currentPos;
+				
+				echo fread($f, $advanceBy);
+				
+				fseek($f, $advanceBy+1, SEEK_CUR);
+				
+				flush();
+				ob_flush();
+				sleep(1);
+			}
+			
+			fclose($f);
+			return true;
+		}
+		else //No download limit 
+		{
+			if ($Resumable)
+			{
+				$f = fopen($File, "rb");
+				fseek($f, $seek_start);
+
+				set_time_limit(0);
+
+				while (ftell($f) <= $seek_end)
+				{
+					$advanceBy = 1024*8;
+					$currentPos = ftell($f);
+
+					if ( ($advanceBy + $currentPos) > $seek_end )
+						$advanceBy = $seek_end - $currentPos;
+
+					echo fread($f, $advanceBy);
+
+					fseek($f, $advanceBy+1, SEEK_CUR);
+
+					flush();
+					ob_flush();
+					sleep(1);
+				}
+
+				fclose($f);
+			}
+			else
+				readfile($File);
+			
+			return true;
+		}
+	}
+	
+	public static function Feed($RealFile,$OutputFile=null)
+	{
+		$File = realpath($RealFile);
+		
+		if (!$File)
+			return false;
+		
+		if (!DownloadManager::IsModifiedSince($File))
+			return true;
+		
+		$FileSize = filesize($File);
+		
+		if ($OutputFile === null)
+			$OutputFile = basename($RealFile);
+		
+		if (strpos($OutputFile," ") !== false)
+			$OutputFile= "'{$OutputFile}'";
+		
+		header("Content-Type: " . DownloadManager::MIME($OutputFile));
+		header("Content-disposition: filename={$OutputFile}");
+		
+		$extremes = DownloadManager::calculate_HTTP_Range();
+		
+		if (isset($extremes[0]))
+			$seek_start = $extremes[0];
+		
+		if (isset($extremes[1]))
+			$seek_end = $extremes[1];
+		
+		//set start and end based on range (if set), else set defaults
+		//also check for invalid ranges.
+		$seek_end = (empty($seek_end)) ? ($FileSize - 1) : min(abs(intval($seek_end)),($FileSize - 1));
+		$seek_start = (empty($seek_start) || $seek_end < abs(intval($seek_start))) ? 0 : max(abs(intval($seek_start)),0);
+		
+		//add headers if resumable
+		$Resumable=false;
+		if ($seek_start > 0 || $seek_end < ($FileSize - 1))
+		{
+			$Resumable=true;
+			header('HTTP/1.1 206 Partial Content');
+		}
+		
+		header('Accept-Ranges: bytes');
+		header('Content-Range: bytes '.$seek_start.'-'.$seek_end.'/'.$FileSize);
+		header('Content-Length: '.($seek_end - $seek_start + 1));
+		
+		return DownloadManager::readFromFile($File, $seek_start, $seek_end, $Resumable);
+	}
+	
+	/**
+	* Feeds some data to the client
+	* @param string $Data
+	* @param string $OutputFilename
+	* @return boolean
+	*/
+	public static function FeedData($Data, $OutputFilename)
+	{
+		$Filename = $OutputFilename;
+		
+		header("Content-type: " . DownloadManager::MIME($Filename));
+		header('Content-disposition: attachment; filename=' . $Filename); //add attachment; here to force download
+		header('Content-length: '. strlen($Data));
+
+		echo $Data;
+		flush();
 		
 		return true;
 	}

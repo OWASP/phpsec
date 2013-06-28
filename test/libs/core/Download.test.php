@@ -23,6 +23,31 @@ class DownloadManagerTest extends \PHPUnit_Framework_TestCase
 		
 		$this->assertTrue(DownloadManager::IsModifiedSince( __FILE__ ));
 	}
+	
+	public function testCalculate_HTTP_Range()
+	{
+		$start = 500;
+		$end = 999;
+		$_SERVER["HTTP_RANGE"] = "bytes=" . $start . "-" . $end . ",1024-2048";
+		
+		$extremes = DownloadManager::calculate_HTTP_Range();
+		
+		$this->assertTrue( ($extremes[0] == $start) && ($extremes[1] == $end));
+	}
+	
+	public function testFeed()
+	{
+		$start = 0;
+		$end = 26;
+		$_SERVER["HTTP_RANGE"] = "bytes=" . $start . "-" . $end . ",1024-2048";
+		
+		$this->assertTrue(DownloadManager::Feed( __FILE__ ));
+	}
+	
+	public function testFeedData()
+	{
+		$this->assertTrue(DownloadManager::FeedData( "\n\n\n-->>>Hey this is the test string for function FeedData.<<<--\n\n\n", "myfile.txt"));
+	}
 }
 
 ?>
