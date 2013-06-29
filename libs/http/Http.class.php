@@ -215,6 +215,18 @@ class HttpRequest
 			return isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : "";
 	}
 
+	/**
+	 * Request method, either GET/POST
+	 *
+	 * @return string RequestMethod
+	 */
+	static function Method()
+	{
+		if (self::IsCLI())
+			return "get";
+		return $_SERVER['REQUEST_METHOD'];
+	}
+
 }
 
 ?>
