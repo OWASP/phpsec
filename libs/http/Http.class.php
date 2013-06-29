@@ -106,7 +106,7 @@ class HttpRequest
 	 * Checks if script is being called from command line
 	 * @return boolean
 	 */
-	private static function isCLI()
+	static function isCLI()
 	{
 		if (php_sapi_name() === "cli" || !isset($_SERVER['REMOTE_ADDR']))
 			return true;
@@ -161,6 +161,24 @@ class HttpRequest
 			return "http";
 		else
 			return "https";
+	}
+
+	/**
+	 * Checks if protocol is HTTPS
+	 * @return boolean
+	 */
+	static function isHTTPS()
+	{
+		return (self::Protocol() === 'https');
+	}
+
+	/**
+	 * Checks if protocol is HTTP
+	 * @return boolean
+	 */
+	static function isHTTP()
+	{
+		return (self::Protocol() === 'http');
 	}
 
 	/**
