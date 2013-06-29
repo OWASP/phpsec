@@ -129,11 +129,14 @@ class HttpRequest
 	 * Returns the current URL
 	 * @return  string URL
 	 */
-	static function URL()
+	static function URL($QueryString=true)
 	{
 		if (self::isCLI())
 			return NULL;
-		return (self::Protocol()."://".self::ServerName().self::PortReadable().self::RequestURI());
+		if ($QueryString && self::QueryString() )
+			return (self::Protocol()."://".self::ServerName().self::PortReadable().self::RequestURI()."?".self::QueryString());
+		else
+			return (self::Protocol()."://".self::ServerName().self::PortReadable().self::RequestURI());
 	}
 
 	/**
@@ -191,6 +194,25 @@ class HttpRequest
 		if (self::isCLI())
 			return NULL;
 		return isset ($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+	}
+
+	/**
+	 * Query String, the last part in url after ?
+	 *
+	 * @return String QueryString
+	 */
+	static function QueryString ()
+	{
+		if (self::IsCLI())
+			return http_build_query($_GET);
+		if (isset($_SERVER['REDIRECT_QUERY_STRING']))
+		{
+			$a = explode("&", $_SERVER['REDIRECT_QUERY_STRING']);
+			$x = array_shift($a);
+			return substr($_SERVER['REDIRECT_QUERY_STRING'], strlen($x) + 1);
+		}
+		else
+			return isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : "";
 	}
 
 }
