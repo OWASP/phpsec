@@ -65,7 +65,7 @@ class HttpRequest
 	 * Checks if script is being called from command line
 	 * @return boolean
 	 */
-	static function isCLI()
+	protected static function isCLI()
 	{
 		if (php_sapi_name() === "cli" || !isset($_SERVER['REMOTE_ADDR']))
 			return true;
@@ -241,6 +241,16 @@ class HttpRequest
 			return NULL;
 		$root = self::Protocol()."://".self::Host().self::PortReadable().self::Path();
 		return $root;
+	}
+
+	/**
+	 * Returns the IP address of the server under which the current script is executing.
+	 */
+	static function ServerIP()
+	{
+		if (self::isCLI())
+			return '127.0.0.1';
+		return isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : NULL;
 	}
 
 }
