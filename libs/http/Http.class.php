@@ -140,12 +140,21 @@ class HttpRequest
 	}
 
 	/**
-	 * Returns name of the server host
-	 * @return  string ServerName
+	 * HTTP Host, aka Domain name
+	 *
+	 * @return string Host
 	 */
+	static function Host()
+	{
+		if (self::IsCLI())
+			return "localhost";
+		return isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
+	}
+
 	static function ServerName()
 	{
-		return isset ($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '';
+		return isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '';
+		
 	}
 
 	/**
