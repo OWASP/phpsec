@@ -250,8 +250,38 @@ class HttpRequest
 	static function Method()
 	{
 		if (self::IsCLI())
-			return "get";
+			return "GET";
 		return $_SERVER['REQUEST_METHOD'];
+	}
+
+	/**
+	 * Request Path, e.g http://somesite.com/this/is/the/request/path/index.php
+	 *
+	 * @return string Path
+	 */
+	static function Path()
+	{
+		if (self::IsCLI())
+			return NULL;
+		$RequestURI = $_SERVER['REQUEST_URI'];
+		if (strpos($RequestURI,"?") !== false)
+			$Path = substr($RequestURI,0,strpos($RequestURI,"?"));
+		else
+			$Path = $RequestURI;
+		return $Path;
+	}
+
+	/**
+	 * Root of website without trailing slash
+	 *
+	 * @return string Root
+	 */
+	static function Root()
+	{
+		if (self::IsCLI())
+			return NULL;
+		$root = self::Protocol()."://".self::Host().self::PortReadable().self::Path();
+		return $root;
 	}
 
 }
