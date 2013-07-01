@@ -2,8 +2,8 @@
 namespace phpsec;
 ob_start();
 
-require_once "../../../libs/core/Download.class.php";
-require_once "../../../libs/core/Time.class.php";
+require_once "../../../libs/core/Download.php";
+require_once "../../../libs/core/Time.php";
 
 class DownloadManagerTest extends \PHPUnit_Framework_TestCase
 {

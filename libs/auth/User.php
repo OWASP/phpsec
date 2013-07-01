@@ -1,8 +1,8 @@
 <?php
 namespace phpsec;
 
-require_once (__DIR__ . '/../core/Time.class.php');
-require_once (__DIR__ . '/../core/Rand.class.php');
+require_once (__DIR__ . '/../core/Time.php');
+require_once (__DIR__ . '/../core/Rand.php');
 
 /**
  * SANITIZE ALL INPUTS. TO-DO FOR LATER.    <-------------  ATTENTION HERE ------------------------>

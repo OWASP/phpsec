@@ -2,10 +2,10 @@
 namespace phpsec;
 
 require_once "../../../libs/db/adapter/pdo_mysql.php";
-require_once '../../../libs/core/Rand.class.php';
-require_once '../../../libs/core/Time.class.php';
-require_once '../../../libs/auth/User.class.php';
-require_once '../../../libs/security/Adv_Password.class.php';
+require_once '../../../libs/core/Rand.php';
+require_once '../../../libs/core/Time.php';
+require_once '../../../libs/auth/User.php';
+require_once '../../../libs/security/Adv_Password.php';
 
 class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 {

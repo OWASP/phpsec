@@ -2,9 +2,9 @@
 namespace phpsec;
 
 require_once "../../../libs/db/adapter/pdo_mysql.php";
-require_once "../../../libs/core/Rand.class.php";	//at later time you won't need this because then users will be created by a different method.
-require_once "../../../libs/auth/User.class.php";
-require_once "../../../libs/session/Session.class.php";
+require_once "../../../libs/core/Rand.php";	//at later time you won't need this because then users will be created by a different method.
+require_once "../../../libs/auth/User.php";
+require_once "../../../libs/session/Session.php";
 
 class SessionTest extends \PHPUnit_Framework_TestCase
 {

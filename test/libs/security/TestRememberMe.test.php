@@ -8,7 +8,7 @@ echo "<PRE>";
 /**
  *					*****************IMPORTANT*****************************
  * 
- * This class is to test the "rememberMe" function in the file "/var/www/phpsec/libs/security/Adv_Password.class.php".
+ * This class is to test the "rememberMe" function in the file "/var/www/phpsec/libs/security/Adv_Password.php".
  * The reason is that I was having problems handling cookies with PHPUnit.
  * 
  * 
@@ -29,10 +29,10 @@ echo "<PRE>";
  */
 
 require_once "../../../libs/db/adapter/pdo_mysql.php";
-require_once '../../../libs/core/Rand.class.php';
-require_once '../../../libs/core/Time.class.php';
-require_once '../../../libs/auth/User.class.php';
-require_once '../../../libs/security/Adv_Password.class.php';
+require_once '../../../libs/core/Rand.php';
+require_once '../../../libs/core/Time.php';
+require_once '../../../libs/auth/User.php';
+require_once '../../../libs/security/Adv_Password.php';
 
 class TestRememberMe
 {

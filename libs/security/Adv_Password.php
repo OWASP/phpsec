@@ -1,9 +1,9 @@
 <?php
 namespace phpsec;
 
-require_once (__DIR__ . '/../core/Rand.class.php');
-require_once (__DIR__ . '/../core/Time.class.php');
-require_once (__DIR__ . '/../auth/User.class.php');
+require_once (__DIR__ . '/../core/Rand.php');
+require_once (__DIR__ . '/../core/Time.php');
+require_once (__DIR__ . '/../auth/User.php');
 
 class BruteForceAttackDetectedException extends WrongPasswordException {}
 
