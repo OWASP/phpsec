@@ -282,9 +282,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 			
 			$this->session[0]->refreshSession();	//refresh the session.
 			
-			$query = "SELECT LAST_ACTIVITY FROM SESSION WHERE SESSION_ID = ?";
-			$args = array( "{$this -> session[0] -> getSessionID()}" );
-			$result = $this -> conn -> SQL($query, $args);
+			$result = $this -> conn -> SQL("SELECT LAST_ACTIVITY FROM SESSION WHERE SESSION_ID = ?", array( "{$this -> session[0] -> getSessionID()}" ));
 			$sessionActivityTime = $result[0]['LAST_ACTIVITY'];
 			
 			$this -> assertTrue( (int)$sessionActivityTime >= $newTime );	//the new time for the session must be greater than or equal to the fake time we set.
@@ -329,9 +327,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 			
 			$this->session[0]->destroyAllSessions();
 			
-			$query = "SELECT TOTAL_SESSIONS FROM USER WHERE USERID = ?";
-			$args = array( "{$this -> session[0] ->getUserID()}" );
-			$result = $this -> conn -> SQL($query, $args);
+			$result = $this -> conn -> SQL("SELECT TOTAL_SESSIONS FROM USER WHERE USERID = ?", array( "{$this -> session[0] ->getUserID()}" ));
 			$totalSessions = $result[0]['TOTAL_SESSIONS'];
 			
 			$this -> assertTrue( $totalSessions == 0 );	//The total sessions must be 0 for this user after this operation.
