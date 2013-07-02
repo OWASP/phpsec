@@ -24,43 +24,43 @@ class Session
 	
 	/**
 	 * To hold the session ID.
-	 * @var type String
+	 * @var String
 	 */
 	protected $session = null;
 	
 	
 	/**
 	 * To hold the user ID.
-	 * @var type String
+	 * @var String
 	 */
 	protected $userID = null;	//for a session to present, there has to be a user. Without a user, a session cannot exist. So you have to create users in such a way that by the userID, the system can differentiate between a guest-user and a priviledged-user. Because you would need this distinction in RBAC.
 	
 	
 	/**
 	 * Database object to make SQL queries.
-	 * @var type Database Object
+	 * @var DatabaseObject
 	 */
 	protected $handler = null;
 	
 	
 	/**
 	 * To hold the maximum time that is considered to be idle for user. After this period, the session must expire.
-	 * @var type int
+	 * @var int
 	 */
 	public static $inactivityMaxTime = 1800;	//30 min.
 	
 	
 	/**
 	 * To hold the maximum time that is considered as session age. After this period, the session must expire.
-	 * @var type int
+	 * @var int
 	 */
 	public static $expireMaxTime = 604800;	//1 week.
 	
 	
 	/**
 	 * Constructor to initialize a new session for some user.
-	 * @param type $dbConn Database Object
-	 * @param type $user String
+	 * @param DatabaseObject $dbConn
+	 * @param String $user
 	 * @throws DBHandlerForSessionNotSetException
 	 */
 	public function __construct($dbConn, $user)
@@ -81,7 +81,7 @@ class Session
 	
 	/**
 	 * To return the current session ID.
-	 * @return type String
+	 * @return String
 	 */
 	public function getSessionID()
 	{
@@ -91,7 +91,7 @@ class Session
 	
 	/**
 	 * To return the current User ID.
-	 * @return type String
+	 * @return String
 	 */
 	public function getUserID()
 	{
@@ -138,7 +138,7 @@ class Session
 	
 	/**
 	 * To get all session IDs for the current user.
-	 * @return type StringArray
+	 * @return StringArray
 	 */
 	public function getAllSessions()
 	{
@@ -150,8 +150,8 @@ class Session
 	
 	/**
 	 * To set the data in the current session.
-	 * @param type $key String
-	 * @param type $value String
+	 * @param String $key 
+	 * @param String $value 
 	 * @return boolean
 	 * @throws SessionNotFoundException
 	 */
@@ -183,8 +183,8 @@ class Session
 	
 	/**
 	 * To get the data associated with the 'Key' in the current session.
-	 * @param type $key string
-	 * @return type String
+	 * @param String $key 
+	 * @return String
 	 * @throws SessionNotFoundException
 	 */
 	public function getData($key)
