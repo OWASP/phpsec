@@ -390,247 +390,276 @@ class BasicPasswordManagement
 }
 
 
+/**
+ * Parent Exception Class.
+ */
 class UserException extends \Exception {}
 
-class DBHandlerForUserNotSetException extends UserException {}
-class InvalidHashException extends UserException {}
-class WrongPasswordException extends UserException {}
-class UserExistsException extends UserException {}
-class UserObjectNotReturnedException extends UserException {}
+/**
+ * Child Exception Classes
+ */
+class DBHandlerForUserNotSetException extends UserException {}		//Database handler to handle SQL queries is not set.
+class InvalidHashException extends UserException {}			//The hash returned is not valid. i.e. it is empty.
+class WrongPasswordException extends UserException {}			//The password provided for the existing user is not correct.
+class UserExistsException extends UserException {}			//No records were found with this userID in the database.
+class UserObjectNotReturnedException extends UserException {}		//Cannot return the userObject.
+class SaltAlreadyPresentInDB extends UserException {}			//The provided salt is already present in the DB.
 
-class ObjectAlreadyPresentInDB extends UserException {}
-
-class SaltAlreadyPresentInDB extends ObjectAlreadyPresentInDB {}
 
 class User extends BasicPasswordManagement
 {
-	protected $_handler = null;
 	
-	protected $_userID = null;
+	/**
+	 * Database object to make SQL queries.
+	 * @var DatabaseObject 
+	 */
+	protected $handler = null;
 	
-	protected $_hashedPassword = "";
-	protected $_dynamicSalt = "";
 	
-	protected static $_passwordExpiryTime = 15552000;	//approx 6 months.
+	/**
+	 * To store the ID of the user.
+	 * @var String
+	 */
+	protected $userID = null;
 	
+	
+	/**
+	 * To store the hash of the user password.
+	 * @var String
+	 */
+	protected $hashedPassword = "";
+	
+	
+	/**
+	 * To store the dynamic salt used in creating the hash of the password.
+	 * @var String
+	 */
+	protected $dynamicSalt = "";
+	
+	
+	/**
+	 * To denote the time after which a password must expire i.e. the password needs to be replaced.
+	 * @var int
+	 */
+	public static $passwordExpiryTime = 15552000;	//approx 6 months.
+	
+	
+	
+	/**
+	 * To create an object for a new user.
+	 * @param DatabaseObject $dbConn
+	 * @param String $id
+	 * @param String $pass
+	 * @param String $staticSalt
+	 * @return \phpsec\User
+	 * @throws DBHandlerForUserNotSetException
+	 * @throws UserExistsException
+	 */
 	public static function newUserObject($dbConn, $id, $pass, $staticSalt = "")
 	{
 		$obj = new User();
 		
-		$obj->_handler = $dbConn;
+		$obj->handler = $dbConn;
 		
-		if ($obj->_handler == null)
+		if ($obj->handler == null)
 		{
 			throw new DBHandlerForUserNotSetException("<BR>ERROR: Connection to DB was not found.<BR>");
 		}
 		else
 		{
-			$obj->_userID = $id;
+			$obj->userID = $id;
 			
+			//If static salt is provided, then use the new static salt, not the default one set.
 			if ($staticSalt != "")
 				$obj->setStaticSalt ( $staticSalt );
 			
-			try
-			{
-				$time = Time::time();
-				
-				$obj->_dynamicSalt = hash("sha512", Rand::generateRandom(64));
-				$obj->_hashedPassword = BasicPasswordManagement::hashPassword($pass, $obj->_dynamicSalt, BasicPasswordManagement::$hashAlgo);
+			$time = Time::time();
+			
+			//calculate the hash of the password.
+			$obj->dynamicSalt = hash("sha512", Rand::generateRandom(64));
+			$obj->hashedPassword = BasicPasswordManagement::hashPassword($pass, $obj->dynamicSalt, BasicPasswordManagement::$hashAlgo);
 
-				$query = "INSERT INTO USER (`USERID`, `ACCOUNT_CREATED`, `HASH`, `DATE_CREATED`, `TOTAL_SESSIONS`, `ALGO`, `DYNAMIC_SALT`, `STATIC_SALT`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-				$args = array("{$obj->_userID}", $time, $obj->_hashedPassword, $time, 0, BasicPasswordManagement::$hashAlgo, $obj->_dynamicSalt, BasicPasswordManagement::$staticSalt);
-				$count = $obj->_handler -> SQL($query, $args);
-				
-				if ($count == 0)
-					throw new UserExistsException("<BR>ERROR: This User already exists in the DB.<BR>");
-				
-				return $obj;
-			}
-			catch(\Exception $e)
-			{
-				throw $e;
-			}
+			$count = $obj->handler -> SQL("INSERT INTO USER (`USERID`, `ACCOUNT_CREATED`, `HASH`, `DATE_CREATED`, `TOTAL_SESSIONS`, `ALGO`, `DYNAMIC_SALT`, `STATIC_SALT`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", array("{$obj->userID}", $time, $obj->hashedPassword, $time, 0, BasicPasswordManagement::$hashAlgo, $obj->dynamicSalt, BasicPasswordManagement::$staticSalt));
+
+			//If the user is already present in the database, then a duplicate won't be created and no rows will be affected. Hence 0 will be returned.
+			if ($count == 0)
+				throw new UserExistsException("<BR>ERROR: This User already exists in the DB.<BR>");
+
+			return $obj;
 		}
 	}
 	
+	
+	/**
+	 * To get the object of an existing user.
+	 * @param DatabaseObject $dbConn
+	 * @param String $id
+	 * @param String $pass
+	 * @return \phpsec\User
+	 * @throws DBHandlerForUserNotSetException
+	 * @throws UserObjectNotReturnedException
+	 * @throws WrongPasswordException
+	 */
 	public static function existingUserObject($dbConn, $id, $pass)
 	{
 		$obj = new User();
 		
-		$obj->_handler = $dbConn;
+		$obj->handler = $dbConn;
 		
-		if ($obj->_handler == null)
+		if ($obj->handler == null)
 		{
 			throw new DBHandlerForUserNotSetException("<BR>ERROR: Connection to DB was not found.<BR>");
 		}
 		else
 		{
-			try
-			{
-				$query = "SELECT `HASH`, `ALGO`, `DYNAMIC_SALT`, `STATIC_SALT` FROM USER WHERE `USERID` = ?";
-				$args = array($id);
-				$result = $obj->_handler -> SQL($query, $args);
-				
-				if (count($result) < 1)
-					throw new UserObjectNotReturnedException("<BR>ERROR: User Object not returned.<BR>");
+			$result = $obj->handler -> SQL("SELECT `HASH`, `ALGO`, `DYNAMIC_SALT`, `STATIC_SALT` FROM USER WHERE `USERID` = ?", array($id));
 
-				BasicPasswordManagement::$staticSalt = $result[0]['STATIC_SALT'];
-				
-				if (!BasicPasswordManagement::validatePassword( $pass, $result[0]['HASH'], $result[0]['DYNAMIC_SALT'], $result[0]['ALGO']))
-					throw new WrongPasswordException("<BR>ERROR: Wrong Password. User Object not returned.<BR>");
+			//If no record is returned for this user, then this user does not exist in the system.
+			if (count($result) < 1)
+				throw new UserObjectNotReturnedException("<BR>ERROR: User Object not returned.<BR>");
 
-				$obj->_userID = $id;
-				$obj->_dynamicSalt = $result[0]['DYNAMIC_SALT'];
-				$obj->_hashedPassword = $result[0]['HASH'];
-				BasicPasswordManagement::$hashAlgo = $result[0]['ALGO'];
+			//extract static salt used while password generation
+			BasicPasswordManagement::$staticSalt = $result[0]['STATIC_SALT'];
 
-				return $obj;
-			}
-			catch(\Exception $e)
-			{
-				throw $e;
-			}
+			//validate the given password with that stored in the DB.
+			if (!BasicPasswordManagement::validatePassword( $pass, $result[0]['HASH'], $result[0]['DYNAMIC_SALT'], $result[0]['ALGO']))
+				throw new WrongPasswordException("<BR>ERROR: Wrong Password. User Object not returned.<BR>");
+
+			//If all goes right, then set the local variables and return the user object.
+			$obj->userID = $id;
+			$obj->dynamicSalt = $result[0]['DYNAMIC_SALT'];
+			$obj->hashedPassword = $result[0]['HASH'];
+			BasicPasswordManagement::$hashAlgo = $result[0]['ALGO'];
+
+			return $obj;
 		}
 	}
 	
+	
+	/**
+	 * Function that lets you store a new static salt in the DB.
+	 * @param String $newSalt
+	 * @throws SaltAlreadyPresentInDB
+	 */
 	private function setStaticSalt($newSalt)
 	{
 		BasicPasswordManagement::$staticSalt = $newSalt;
 		
-		try
-		{
-			$query = "INSERT INTO STATIC_SALT (`STATICSALT`) VALUES (?)";
-			$args = array(BasicPasswordManagement::$staticSalt);
-			$count = $this->_handler -> SQL($query, $args);
+		$count = $this->handler -> SQL("INSERT INTO STATIC_SALT (`STATICSALT`) VALUES (?)", array(BasicPasswordManagement::$staticSalt));
 			
-			if ($count == 0)
-				throw new SaltAlreadyPresentInDB("This static-salt is already present in the DB. Please choose a different salt.");
-		}
-		catch(\Exception $e)
-		{
-			throw $e;
-		}
+		if ($count == 0)
+			throw new SaltAlreadyPresentInDB("This static-salt is already present in the DB. Please choose a different salt.");
 	}
 	
+	
+	/**
+	 * To set optional fields for a user such as emails and name.
+	 * @param String $email
+	 * @param String $firstName
+	 * @param String $lastName
+	 */
 	public function setOptionalFields($email = "", $firstName = "", $lastName = "")
 	{
-		try
-		{
-			$query = "UPDATE USER SET FIRST_NAME = ?, LAST_NAME = ?, EMAIL = ? WHERE USERID = ?";
-			$args = array($firstName, $lastName, $email, "{$this->_userID}");
-			$count = $this->_handler -> SQL($query, $args);
-		}
-		catch(\Exception $e)
-		{
-			throw $e;
-		}
+		$this->handler -> SQL("UPDATE USER SET FIRST_NAME = ?, LAST_NAME = ?, EMAIL = ? WHERE USERID = ?", array($firstName, $lastName, $email, "{$this->userID}"));
 	}
 	
+	
+	/**
+	 * To get the date when the user account was created. The value returned is the UNIX timestamp.
+	 * @return int
+	 */
 	public function getAccountCreationDate()
 	{
-		try
-		{
-			$query = "SELECT `ACCOUNT_CREATED` FROM USER WHERE USERID = ?";
-			$args = array("{$this->_userID}");
-			$result = $this->_handler -> SQL($query, $args);
-			
-			return $result[0]['ACCOUNT_CREATED'];
-		}
-		catch(\Exception $e)
-		{
-			throw $e;
-		}
+		$result = $this->handler -> SQL("SELECT `ACCOUNT_CREATED` FROM USER WHERE USERID = ?", array("{$this->userID}"));
+
+		return $result[0]['ACCOUNT_CREATED'];
 	}
 	
+	
+	/**
+	 * To get the userID of the current User.
+	 * @return String
+	 */
 	public function getUserID()
 	{
-		return $this->_userID;
+		return $this->userID;
 	}
 	
+	
+	/**
+	 * To get the hash of the current password of the user.
+	 * @return String
+	 * @throws InvalidHashException
+	 */
 	public function getHashedPassword()
 	{
-		if ($this->_hashedPassword == "")
+		if ($this->hashedPassword == "")
 			throw new InvalidHashException("<BR>WARNING: This hash seems invalid.<BR>");
 		else
-			return $this->_hashedPassword;
+			return $this->hashedPassword;
 	}
 	
+	
+	/**
+	 * To get the dynamic salt that was used in the password generation.
+	 * @return String
+	 */
 	public function getDynamiSalt()
 	{
-		return $this->_dynamicSalt;
+		return $this->dynamicSalt;
 	}
 	
+	
+	/**
+	 * Function to facilitate the password reset for the current user.
+	 * @param String $oldPassword
+	 * @param String $newPassword
+	 * @return boolean
+	 * @throws WrongPasswordException
+	 */
 	public function resetPassword($oldPassword, $newPassword)
 	{
-		if (! BasicPasswordManagement::validatePassword( $oldPassword, $this->_hashedPassword, $this->_dynamicSalt, BasicPasswordManagement::$hashAlgo))
+		//If given password ($oldPassword) is not matched with the one stored in the DB.
+		if (! BasicPasswordManagement::validatePassword( $oldPassword, $this->hashedPassword, $this->dynamicSalt, BasicPasswordManagement::$hashAlgo))
 			throw new WrongPasswordException("<BR>ERROR: Wrong Password provided!!<BR>");
 		
-		$this->_dynamicSalt = hash("sha512", Rand::generateRandom(64));
+		//create a new dynamic salt.
+		$this->dynamicSalt = hash("sha512", Rand::generateRandom(64));
+		//create the hash of the new password.
 		$newHash = BasicPasswordManagement::hashPassword($newPassword, $this->getDynamiSalt(), BasicPasswordManagement::$hashAlgo);
 		
-		$query = "UPDATE USER SET `HASH` = ?, `DATE_CREATED` = ?, `DYNAMIC_SALT` = ?, `ALGO` = ? WHERE `USERID` = ?";
-		$args = array($newHash, Time::time(), $this->_dynamicSalt, BasicPasswordManagement::$hashAlgo, $this->_userID);
-		$count = $this->_handler -> SQL($query, $args);
+		//update the old password with the new password.
+		$this->handler -> SQL("UPDATE USER SET `HASH` = ?, `DATE_CREATED` = ?, `DYNAMIC_SALT` = ?, `ALGO` = ? WHERE `USERID` = ?", array($newHash, Time::time(), $this->dynamicSalt, BasicPasswordManagement::$hashAlgo, $this->userID));
 		
-		$this->_hashedPassword = $newHash;
+		$this->hashedPassword = $newHash;
 
 		return TRUE;
 	}
 	
+	
+	/**
+	 * To delete the current user.
+	 */
 	public function deleteUser()
 	{
-		try
-		{
-			$query = "DELETE FROM USER WHERE USERID = ?";
-			$args = array("{$this->_userID}");
-			$count = $this->_handler -> SQL($query, $args);
-		}
-		catch(\Exception $e)
-		{
-			throw $e;
-		}
+		$this->handler -> SQL("DELETE FROM USER WHERE USERID = ?", array("{$this->userID}"));
 	}
 	
-	public static function setPasswordExpiryTime($time)
-	{
-		if( ( gettype($time) != "integer" ) )
-			throw new \Exception("<BR>ERROR: Integer is required. " . gettype($time) . " was found.<BR>");
-		
-		User::$_passwordExpiryTime = $time;
-	}
 	
-	public static function getPasswordExpiryTime()
-	{
-		return User::$_passwordExpiryTime;
-	}
-	
+	/**
+	 * To check if the password has aged. i.e. if the time has passed after which the password must be changed.
+	 * @return boolean
+	 */
 	public function checkIfPasswordExpired()
 	{
-		try
-		{
-			$query = "SELECT `DATE_CREATED` FROM USER WHERE `USERID` = ?";
-			$args = array($this->_userID);
-			$result = $this->_handler->SQL($query, $args);
+		$result = $this->handler->SQL("SELECT `DATE_CREATED` FROM USER WHERE `USERID` = ?", array($this->userID));
 			
-			$currentTime = Time::time();
-		
-			if ( ($currentTime - $result[0]['DATE_CREATED'])  > User::$_passwordExpiryTime)
-				return TRUE;
-			else
-				return FALSE;
-		}
-		catch(\Exception $e)
-		{
-			throw $e;
-		}
-	}
-	
-	public function __destruct()
-	{
-		$this->_handler = null;
-		$this->_userID = null;
-		$this->_dynamicSalt = null;
-		$this->_hashedPassword = null;
+		$currentTime = Time::time();
+
+		if ( ($currentTime - $result[0]['DATE_CREATED'])  > User::$passwordExpiryTime)
+			return TRUE;
+		else
+			return FALSE;
 	}
 }
 
