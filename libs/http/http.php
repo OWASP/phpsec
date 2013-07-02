@@ -12,9 +12,9 @@ require (__DIR__ . '/tainted.php');
  * HttpRequestArray class
  * Wraps $_SERVER in an ArrayAccess interface
  */
-class HttpRequestArray implements \ArrayAccess
+abstract class HttpRequestArray implements \ArrayAccess
 {
-	private $data;
+	protected $data;
 
 	public function __construct($data = null)
 	{
@@ -53,13 +53,11 @@ class HttpRequestArray implements \ArrayAccess
 	}
 }
 
-$_SERVER = new HttpRequestArray($_SERVER);
-
 /**
  * HttpRequest class
  * Wrapper class to securely process HTTP request parameters
  */
-class HttpRequest
+class HttpRequest extends HttpRequestArray
 {
 	/**
 	 * Checks if script is being called from command line
@@ -254,5 +252,7 @@ class HttpRequest
 	}
 
 }
+
+$_SERVER = new HttpRequest($_SERVER);
 
 ?>
