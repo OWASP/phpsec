@@ -1,36 +1,69 @@
 <?php
 namespace phpsec;
 
+/**
+ * Required Files.
+ */
 require_once (__DIR__ . '/../core/Time.php');
 require_once (__DIR__ . '/../core/Rand.php');
-
-/**
- * SANITIZE ALL INPUTS. TO-DO FOR LATER.    <-------------  ATTENTION HERE ------------------------>
- */
 
 
 class BasicPasswordManagement
 {
-	protected static $_staticSalt = "7d2cdb76dcc3c97fc55bff3dafb35724031f3e4c47512d4903b6d1fb914774405e74539ea70a49fbc4b52ededb1f5dfb7eebef3bcc89e9578e449ed93cfb2103";
+	
+	/**
+	 * To store the static salt for password salting.
+	 * @var String
+	 */
+	protected static $staticSalt = "7d2cdb76dcc3c97fc55bff3dafb35724031f3e4c47512d4903b6d1fb914774405e74539ea70a49fbc4b52ededb1f5dfb7eebef3bcc89e9578e449ed93cfb2103";
+	
+	
+	/**
+	 * To store the current hash algorithm in use.
+	 * @var String
+	 */
 	public static $hashAlgo = "sha512";
 	
 	
+	/**
+	 * To return the current value of static salt in use.
+	 * @return String.
+	 */
 	public static function getStaticSalt()
 	{
-		return BasicPasswordManagement::$_staticSalt;
+		return BasicPasswordManagement::$staticSalt;
 	}
 	
+	
+	/**
+	 * To create hash of a string using dynamic and static salt.
+	 * @param String $pass
+	 * @param String $dynamicSalt
+	 * @param String $algo
+	 * @return String
+	 */
 	public static function hashPassword($pass, $dynamicSalt = "", $algo = "")
 	{
+		//If dynamic salt is not present, create one.
 		if ($dynamicSalt == "")
 			$dynamicSalt = hash("sha512",Rand::generateRandom(64));
 		
+		//If algo is not defined, use sha512 by default.
 		if ($algo == "")
 			$algo = "sha512";
 		
-		return hash($algo, strtolower($dynamicSalt . $pass . BasicPasswordManagement::$_staticSalt));
+		return hash($algo, strtolower($dynamicSalt . $pass . BasicPasswordManagement::$staticSalt));
 	}
 	
+	
+	/**
+	 * To check if hash from the new password is equal to the old password's hash.
+	 * @param String $newPassword
+	 * @param String $oldHash
+	 * @param String $oldSalt
+	 * @param String $oldAlgo
+	 * @return boolean
+	 */
 	public static function validatePassword($newPassword, $oldHash, $oldSalt, $oldAlgo)
 	{
 		$newHash = BasicPasswordManagement::hashPassword($newPassword, $oldSalt, $oldAlgo);
@@ -41,44 +74,83 @@ class BasicPasswordManagement
 			return FALSE;
 	}
 	
-	//taken from http://stackoverflow.com/questions/3198005/help-with-the-calculation-and-usefulness-of-password-entropy
+	
+	/**
+	 * To calculate entropy of a string.
+	 * @param String $string
+	 * @return float
+	 */
 	public static function Entropy($string)
 	{
 		$h=0;
 		$size = strlen($string);
+		
+		//Calculate the occurence of each character and compare that number with the overall length of the string and put it in the entropy formula.
 		foreach (count_chars($string, 1) as $v)
 		{
 			$p = $v/$size;
 			$h -= $p*log($p)/log(2);
 		}
+		
 		return $h;
 	}
 	
-	//taken from jframework
-	public static function hasOrderedCharacters($string, $length) {
+	
+	/**
+	 * To check if the string has ordered characters i.e. strings such as "abcd".
+	 * @param String $string
+	 * @param int $length
+	 * @return boolean
+	 */
+	public static function hasOrderedCharacters($string, $length)
+	{
 		$length=(int)$length;
+		
 		$i = 0;
 		$j = strlen($string);
-		$str = implode('', array_map(function($m) use (&$i, &$j) {
+		
+		//Group all the characters into length 1, and calculate their ASCII value. If they are continous, then they contain ordered characters.
+		$str = implode('', array_map(function($m) use (&$i, &$j)
+		{
 			return chr((ord($m[0]) + $j--) % 256) . chr((ord($m[0]) + $i++) % 256);
 		}, str_split($string, 1)));
+		
 		return preg_match('#(.)(.\1){' . ($length - 1) . '}#', $str)==true;
 	}
 	
-	//taken from jframework
-	public static function hasKeyboardOrderedCharacters($string, $length) {
+	
+	/**
+	 * To check if the string has keyboard ordered characters i.e. strings such as "qwert".
+	 * @param String $string
+	 * @param int $length
+	 * @return boolean
+	 */
+	public static function hasKeyboardOrderedCharacters($string, $length)
+	{
 		$length=(int)$length;
+		
 		$i = 0;
 		$j = strlen($string);
-		$str = implode('', array_map(function($m) use (&$i, &$j) {
+		
+		//group all the characters into length 1, and calculate their positions. If the positions match with the value $keyboardSet, then they contain keyboard ordered characters.
+		$str = implode('', array_map(function($m) use (&$i, &$j)
+		{
 			$keyboardSet="1234567890qwertyuiopasdfghjklzxcvbnm";
 			return ((strpos($keyboardSet,$m[0]) + $j--) ) . ((strpos($keyboardSet,$m[0]) + $i++) );
 		}, str_split($string, 1)));
+		
 		return preg_match('#(..)(..\1){' . ($length - 1) . '}#', $str)==true;
 	}
 	
+	
+	/**
+	 * To check if the string is of a phone-number pattern.
+	 * @param String $string
+	 * @return boolean
+	 */
 	public static function isPhoneNumber($string)	//there are many cases that phone numbers can be arranged. Hence not all possible combinations were taken into account.
 	{
+		//If the string contains only numbers and the length of the string is between 6 and 13, it is possibly a phone number.
 		preg_match_all ("/^(\+)?\d{6,13}$/i", $string, $matches);
 		
 		if (count($matches[0])>=1)
@@ -87,8 +159,15 @@ class BasicPasswordManagement
 			return FALSE;
 	}
 	
+	
+	/**
+	 * To check if the string contains a phone-number pattern.
+	 * @param String $string
+	 * @return boolean
+	 */
 	public static function containsPhoneNumber($string)	//there are many cases that phone numbers can be arranged. Hence not all possible combinations were taken into account.
 	{
+		//If the string contains continous numbers of length beteen 6 and 13, then it is possible that the string contains a phone-number pattern. e.g. owasp+91917817
 		preg_match_all ("/(\+)?\d{6,13}/i", $string, $matches);
 		
 		if (count($matches[0])>=1)
@@ -97,51 +176,92 @@ class BasicPasswordManagement
 			return FALSE;
 	}
 	
+	
+	/**
+	 * To check if the string is of a date-like pattern.
+	 * @param String $string
+	 * @return boolean
+	 */
 	public static function isDate($string)
 	{
+		//This checks dates of type Date-Month-Year (all digits)
 		preg_match_all ("/^(0?[1-9]|[12][0-9]|3[01])[.\-\/\s]?(0?[1-9]|1[012])[.\-\/\s]?((19|20)?\d\d)$/i", $string, $matches1);
+		//This checks dates of type Date-Month-Year (where month is represented by string)
 		preg_match_all ("/^(0?[1-9]|[12][0-9]|3[01])[.\-\/\s]?(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[.\-\/\s]?((19|20)?\d\d)$/i", $string, $matches2);
 		
+		//This checks dates of type Month-Date-Year (all digits)
 		preg_match_all ("/^(0?[1-9]|1[012])[.\-\/\s]?(0?[1-9]|[12][0-9]|3[01])[.\-\/\s]?((19|20)?\d\d)$/i", $string, $matches3);
+		//This checks dates of type Month-Date-Year (where month is represented by string)
 		preg_match_all ("/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[.\-\/\s]?(0?[1-9]|[12][0-9]|3[01])[.\-\/\s]?((19|20)?\d\d)$/i", $string, $matches4);
 		
+		//This checks dates of type Year-Month-Date (all digits)
 		preg_match_all ("/^((19|20)?\d\d)[.\-\/\s]?(0?[1-9]|1[012])[.\-\/\s]?(0?[1-9]|[12][0-9]|3[01])$/i", $string, $matches5);
+		//This checks dates of type Year-Month-Date (where month is represented by string)
 		preg_match_all ("/^((19|20)?\d\d)[.\-\/\s]?(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[.\-\/\s]?(0?[1-9]|[12][0-9]|3[01])$/i", $string, $matches6);
 		
+		//If any of the above conditions becomes true, then there is a date pattern.
 		if (count($matches1[0])>=1 || count($matches2[0])>=1 || count($matches3[0])>=1 || count($matches4[0])>=1 || count($matches5[0])>=1 || count($matches6[0])>=1)
 			return TRUE;
 		else
 			return FALSE;
 	}
 	
+	
+	/**
+	 * To check if the string contains a date-like pattern.
+	 * @param String $string
+	 * @return boolean
+	 */
 	public static function containsDate($string)
 	{
+		//This checks dates of type Date-Month-Year (all digits)
 		preg_match_all ("/(0?[1-9]|[12][0-9]|3[01])[.\-\/\s]?(0?[1-9]|1[012])[.\-\/\s]?((19|20)?\d\d)/i", $string, $matches1);
+		//This checks dates of type Date-Month-Year (where month is represented by string)
 		preg_match_all ("/(0?[1-9]|[12][0-9]|3[01])[.\-\/\s]?(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[.\-\/\s]?((19|20)?\d\d)/i", $string, $matches2);
 		
+		//This checks dates of type Month-Date-Year (all digits)
 		preg_match_all ("/(0?[1-9]|1[012])[.\-\/\s]?(0?[1-9]|[12][0-9]|3[01])[.\-\/\s]?((19|20)?\d\d)/i", $string, $matches3);
+		//This checks dates of type Month-Date-Year (where month is represented by string)
 		preg_match_all ("/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[.\-\/\s]?(0?[1-9]|[12][0-9]|3[01])[.\-\/\s]?((19|20)?\d\d)/i", $string, $matches4);
 		
+		//This checks dates of type Year-Month-Date (all digits)
 		preg_match_all ("/((19|20)?\d\d)[.\-\/\s]?(0?[1-9]|1[012])[.\-\/\s]?(0?[1-9]|[12][0-9]|3[01])/i", $string, $matches5);
+		//This checks dates of type Year-Month-Date (where month is represented by string)
 		preg_match_all ("/((19|20)?\d\d)[.\-\/\s]?(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[.\-\/\s]?(0?[1-9]|[12][0-9]|3[01])/i", $string, $matches6);
 		
+		//If any of the above conditions becomes true, then there is a date pattern.
 		if (count($matches1[0])>=1 || count($matches2[0])>=1 || count($matches3[0])>=1 || count($matches4[0])>=1 || count($matches5[0])>=1 || count($matches6[0])>=1)
 			return TRUE;
 		else
 			return FALSE;
 	}
 	
-	public static function containDoubledWords($string)	//such as crabcrab, stopstop, treetree, passpass, etc.
+	
+	/**
+	 * To check if the string contains double words such as crabcrab, stopstop, treetree, passpass, etc.
+	 * @param String $string
+	 * @return boolean
+	 */
+	public static function containDoubledWords($string)
 	{
+		//divide the string into two halves.
 		$firstHalf = substr($string, 0, (strlen($string) / 2));
 		$secondHalf = substr($string, (strlen($string) / 2), strlen($string));
 		
+		//check for the equality of the two words.
 		if ($firstHalf == $secondHalf)
 			return TRUE;
 		else
 			return FALSE;
 	}
 	
+	
+	/**
+	 * To check if the given string($hay) contains another string ($needle) in it.
+	 * @param String $hay
+	 * @param String $needle
+	 * @return boolean
+	 */
 	public static function containsString($hay, $needle)	//used for checking for usernames, firstname, lastname etc.
 	{
 		preg_match_all("/(" . $needle . ")/i", $hay, $matches);
@@ -152,6 +272,12 @@ class BasicPasswordManagement
 			return FALSE;
 	}
 	
+	
+	/**
+	 * To calculate the strength of a given string. The value lies between 0 and 1 where 1 being the strongest.
+	 * @param String $RawPassword
+	 * @return float
+	 */
 	public static function strength($RawPassword)
 	{
 		$score=0;
@@ -214,22 +340,28 @@ class BasicPasswordManagement
 
 	}
 	
+	
+	/**
+	 * To generate a random string of specified strength.
+	 * @param float $Security
+	 * @return String
+	 */
 	public static function generate($Security=.5)
 	{
 		$MaxLen=20;
 		
 		if ($Security>.3)
-			$UseNumbers=true;
+			$UseNumbers=true;	//can use digits.
 		else
 			$UseNumbers=false;
 		
 		if ($Security>.5)
-			$UseUpper=true;
+			$UseUpper=true;		//can use upper case letters.
 		else
 			$UseUpper=false;
 		
 		if ($Security>.9)
-			$UseSymbols=true;
+			$UseSymbols=true;	//can use symbols such as %, &, # etc.
 		else
 			$UseSymbols=false;
 		
@@ -248,6 +380,8 @@ class BasicPasswordManagement
 			$chars.="!@#$%^&*()_+-=?.,";
 
 		$Pass="";
+		//$char contains the string that has all the letters we can use in a password.
+		//The loop pics a character from $char in random and adds that character to the final $pass variable.
 		for ($i=0;$i<$Length;++$i)
 			$Pass.=$chars[Rand::randLen(0, strlen($chars)-1)];
 		
@@ -304,7 +438,7 @@ class User extends BasicPasswordManagement
 				$obj->_hashedPassword = BasicPasswordManagement::hashPassword($pass, $obj->_dynamicSalt, BasicPasswordManagement::$hashAlgo);
 
 				$query = "INSERT INTO USER (`USERID`, `ACCOUNT_CREATED`, `HASH`, `DATE_CREATED`, `TOTAL_SESSIONS`, `ALGO`, `DYNAMIC_SALT`, `STATIC_SALT`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-				$args = array("{$obj->_userID}", $time, $obj->_hashedPassword, $time, 0, BasicPasswordManagement::$hashAlgo, $obj->_dynamicSalt, BasicPasswordManagement::$_staticSalt);
+				$args = array("{$obj->_userID}", $time, $obj->_hashedPassword, $time, 0, BasicPasswordManagement::$hashAlgo, $obj->_dynamicSalt, BasicPasswordManagement::$staticSalt);
 				$count = $obj->_handler -> SQL($query, $args);
 				
 				if ($count == 0)
@@ -340,7 +474,7 @@ class User extends BasicPasswordManagement
 				if (count($result) < 1)
 					throw new UserObjectNotReturnedException("<BR>ERROR: User Object not returned.<BR>");
 
-				BasicPasswordManagement::$_staticSalt = $result[0]['STATIC_SALT'];
+				BasicPasswordManagement::$staticSalt = $result[0]['STATIC_SALT'];
 				
 				if (!BasicPasswordManagement::validatePassword( $pass, $result[0]['HASH'], $result[0]['DYNAMIC_SALT'], $result[0]['ALGO']))
 					throw new WrongPasswordException("<BR>ERROR: Wrong Password. User Object not returned.<BR>");
@@ -361,12 +495,12 @@ class User extends BasicPasswordManagement
 	
 	private function setStaticSalt($newSalt)
 	{
-		BasicPasswordManagement::$_staticSalt = $newSalt;
+		BasicPasswordManagement::$staticSalt = $newSalt;
 		
 		try
 		{
 			$query = "INSERT INTO STATIC_SALT (`STATICSALT`) VALUES (?)";
-			$args = array(BasicPasswordManagement::$_staticSalt);
+			$args = array(BasicPasswordManagement::$staticSalt);
 			$count = $this->_handler -> SQL($query, $args);
 			
 			if ($count == 0)
