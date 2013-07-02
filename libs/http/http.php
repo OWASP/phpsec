@@ -6,7 +6,7 @@ class HttpRequestException extends \Exception {}
 class HttpRequestInsecureParameterException extends HttpRequestException {}
 
 
-require (__DIR__ . '/Tainted.class.php');
+require (__DIR__ . '/tainted.php');
 
 /**
  * HttpRequestArray class
