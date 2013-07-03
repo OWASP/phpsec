@@ -7,7 +7,7 @@ namespace phpsec;
  */
 require_once (__DIR__ . '/../core/Rand.php');
 require_once (__DIR__ . '/../core/Time.php');
-require_once (__DIR__ . '/../auth/User.php');
+require_once (__DIR__ . '/User.php');
 
 
 /**
