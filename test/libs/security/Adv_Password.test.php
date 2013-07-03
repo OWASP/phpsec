@@ -1,25 +1,35 @@
 <?php
 namespace phpsec;
 
+
+/**
+ * Required Files
+ */
 require_once "../../../libs/db/adapter/pdo_mysql.php";
 require_once '../../../libs/core/Rand.php';
 require_once '../../../libs/core/Time.php';
 require_once '../../../libs/auth/User.php';
 require_once '../../../libs/security/Adv_Password.php';
 
+
+
 class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 {
-	private $_handler = "";
-	private $_userID = "";
-	private $obj = "";
+	protected $handler = "";
+	protected $userID = "";
+	protected $obj = "";
 	
+	
+	/**
+	 * Function to be run before every test*() functions.
+	 */
 	public function setUp()
 	{
 		Time::$realTime = true;
 
 		try
 		{
-			$this->_handler = new \phpsec\Database_pdo_mysql ('OWASP', 'root', 'testing');
+			$this->handler = new \phpsec\Database_pdo_mysql ('OWASP', 'root', 'testing');	//create DB connection.
 		}
 		catch (\Exception $e)
 		{
@@ -28,9 +38,9 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 		
 		try
 		{
-			BasicPasswordManagement::$hashAlgo = "haval256,5";
-			$this->_userID = User::newUserObject($this->_handler, Rand::generateRandom(10), "testing");
-			$this->obj = new AdvancedPasswordManagement($this->_handler, $this->_userID->getUserID(), "testing");
+			BasicPasswordManagement::$hashAlgo = "haval256,5";	//choose salting algo.
+			$this->userID = User::newUserObject($this->handler, Rand::generateRandom(10), "testing");	//create a user.
+			$this->obj = new AdvancedPasswordManagement($this->handler, $this->userID->getUserID(), "testing");	//create object to AdvancedPasswordManagement class.
 		}
 		catch (\Exception $e)
 		{
@@ -39,34 +49,30 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 		}
 	}
 	
-	public function testSetTempPassExpiryTime()
-	{
-		$time = 1800;
-		
-		AdvancedPasswordManagement::setTempPassExpiryTime($time);
-		
-		$this->assertTrue(AdvancedPasswordManagement::getTempPassExpiryTime() == $time);
-	}
 	
+	
+	/**
+	 * Function to check if the temp password expiry functionality is working.
+	 */
 	public function testCheckIfTempPassExpired()
 	{
 		try
 		{
-			$query = "UPDATE PASSWORD SET TEMP_TIME = ? WHERE USERID = ?";
-			$args = array(Time::time(), $this->_userID->getUserID());
-			$count = $this->_handler->SQL($query, $args);
+			//update the temp pass time to current time.
+			$this->handler->SQL("UPDATE PASSWORD SET TEMP_TIME = ? WHERE USERID = ?", array(Time::time(), $this->userID->getUserID()));
 			
-			$firstTest = $this->obj->checkIfTempPassExpired();
+			$firstTest = $this->obj->checkIfTempPassExpired();	//this check will provide false, since the temp password time has not expired.
 
 			Time::$realTime = false;
-			Time::setTime(1390706853);
-
-			$secondTest = $this->obj->checkIfTempPassExpired();
+			Time::setTime(1390706853);	//Now set the time to some distant future time.
 			
-			$query = "UPDATE PASSWORD SET TEMP_TIME = ? WHERE USERID = ?";
-			$args = array(0, $this->_userID->getUserID());
-			$count = $this->_handler->SQL($query, $args);
+			$secondTest = $this->obj->checkIfTempPassExpired();	//this check will provide true, since the temp password time has expired.
+			
+			//Make the temp password time as it was.
+			$this->handler->SQL("UPDATE PASSWORD SET TEMP_TIME = ? WHERE USERID = ?", array(0, $this->userID->getUserID()));
 
+			$this->userID->deleteUser();
+			
 			$this->assertTrue(!$firstTest && $secondTest);
 		}
 		catch (\Exception $e)
@@ -76,31 +82,40 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 		}
 	}
 	
+	
+	
+	/**
+	 * Function to check if the temp Password functionality is working correctly.
+	 */
 	public function testTempPassword()
 	{
 		try
 		{
 			$currentTime = Time::time();
 			
-			AdvancedPasswordManagement::setTempPassExpiryTime(900);
+			AdvancedPasswordManagement::$tempPassExpiryTime = 900;
 			
-			$this->obj->tempPassword();
+			$this->obj->tempPassword();	//this will create a new temp password.
 			
-			$query = "SELECT TEMP_PASS FROM PASSWORD WHERE USERID = ?";
-			$args = array($this->_userID->getUserID());
-			$result = $this->_handler -> SQL($query, $args);
+			$result = $this->handler -> SQL("SELECT TEMP_PASS FROM PASSWORD WHERE USERID = ?", array($this->userID->getUserID()));
 			
 			Time::$realTime = false;
 			
 			//firstTest
-			Time::setTime($currentTime + 500);
-			$firstTest = $this->obj->tempPassword("qwert");
+			Time::setTime($currentTime + 500);	//set future time that has not passed.
+			$firstTest = $this->obj->tempPassword("qwert");	//This should return false since the password is wrong. Even though time has not expired.
 			
-			//secondTesSt
+			//secondTest
 			Time::setTime($currentTime + 500);
-			$secondTest = $this->obj->tempPassword($result[0]['TEMP_PASS']);
+			$secondTest = $this->obj->tempPassword($result[0]['TEMP_PASS']);	//This should return true since the pasword is correct and time has not expired.
 			
-			$this->assertTrue(!$firstTest && $secondTest);
+			//thirdTest
+			Time::setTime($currentTime + 1000);
+			$thirdTest = $this->obj->tempPassword($result[0]['TEMP_PASS']);
+			
+			$this->userID->deleteUser();
+			
+			$this->assertTrue(!$firstTest && $secondTest && !$thirdTest);
 		}
 		catch (\Exception $e)
 		{
@@ -109,30 +124,38 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 		}
 	}
 	
+	
+	/**
+	 * Function to test if brute force is detected.
+	 */
 	public function testBruteForce()
 	{
 		try
 		{
-			$this->_userID = User::newUserObject($this->_handler, "rash", "testing");
-			
+			//repetedly provide wrong password.
 			for($i = 0; $i < 7; $i++)
 			{
-				$this->obj = new AdvancedPasswordManagement($this->_handler, $this->_userID->getUserID(), "resting", true);
+				$this->obj = new AdvancedPasswordManagement($this->handler, $this->userID->getUserID(), "resting", true);	//wrong password provided.
 			}
 
+			//since an exception is generated in the above loop, the below line won't execute.
 			$this->assertTrue(false);
 		}
 		catch (\Exception $e)
 		{
-			$this->assertTrue(true);
+			$this->userID->deleteUser();
+			$this->assertTrue(true);	//If exception is generated, then the function worked.
 		}
 	}
 	
+	
+	/**
+	 * This function will run after each test*() function has run. Its job is to clean up all the mess creted by other functions.
+	 */
 	public function tearDown()
 	{
-		$this->_handler = null;
-		$this->_userID = null;
-		$this->obj = null;
+		$this->handler->SQL("DELETE FROM PASSWORD WHERE USERID = ?", array($this->userID->getUserID()));
+		$this->userID->deleteUser();
 		
 		Time::$realTime = true;
 	}

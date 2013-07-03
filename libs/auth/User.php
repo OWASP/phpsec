@@ -541,7 +541,7 @@ class User extends BasicPasswordManagement
 	 * @param String $newSalt
 	 * @throws SaltAlreadyPresentInDB
 	 */
-	private function setStaticSalt($newSalt)
+	protected function setStaticSalt($newSalt)
 	{
 		BasicPasswordManagement::$staticSalt = $newSalt;
 		
