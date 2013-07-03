@@ -17,15 +17,22 @@ class BruteForceAttackDetectedException extends WrongPasswordException {}	//a su
 
 
 
-class AdvancedPasswordManagement extends User
+class AdvancedPasswordManagement
 {
+	
+	/**
+	 * To keep the DatabaseObject for SQL queries.
+	 * @var DatabaseObject
+	 */
+	protected $handler = null;
+	
 	
 	
 	/**
 	 * To keep the object of current user.
 	 * @var \phpsec\User
 	 */
-	protected $userObj = null;
+	protected $userID = null;
 	
 	
 	/**
@@ -71,7 +78,10 @@ class AdvancedPasswordManagement extends User
 	{
 		try
 		{
-			$this->userObj = User::existingUserObject($dbConn, $user, $pass);
+			$this->handler = $dbConn;
+			$this->userID = $user;
+			
+			$userObj = User::existingUserObject($dbConn, $user, $pass);
 		}
 		catch(\phpsec\WrongPasswordException $e)
 		{
@@ -79,7 +89,7 @@ class AdvancedPasswordManagement extends User
 			{
 				$bruteFound = false;
 				
-				$bruteFound = $this->isBruteForce($dbConn, $user);
+				$bruteFound = $this->isBruteForce($user);
 				
 				if ($bruteFound)
 					throw new BruteForceAttackDetectedException($e->getMessage ( ) . "<BR>" . "<BR>WARNING: Brute Force Attack Detected. We Recommend you use captcha.<BR>");
@@ -92,7 +102,7 @@ class AdvancedPasswordManagement extends User
 			throw $e;
 		}
 		
-		$dbConn-> SQL("INSERT INTO PASSWORD (`TEMP_PASS`, `USE_FLAG`, `TEMP_TIME`, `TOTAL_LOGIN_ATTEMPTS`, `LAST_LOGIN_ATTEMPT`, `USERID`) VALUES (?, ?, ?, ?, ?, ?)", array(Rand::generateRandom(10), 1, 0, 0, Time::time(), $user));
+		$this->handler-> SQL("INSERT INTO PASSWORD (`TEMP_PASS`, `USE_FLAG`, `TEMP_TIME`, `TOTAL_LOGIN_ATTEMPTS`, `LAST_LOGIN_ATTEMPT`, `USERID`) VALUES (?, ?, ?, ?, ?, ?)", array(Rand::generateRandom(10), 1, 0, 0, Time::time(), $user));
 	}
 	
 	
@@ -103,15 +113,15 @@ class AdvancedPasswordManagement extends User
 	 * @param String $user
 	 * @return boolean
 	 */
-	protected function isBruteForce($dbConn, $user)
+	protected function isBruteForce($user)
 	{
 		$currentTime = Time::time();
 			
-		$result = $dbConn-> SQL("SELECT `TOTAL_LOGIN_ATTEMPTS`, `LAST_LOGIN_ATTEMPT` FROM PASSWORD WHERE USERID = ?", array($user));
+		$result = $this->handler-> SQL("SELECT `TOTAL_LOGIN_ATTEMPTS`, `LAST_LOGIN_ATTEMPT` FROM PASSWORD WHERE USERID = ?", array($user));
 
 		if (count($result) < 1)
 		{
-			$dbConn-> SQL("INSERT INTO PASSWORD (`TEMP_PASS`, `USE_FLAG`, `TEMP_TIME`, `TOTAL_LOGIN_ATTEMPTS`, `LAST_LOGIN_ATTEMPT`, `USERID`) VALUES (?, ?, ?, ?, ?, ?)", array(Rand::generateRandom(10), 1, 0, 1, Time::time(), $user));
+			$this->handler-> SQL("INSERT INTO PASSWORD (`TEMP_PASS`, `USE_FLAG`, `TEMP_TIME`, `TOTAL_LOGIN_ATTEMPTS`, `LAST_LOGIN_ATTEMPT`, `USERID`) VALUES (?, ?, ?, ?, ?, ?)", array(Rand::generateRandom(10), 1, 0, 1, Time::time(), $user));
 
 			return FALSE;
 		}
@@ -121,20 +131,20 @@ class AdvancedPasswordManagement extends User
 			{
 				if ($result[0]['TOTAL_LOGIN_ATTEMPTS'] >= AdvancedPasswordManagement::$bruteForceLockAttempts)
 				{
-					$dbConn-> SQL("UPDATE PASSWORD SET `TOTAL_LOGIN_ATTEMPTS` = `TOTAL_LOGIN_ATTEMPTS` + 1, `LAST_LOGIN_ATTEMPT` = ? WHERE USERID = ?", array($currentTime, $user));
+					$this->handler-> SQL("UPDATE PASSWORD SET `TOTAL_LOGIN_ATTEMPTS` = `TOTAL_LOGIN_ATTEMPTS` + 1, `LAST_LOGIN_ATTEMPT` = ? WHERE USERID = ?", array($currentTime, $user));
 
 					return TRUE;
 				}
 				else
 				{
-					$dbConn-> SQL("UPDATE PASSWORD SET `TOTAL_LOGIN_ATTEMPTS` = `TOTAL_LOGIN_ATTEMPTS` + 1, `LAST_LOGIN_ATTEMPT` = ? WHERE USERID = ?", array($currentTime, $user));
+					$this->handler-> SQL("UPDATE PASSWORD SET `TOTAL_LOGIN_ATTEMPTS` = `TOTAL_LOGIN_ATTEMPTS` + 1, `LAST_LOGIN_ATTEMPT` = ? WHERE USERID = ?", array($currentTime, $user));
 
 					return FALSE;
 				}
 			}
 			else
 			{
-				$dbConn-> SQL("UPDATE PASSWORD SET `TOTAL_LOGIN_ATTEMPTS` = ?, `LAST_LOGIN_ATTEMPT` = ? WHERE USERID = ?", array(1, $currentTime, $user));
+				$this->handler-> SQL("UPDATE PASSWORD SET `TOTAL_LOGIN_ATTEMPTS` = ?, `LAST_LOGIN_ATTEMPT` = ? WHERE USERID = ?", array(1, $currentTime, $user));
 
 				return FALSE;
 			}
@@ -149,7 +159,7 @@ class AdvancedPasswordManagement extends User
 	 */
 	public function checkIfTempPassExpired()
 	{
-		$result = $this->userObj->handler-> SQL("SELECT `TEMP_TIME` FROM PASSWORD WHERE `USERID` = ?", array($this->userObj->getUserID()));
+		$result = $this->handler-> SQL("SELECT `TEMP_TIME` FROM PASSWORD WHERE `USERID` = ?", array($this->userID));
 			
 		$currentTime = Time::time();
 		
@@ -174,26 +184,26 @@ class AdvancedPasswordManagement extends User
 			$tempPass = hash("sha512", Rand::generateRandom(64));
 			$time = Time::time();
 
-			$this->userObj->handler-> SQL("UPDATE PASSWORD SET `TEMP_PASS` = ?, `USE_FLAG` = ?, `TEMP_TIME` = ? WHERE USERID = ?", array($tempPass, 0, $time, $this->userObj->getUserID()));
+			$this->handler-> SQL("UPDATE PASSWORD SET `TEMP_PASS` = ?, `USE_FLAG` = ?, `TEMP_TIME` = ? WHERE USERID = ?", array($tempPass, 0, $time, $this->userID));
 
 			return TRUE;
 		}
 		else	//If a temp pass is provided, then check if it is not expired and it correct.
 		{
-			$result = $this->userObj->handler-> SQL("SELECT `TEMP_PASS`, `USE_FLAG`, `TEMP_TIME` FROM PASSWORD WHERE `USERID` = ?", array($this->userObj->getUserID()));
+			$result = $this->handler-> SQL("SELECT `TEMP_PASS`, `USE_FLAG`, `TEMP_TIME` FROM PASSWORD WHERE `USERID` = ?", array($this->userID));
 				
 			if ( ($result[0]['USE_FLAG'] == 0) && (!$this->checkIfTempPassExpired()))
 			{	
 				if ( $result[0]['TEMP_PASS'] != $tempPass )
 					return FALSE;
 
-				$this->userObj->handler-> SQL("UPDATE PASSWORD SET TEMP_PASS = ?, USE_FLAG = ?, TEMP_TIME = ? WHERE USERID = ?", array(Rand::generateRandom(10), 1, 0, $this->userObj->getUserID()));
+				$this->handler-> SQL("UPDATE PASSWORD SET TEMP_PASS = ?, USE_FLAG = ?, TEMP_TIME = ? WHERE USERID = ?", array(Rand::generateRandom(10), 1, 0, $this->userID));
 
 				return TRUE;
 			}
 			else
 			{
-				$this->userObj->handler-> SQL("UPDATE PASSWORD SET TEMP_PASS = ?, USE_FLAG = ?, TEMP_TIME = ? WHERE USERID = ?", array(Rand::generateRandom(10), 1, 0, $this->userObj->getUserID()));
+				$this->handler-> SQL("UPDATE PASSWORD SET TEMP_PASS = ?, USE_FLAG = ?, TEMP_TIME = ? WHERE USERID = ?", array(Rand::generateRandom(10), 1, 0, $this->userID));
 
 				return FALSE;
 			}
@@ -215,7 +225,7 @@ class AdvancedPasswordManagement extends User
 		{
 			$newID = hash("sha512", Rand::generateRandom(64));
 				
-			$this->userObj->handler-> SQL("INSERT INTO AUTH_STORAGE (`AUTH_ID`, `DATE_CREATED`, `USERID`) VALUES (?, ?, ?)", array($newID, Time::time(), $this->userObj->getUserID()));
+			$this->handler-> SQL("INSERT INTO AUTH_STORAGE (`AUTH_ID`, `DATE_CREATED`, `USERID`) VALUES (?, ?, ?)", array($newID, Time::time(), $this->userID));
 
 			if ($secure && $httpOnly)
 				\setcookie("AUTHID", $newID, Time::time ( ) + 29999999, null, null, TRUE, TRUE);	//keep cookie for unlimited time because it doesn't matter. The time that cookie will be present in client's system will be determined from the $automaticLoginTimePeriod variable. Once this time has passed, the cookie will be cancelled from the server end.
@@ -230,7 +240,7 @@ class AdvancedPasswordManagement extends User
 		}
 		else	//If the cookie is already set, then validate it.
 		{
-			$result = $this->userObj->handler-> SQL("SELECT `AUTH_ID`, `DATE_CREATED` FROM `AUTH_STORAGE` WHERE `USERID` = ?", array($this->userObj->getUserID()));
+			$result = $this->handler-> SQL("SELECT `AUTH_ID`, `DATE_CREATED` FROM `AUTH_STORAGE` WHERE `USERID` = ?", array($this->userID));
 				
 			foreach ($result as $auth)
 			{
@@ -241,7 +251,7 @@ class AdvancedPasswordManagement extends User
 					//If cookie time has expired, the delete the cookie from the DB and the user's browser.
 					if ( ($currentTime - $auth['DATE_CREATED']) >= AdvancedPasswordManagement::$automaticLoginTimePeriod)
 					{
-						$this->userObj->handler-> SQL("DELETE FROM `AUTH_STORAGE` WHERE USERID = ? AND `AUTH_ID` = ?", array($this->userObj->getUserID(), $_COOKIE['AUTHID']));
+						$this->handler-> SQL("DELETE FROM `AUTH_STORAGE` WHERE USERID = ? AND `AUTH_ID` = ?", array($this->userID, $_COOKIE['AUTHID']));
 
 						setcookie("AUTHID", "");
 
