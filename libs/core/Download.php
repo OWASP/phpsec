@@ -1,19 +1,43 @@
 <?php
 namespace phpsec;
 
+/**
+ * Parent Exception
+ */
 class DownloadManagerException extends \Exception {}
+
+/**
+ * Child Exceptions
+ */
 class InvalidFileModifiedDateException extends DownloadManagerException {}
 
-// This whole class is  just modification from jFramwork.
+
 class DownloadManager
 {
+	
+	/**
+	 * To denote the minimum size in bytes for enabling the limitation of speed.
+	 * @var int
+	 */
 	public static $BandwidthLimitInitialSize=10485760; //10MB
+	
+	
+	/**
+	 * To denote the amount of bytes that must be read. This is also called speed-limiter with which files are read.
+	 * @var int
+	 */
 	public static $BandwidthLimitSpeed=1048576; //1MB
 	
+	
+	/**
+	 * To determine the type of file from its extension.
+	 * @param String $File
+	 * @return string
+	 */
 	public static function MIME ($File)
 	{
-		$a=explode('.', $File);
-		$extension = array_pop($a);
+		$a=explode('.', $File);	
+		$extension = array_pop($a);	//extract the extension.
 		$ex=strtolower($extension);
 		
 		if ($ex=='htm') return'text/html';
@@ -77,18 +101,29 @@ class DownloadManager
 		else return 'application/octet-stream'; //Download if not known
 	}
 	
+	
+	
+	/**
+	 * To determine if a file has been modified since the last user visit.
+	 * @param String $File
+	 * @param boolean $SendHeader
+	 * @return boolean
+	 * @throws InvalidFileModifiedDateException
+	 */
 	public static function IsModifiedSince($File,$SendHeader=true)
 	{
-		$lastModified = filemtime($File);
+		$lastModified = filemtime($File);	//get the time when the file was last modified.
 		
-		if ($lastModified === FALSE)
+		if ($lastModified === FALSE)	//If it cannot be determined, then throw an exception.
 			throw new InvalidFileModifiedDateException("<BR>ERROR: The last modified date of the file: {$File} cannot be determined.<BR>");
 
-		$gmdate_mod = gmdate('D, d M Y H:i:s', $lastModified) . ' GMT';
-			
+		$gmdate_mod = gmdate('D, d M Y H:i:s', $lastModified) . ' GMT';		//convert the filetime to proper format.
+		
+		//check if the client is enabled to send headers that specifies the file modified time since user last visited it. If not, set that environment.
 		$cond = isset($_SERVER['http_if_modified_since']) ? $_SERVER['http_if_modified_since'] : getenv("http_if_modified_since");
 		$if_modified_since = preg_replace('/;.*$/', '', $cond);
 		
+		//If our calculated last modified date and the date returned from the server are same, then the file has not changed.
 		if ($if_modified_since == $gmdate_mod)
 		{
 		    if ($SendHeader)
@@ -97,6 +132,7 @@ class DownloadManager
 		    return false;
 		}
 		
+		//else the file has changed. Thus the header must be reset to reflect this new time and it must tell the user to update their copy.
 		if ($SendHeader)
 		{
 			header("Last-Modified: $gmdate_mod"); //Set the time this resource is modified
@@ -106,12 +142,20 @@ class DownloadManager
 		return true;
 	}
 	
-	//Common example of "Range":      Range: bytes=500-999
+	
+	
+	/**
+	 * To extract the range of the file specified in the header (Range) returned by the client.
+	 * @return IntArray
+	 */
 	public static function calculate_HTTP_Range()
 	{
+		
+		//Common example of "Range":      Range: bytes=500-999,1000-1999
+		
 		if(isset($_SERVER['HTTP_RANGE']))
 		{
-			list($size_unit, $range_orig) = explode('=', $_SERVER['HTTP_RANGE'], 2);
+			list($size_unit, $range_orig) = explode('=', $_SERVER['HTTP_RANGE'], 2);	//extract the first set of range from all other ranges.
 
 			if ($size_unit == 'bytes')
 			{
@@ -129,11 +173,21 @@ class DownloadManager
 			$range = '';
 		}
 		
-		$extremes = explode('-', $range);
+		$extremes = explode('-', $range);	//store the range in an array. e.g. $extremes would like this: $extremes = array(500, 599);
 		
 		return $extremes;
 	}
 	
+	
+	
+	/**
+	 * Function to read the file from $seek_start to $seek_end.
+	 * @param String $File
+	 * @param int $seek_start
+	 * @param int $seek_end
+	 * @param boolean $Resumable
+	 * @return boolean
+	 */
 	public static function readFromFile($File, $seek_start, $seek_end, $Resumable = FALSE)
 	{
 		$FileSize = filesize($File);
@@ -142,21 +196,22 @@ class DownloadManager
 		if (  (DownloadManager::$BandwidthLimitInitialSize > 0) && ($FileSize > DownloadManager::$BandwidthLimitInitialSize) )
 		{
 			$f = fopen($File, "rb");
-			fseek($f, $seek_start);
+			fseek($f, $seek_start);		//seek to the position from where the file needs to be read.
 			
 			set_time_limit(0);
 			
+			//read till you reach the $seek_end of the file.
 			while (ftell($f) <= $seek_end)
 			{
-				$advanceBy = DownloadManager::$BandwidthLimitSpeed;
+				$advanceBy = DownloadManager::$BandwidthLimitSpeed;	//only read 'n' bytes at a time, as specified by the "$BandwidthLimitSpeed"
 				$currentPos = ftell($f);
 				
-				if ( ($advanceBy + $currentPos) > $seek_end )
+				if ( ($advanceBy + $currentPos) > $seek_end )	//check if you have reached the position where you have to stop reading.
 					$advanceBy = $seek_end - $currentPos;
 				
-				echo fread($f, $advanceBy);
+				echo fread($f, $advanceBy);	//read the specified number of bytes.
 				
-				fseek($f, $advanceBy+1, SEEK_CUR);
+				fseek($f, $advanceBy+1, SEEK_CUR);	//seek to the position till you have read.
 				
 				flush();
 				ob_flush();
@@ -171,21 +226,22 @@ class DownloadManager
 			if ($Resumable)
 			{
 				$f = fopen($File, "rb");
-				fseek($f, $seek_start);
+				fseek($f, $seek_start);		//seek to the position from where the file needs to be read.
 
 				set_time_limit(0);
 
+				//read till you reach the $seek_end of the file.
 				while (ftell($f) <= $seek_end)
 				{
-					$advanceBy = 1024*8;
+					$advanceBy = 1024*8;	//since no limit, read 1024*8 bytes at a time.
 					$currentPos = ftell($f);
 
-					if ( ($advanceBy + $currentPos) > $seek_end )
+					if ( ($advanceBy + $currentPos) > $seek_end )	//check if you have reached the position where you have to stop reading.
 						$advanceBy = $seek_end - $currentPos;
 
-					echo fread($f, $advanceBy);
+					echo fread($f, $advanceBy);	//read the specified number of bytes.
 
-					fseek($f, $advanceBy+1, SEEK_CUR);
+					fseek($f, $advanceBy+1, SEEK_CUR);	//seek to the position till you have read.
 
 					flush();
 					ob_flush();
@@ -195,35 +251,44 @@ class DownloadManager
 				fclose($f);
 			}
 			else
-				readfile($File);
+				readfile($File);	//If resume is not supported, then read the whole file at once.
 			
 			return true;
 		}
 	}
 	
+	
+	
+	/**
+	 * Function to feed a file to the user.
+	 * @param String $RealFile
+	 * @param String $OutputFile
+	 * @return boolean
+	 */
 	public static function Feed($RealFile,$OutputFile=null)
 	{
-		$File = realpath($RealFile);
+		$File = realpath($RealFile);	//get the file path of the real file.
 		
-		if (!$File)
+		if (!$File)	//If the real file does not exists, then just return.
 			return false;
 		
-		if (!DownloadManager::IsModifiedSince($File))
+		if (!DownloadManager::IsModifiedSince($File))	//If the file has not modifed since last visit, no need to send data.
 			return true;
 		
 		$FileSize = filesize($File);
 		
-		if ($OutputFile === null)
+		if ($OutputFile === null)	//If no outfile has not been mentioned, use the real file name by default.
 			$OutputFile = basename($RealFile);
 		
-		if (strpos($OutputFile," ") !== false)
+		if (strpos($OutputFile," ") !== false)	//to handle situtations where the file contains space in its name.
 			$OutputFile= "'{$OutputFile}'";
 		
-		header("Content-Type: " . DownloadManager::MIME($OutputFile));
-		header("Content-disposition: filename={$OutputFile}");
+		header("Content-Type: " . DownloadManager::MIME($OutputFile));	//specify the header for the file type.
+		header("Content-disposition: filename={$OutputFile}");	//specify the header for the file name.
 		
-		$extremes = DownloadManager::calculate_HTTP_Range();
+		$extremes = DownloadManager::calculate_HTTP_Range();	//calculate the range, if present, till the file needs to be read.
 		
+		//check for the present of ranges that has to be read.
 		if (isset($extremes[0]))
 			$seek_start = $extremes[0];
 		
@@ -240,9 +305,10 @@ class DownloadManager
 		if ($seek_start > 0 || $seek_end < ($FileSize - 1))
 		{
 			$Resumable=true;
-			header('HTTP/1.1 206 Partial Content');
+			header('HTTP/1.1 206 Partial Content');		//specify header that the data you are getting is partial data.
 		}
 		
+		//specify headers for common information.
 		header('Accept-Ranges: bytes');
 		header('Content-Range: bytes '.$seek_start.'-'.$seek_end.'/'.$FileSize);
 		header('Content-Length: '.($seek_end - $seek_start + 1));
@@ -250,19 +316,21 @@ class DownloadManager
 		return DownloadManager::readFromFile($File, $seek_start, $seek_end, $Resumable);
 	}
 	
+	
+	
 	/**
 	* Feeds some data to the client
-	* @param string $Data
-	* @param string $OutputFilename
+	* @param String $Data
+	* @param String $OutputFilename
 	* @return boolean
 	*/
 	public static function FeedData($Data, $OutputFilename)
 	{
 		$Filename = $OutputFilename;
 		
-		header("Content-type: " . DownloadManager::MIME($Filename));
+		header("Content-type: " . DownloadManager::MIME($Filename));	//get the file type.
 		header('Content-disposition: attachment; filename=' . $Filename); //add attachment; here to force download
-		header('Content-length: '. strlen($Data));
+		header('Content-length: '. strlen($Data));	//specify the browser the length of data it must expect.
 
 		echo $Data;
 		flush();
