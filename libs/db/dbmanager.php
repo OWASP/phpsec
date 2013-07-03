@@ -1,6 +1,9 @@
 <?php
 
-    namespace phpsec;
+	namespace phpsec;
+
+	class DatabaseException extends \Exception {}
+	class DatabaseUnsupportedAdapterException extends DatabaseException {}
 
 	/**
 	 * This class is not being used currently.
@@ -26,9 +29,9 @@
 				if(file_exists("adapter/{$dbConfig->adapter}.php"))
 					require (__DIR__ . "/adapter/{$dbConfig->adapter}.php");
 				else
-					throw new Exception("{$dbConfig->adapter} is not a supported database adapter.");
+					throw new DatabaseUnsupportedAdapterException("{$dbConfig->adapter} is not a supported database adapter.");
 			}
-			catch (Exception $e) {
+			catch (DatabaseUnsupportedAdapterException $e) {
 				echo $e->getMessage();
 				return false;
 			}
