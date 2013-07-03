@@ -2,7 +2,7 @@
 
 	namespace phpsec;
 
-	require (__DIR__ . "/../model.php");
+	require_once (__DIR__ . "/base.php");
 
 	/**
 	 * PDO_MySQL wrapper class.

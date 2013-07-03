@@ -15,7 +15,7 @@
 	 * Intended support for pdo_mysql, pdo_sqlite, pdo_pgsql for now.
 	 */
 
-	require (__DIR__ . '/model.php');
+	require_once (__DIR__ . '/adapter/base.php');
 
 	class DatabaseManager {
 
