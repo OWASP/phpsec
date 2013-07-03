@@ -11,6 +11,11 @@
 
 	class Database_pdo_mysql extends DatabaseModel {
 
+		/**
+		 * @param db_name
+		 * @param db_user
+		 * @param db_pass
+		*/
 		public function __construct () {
 			$args = func_get_args ();
 			if (!isset($args[0]))
