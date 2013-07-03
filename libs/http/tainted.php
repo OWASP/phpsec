@@ -43,5 +43,3 @@ class TaintedString extends Tainted
 		return $this->data;
 	}
 }
-
-?>

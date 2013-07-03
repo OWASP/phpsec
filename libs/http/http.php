@@ -6,7 +6,7 @@ class HttpRequestException extends \Exception {}
 class HttpRequestInsecureParameterException extends HttpRequestException {}
 
 
-require (__DIR__ . '/tainted.php');
+require_once (__DIR__ . '/tainted.php');
 
 /**
  * HttpRequestArray class
@@ -254,5 +254,3 @@ class HttpRequest extends HttpRequestArray
 }
 
 $_SERVER = new HttpRequest($_SERVER);
-
-?>
