@@ -42,7 +42,7 @@ class BasicPasswordManagement
 	 * @param String $algo
 	 * @return String
 	 */
-	public static function hashPassword($pass, $dynamicSalt = "", $algo = "")
+	protected static function hashPassword($pass, $dynamicSalt = "", $algo = "")
 	{
 		//If dynamic salt is not present, create one.
 		if ($dynamicSalt == "")
@@ -537,18 +537,6 @@ class User extends BasicPasswordManagement
 	
 	
 	/**
-	 * To set optional fields for a user such as emails and name.
-	 * @param String $email
-	 * @param String $firstName
-	 * @param String $lastName
-	 */
-	public function setOptionalFields($email = "", $firstName = "", $lastName = "")
-	{
-		$this->handler -> SQL("UPDATE USER SET FIRST_NAME = ?, LAST_NAME = ?, EMAIL = ? WHERE USERID = ?", array($firstName, $lastName, $email, "{$this->userID}"));
-	}
-	
-	
-	/**
 	 * To get the date when the user account was created. The value returned is the UNIX timestamp.
 	 * @return int
 	 */
@@ -634,7 +622,7 @@ class User extends BasicPasswordManagement
 	 * To check if the password has aged. i.e. if the time has passed after which the password must be changed.
 	 * @return boolean
 	 */
-	public function checkIfPasswordExpired()
+	public function isPasswordExpired()
 	{
 		$result = $this->handler->SQL("SELECT `DATE_CREATED` FROM USER WHERE `USERID` = ?", array($this->userID));
 			

@@ -21,7 +21,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 
 		try
 		{
-			$this->_handler = new \phpsec\Database_pdo_mysql ('OWASP', 'root', 'testing');
+			$this->handler = new \phpsec\Database_pdo_mysql ('OWASP', 'root', 'testing');
 		}
 		catch (\Exception $e)
 		{
@@ -29,7 +29,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		}
 		
 		BasicPasswordManagement::$hashAlgo = "haval256,5";	//choose a hashing algo.
-		$this->obj = User::newUserObject($this->_handler, "rash", "testing");	//create a new user.
+		$this->obj = User::newUserObject($this->handler, "rash", "testing");	//create a new user.
 	}
 	
 	
@@ -37,26 +37,6 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	//--------------------------------------------------------------------------------------------------------------------------------------
 	//for class User.
 	
-	
-	/**
-	 * Function to check if all the fields are getting inserted properly.
-	 */
-	public function testSetOptionalFields()
-	{
-		$this->obj->setOptionalFields("rahul300chaudhary400@gmail.com", "Rahul", "Chaudhary");
-		
-		try
-		{
-			$result = $this->_handler -> SQL("SELECT FIRST_NAME FROM USER WHERE USERID = ?", array("{$this->obj->getUserID()}"));
-			
-			$this->assertTrue($result[0]['FIRST_NAME'] == "Rahul");
-		}
-		catch(\Exception $e)
-		{
-			echo $e->getLine();
-			echo $e -> getMessage();
-		}
-	}
 	
 	
 	/**
@@ -71,18 +51,6 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		
 		//the current time must be greater than the time it was created.
 		$this->assertTrue( ($currentTime >= $creationTime) && (strlen( (string)$creationTime ) == 10) );
-	}
-	
-	
-	/**
-	 * Function to check if the passwords are getting hashed correctly.
-	 */
-	public function testHashPassword()
-	{
-		$hash = BasicPasswordManagement::hashPassword("password", Rand::generateRandom(64), "sha512");
-		
-		//This would have produced a string of length 128.
-		$this->assertTrue(strlen($hash) == 128);
 	}
 	
 	
@@ -137,7 +105,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		try
 		{
 			$this->obj = null;	//destroy the object to current user.
-			$this->obj = User::existingUserObject($this->_handler, "rash", "testing");	//get the object of this user again via this method.
+			$this->obj = User::existingUserObject($this->handler, "rash", "testing");	//get the object of this user again via this method.
 			
 			//try to run validate password function with this new object.
 			$test = BasicPasswordManagement::validatePassword("testing", $this->obj->getHashedPassword(), $this->obj->getDynamiSalt(), BasicPasswordManagement::$hashAlgo);
@@ -161,14 +129,14 @@ class UserTest extends \PHPUnit_Framework_TestCase
 			$newPassword = "resting";
 			$oldPassword = "testing";
 			
-			$result = $this->_handler->SQL("SELECT `HASH`, `DYNAMIC_SALT`, `ALGO` FROM USER WHERE USERID = ?", array($this->obj->getUserID()));
+			$result = $this->handler->SQL("SELECT `HASH`, `DYNAMIC_SALT`, `ALGO` FROM USER WHERE USERID = ?", array($this->obj->getUserID()));
 			
 			//try to reset password by providing wrong password.
 			$firstAttempt = BasicPasswordManagement::validatePassword($newPassword, $result[0]['HASH'], $result[0]['DYNAMIC_SALT'], $result[0]['ALGO']);
 			
 			$this->obj->resetPassword($oldPassword, $newPassword);
 			
-			$result = $this->_handler->SQL("SELECT `HASH`, `DYNAMIC_SALT`, `ALGO` FROM USER WHERE USERID = ?", array($this->obj->getUserID()));
+			$result = $this->handler->SQL("SELECT `HASH`, `DYNAMIC_SALT`, `ALGO` FROM USER WHERE USERID = ?", array($this->obj->getUserID()));
 			
 			//try to reset password by providing correct password.
 			$secondAttempt = BasicPasswordManagement::validatePassword($newPassword, $result[0]['HASH'], $result[0]['DYNAMIC_SALT'], $result[0]['ALGO']);
@@ -191,11 +159,11 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		try
 		{
 			//create a new user with user provided static salt. This will set the static salt to this provided salt.
-			$this->obj2 = User::newUserObject($this->_handler, "rahul", "owasp pass", hash("sha512", Rand::generateRandom(64)) );
+			$this->obj2 = User::newUserObject($this->handler, "rahul", "owasp pass", hash("sha512", Rand::generateRandom(64)) );
 			//delete this object.
 			$this->obj2 = null;
 			//revive this user's object again.
-			$this->obj2 = User::existingUserObject($this->_handler, "rahul", "owasp pass");
+			$this->obj2 = User::existingUserObject($this->handler, "rahul", "owasp pass");
 			
 			//try to validate password by giving correct password. Note that the static salt has already been set.
 			$firstTest = BasicPasswordManagement::validatePassword("owasp pass", $this->obj2->getHashedPassword(), $this->obj2->getDynamiSalt(), BasicPasswordManagement::$hashAlgo);
@@ -217,7 +185,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	/**
 	 * To check if password has expired or not.
 	 */
-	public function testCheckIfPasswordExpired()
+	public function testIsPasswordExpired()
 	{
 		try
 		{
@@ -227,7 +195,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 			Time::$realTime = false;
 			Time::setTime($currentTime + 5000);	//set a new false time that is bound to exceed the expiry limit.
 			
-			$this->assertTrue($this->obj->checkIfPasswordExpired());
+			$this->assertTrue($this->obj->isPasswordExpired());
 		}
 		catch (\Exception $e)
 		{
@@ -370,7 +338,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		}
 		
 		$this->obj = null;
-		$this->_handler = null;
+		$this->handler = null;
 	}
 }
 

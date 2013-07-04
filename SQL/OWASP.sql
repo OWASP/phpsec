@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jul 04, 2013 at 02:04 PM
+-- Generation Time: Jul 04, 2013 at 03:05 PM
 -- Server version: 5.5.22
 -- PHP Version: 5.3.10-1ubuntu3
 
@@ -99,15 +99,12 @@ CREATE TABLE IF NOT EXISTS `USER` (
   `HASH` varchar(128) NOT NULL,
   `DATE_CREATED` int(10) NOT NULL,
   `TOTAL_SESSIONS` int(2) NOT NULL DEFAULT '0',
-  `FIRST_NAME` varchar(20) DEFAULT NULL,
-  `LAST_NAME` varchar(20) DEFAULT NULL,
-  `EMAIL` varchar(60) DEFAULT NULL,
   `ALGO` varchar(15) NOT NULL,
   `DYNAMIC_SALT` varchar(128) NOT NULL,
   `STATIC_SALT` varchar(128) NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `USERID` (`USERID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2245 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2287 ;
 
 --
 -- Constraints for dumped tables
