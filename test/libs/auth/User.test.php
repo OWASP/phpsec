@@ -6,7 +6,7 @@ namespace phpsec;
  */
 require_once "../../../libs/db/adapter/pdo_mysql.php";
 require_once '../../../libs/core/random.php';
-require_once '../../../libs/auth/User.php';
+require_once '../../../libs/auth/user.php';
 
 
 class UserTest extends \PHPUnit_Framework_TestCase

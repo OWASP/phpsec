@@ -31,8 +31,8 @@ echo "<PRE>";
 require_once "../../../libs/db/adapter/pdo_mysql.php";
 require_once '../../../libs/core/random.php';
 require_once '../../../libs/core/time.php';
-require_once '../../../libs/auth/User.php';
-require_once '../../../libs/auth/Adv_Password.php';
+require_once '../../../libs/auth/user.php';
+require_once '../../../libs/auth/adv_password.php';
 
 class TestRememberMe
 {
