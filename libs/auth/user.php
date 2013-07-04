@@ -471,7 +471,7 @@ class User extends BasicPasswordManagement
 			
 			//If static salt is provided, then use the new static salt, not the default one set.
 			if ($staticSalt != "")
-				$obj->setStaticSalt ( $staticSalt );
+				BasicPasswordManagement::$staticSalt = $staticSalt;
 			
 			$time = Time::time();
 			
@@ -533,22 +533,6 @@ class User extends BasicPasswordManagement
 
 			return $obj;
 		}
-	}
-	
-	
-	/**
-	 * Function that lets you store a new static salt in the DB.
-	 * @param String $newSalt
-	 * @throws SaltAlreadyPresentInDB
-	 */
-	protected function setStaticSalt($newSalt)
-	{
-		BasicPasswordManagement::$staticSalt = $newSalt;
-		
-		$count = $this->handler -> SQL("INSERT INTO STATIC_SALT (`STATICSALT`) VALUES (?)", array(BasicPasswordManagement::$staticSalt));
-			
-		if ($count == 0)
-			throw new SaltAlreadyPresentInDB("This static-salt is already present in the DB. Please choose a different salt.");
 	}
 	
 	
