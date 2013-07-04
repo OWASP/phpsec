@@ -6,9 +6,9 @@ namespace phpsec;
  * Required Files.
  */
 require_once "../../../libs/db/adapter/pdo_mysql.php";
-require_once "../../../libs/core/Rand.php";
+require_once "../../../libs/core/random.php";
 require_once "../../../libs/auth/User.php";
-require_once "../../../libs/session/Session.php";
+require_once "../../../libs/session/session.php";
 
 class SessionTest extends \PHPUnit_Framework_TestCase
 {

@@ -6,8 +6,8 @@ ob_start();
 /**
  * Required Files.
  */
-require_once "../../../libs/core/Download.php";
-require_once "../../../libs/core/Time.php";
+require_once "../../../libs/http/download.php";
+require_once "../../../libs/core/time.php";
 
 
 class DownloadManagerTest extends \PHPUnit_Framework_TestCase
