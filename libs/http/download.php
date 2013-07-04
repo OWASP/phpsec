@@ -40,65 +40,71 @@ class DownloadManager
 		$extension = array_pop($a);	//extract the extension.
 		$ex=strtolower($extension);
 		
-		if ($ex=='htm') return'text/html';
-		elseif ($ex=='html') return'text/html';
-		elseif ($ex=='txt') return'text/plain';
-		elseif ($ex=='asc') return'text/plain';
-		elseif ($ex=='bmp') return'image/bmp';
-		elseif ($ex=='gif') return'image/gif';
-		elseif ($ex=='jpeg') return'image/jpeg';
-		elseif ($ex=='jpg') return'image/jpeg';
-		elseif ($ex=='jpe') return'image/jpeg';
-		elseif ($ex=='png') return'image/png';
-		elseif ($ex=='ico') return'image/vnd.microsoft.icon';
-		elseif ($ex=='mpeg') return'video/mpeg';
-		elseif ($ex=='mpg') return'video/mpeg';
-		elseif ($ex=='mpe') return'video/mpeg';
-		elseif ($ex=='qt') return'video/quicktime';
-		elseif ($ex=='mov') return'video/quicktime';
-		elseif ($ex=='avi') return'video/x-msvideo';
-		elseif ($ex=='wmv') return'video/x-ms-wmv';
-		elseif ($ex=='mp2') return'audio/mpeg';
-		elseif ($ex=='mp3') return'audio/mpeg';
-		elseif ($ex=='rm') return'audio/x-pn-realaudio';
-		elseif ($ex=='ram') return'audio/x-pn-realaudio';
-		elseif ($ex=='rpm') return'audio/x-pn-realaudio-plugin';
-		elseif ($ex=='ra') return'audio/x-realaudio';
-		elseif ($ex=='wav') return'audio/x-wav';
-		elseif ($ex=='css') return'text/css';
-		elseif ($ex=='zip') return'application/zip';
-		elseif ($ex=='pdf') return'application/pdf';
-		elseif ($ex=='doc') return'application/msword';
-		elseif ($ex=='bin') return'application/octet-stream';
-		elseif ($ex=='exe') return'application/octet-stream';
-		elseif ($ex=='class') return'application/octet-stream';
-		elseif ($ex=='dll') return'application/octet-stream';
-		elseif ($ex=='xls') return'application/vnd.ms-excel';
-		elseif ($ex=='ppt') return'application/vnd.ms-powerpoint';
-		elseif ($ex=='wbxml') return'application/vnd.wap.wbxml';
-		elseif ($ex=='wmlc') return'application/vnd.wap.wmlc';
-		elseif ($ex=='wmlsc') return'application/vnd.wap.wmlscriptc';
-		elseif ($ex=='dvi') return'application/x-dvi';
-		elseif ($ex=='spl') return'application/x-futuresplash';
-		elseif ($ex=='gtar') return'application/x-gtar';
-		elseif ($ex=='gzip') return'application/x-gzip';
-		elseif ($ex=='js') return'text/javascript';
-		elseif ($ex=='swf') return'application/x-shockwave-flash';
-		elseif ($ex=='tar') return'application/x-tar';
-		elseif ($ex=='xhtml') return'application/xhtml+xml';
-		elseif ($ex=='au') return'audio/basic';
-		elseif ($ex=='snd') return'audio/basic';
-		elseif ($ex=='midi') return'audio/midi';
-		elseif ($ex=='mid') return'audio/midi';
-		elseif ($ex=='m3u') return'audio/x-mpegurl';
-		elseif ($ex=='tiff') return'image/tiff';
-		elseif ($ex=='tif') return'image/tiff';
-		elseif ($ex=='rtf') return'text/rtf';
-		elseif ($ex=='wml') return'text/vnd.wap.wml';
-		elseif ($ex=='wmls') return'text/vnd.wap.wmlscript';
-		elseif ($ex=='xsl') return'text/xml';
-		elseif ($ex=='xml') return'text/xml';
-		else return 'application/octet-stream'; //Download if not known
+		$extensionTypes = array(
+		    'htm' => 'text/html',
+		    'html' => 'text/html',
+		    'txt' => 'text/plain',
+		    'asc' => 'text/plain',
+		    'bmp' => 'image/bmp',
+		    'gif' => 'image/gif',
+		    'jpeg' => 'image/jpeg',
+		    'jpg' => 'image/jpeg',
+		    'jpe' => 'image/jpeg',
+		    'png' => 'image/png',
+		    'ico' => 'image/vnd.microsoft.icon',
+		    'mpeg' => 'video/mpeg',
+		    'mpg' => 'video/mpeg',
+		    'mpe' => 'video/mpeg',
+		    'qt' => 'video/quicktime',
+		    'mov' => 'video/quicktime',
+		    'avi' => 'video/x-msvideo',
+		    'wmv' => 'video/x-ms-wmv',
+		    'mp2' => 'audio/mpeg',
+		    'mp3' => 'audio/mpeg',
+		    'rm' => 'audio/x-pn-realaudio',
+		    'ram' => 'audio/x-pn-realaudio',
+		    'rpm' => 'audio/x-pn-realaudio-plugin',
+		    'ra' => 'audio/x-realaudio',
+		    'wav' => 'audio/x-wav',
+		    'css' => 'text/css',
+		    'zip' => 'application/zip',
+		    'pdf' => 'application/pdf',
+		    'doc' => 'application/msword',
+		    'bin' => 'application/octet-stream',
+		    'exe' => 'application/octet-stream',
+		    'class' => 'application/octet-stream',
+		    'dll' => 'application/octet-stream',
+		    'xls' => 'application/vnd.ms-excel',
+		    'ppt' => 'application/vnd.ms-powerpoint',
+		    'wbxml' => 'application/vnd.wap.wbxml',
+		    'wmlc' => 'application/vnd.wap.wmlc',
+		    'wmlsc' => 'application/vnd.wap.wmlscriptc',
+		    'dvi' => 'application/x-dvi',
+		    'spl' => 'application/x-futuresplash',
+		    'gtar' => 'application/x-gtar',
+		    'gzip' => 'application/x-gzip',
+		    'js' => 'text/javascript',
+		    'swf' => 'application/x-shockwave-flash',
+		    'tar' => 'application/x-tar',
+		    'xhtml' => 'application/xhtml+xml',
+		    'au' => 'audio/basic',
+		    'snd' => 'audio/basic',
+		    'midi' => 'audio/midi',
+		    'mid' => 'audio/midi',
+		    'm3u' => 'audio/x-mpegurl',
+		    'tiff' => 'image/tiff',
+		    'tif' => 'image/tiff',
+		    'rtf' => 'text/rtf',
+		    'wml' => 'text/vnd.wap.wml',
+		    'wmls' => 'text/vnd.wap.wmlscript',
+		    'xsl' => 'text/xml',
+		    'xml' => 'text/xml',
+		);
+		
+		if ( array_key_exists( $ex, $extensionTypes) )
+			return $extensionTypes[$ex];
+		else
+			return 'application/octet-stream'; //Download if not known
 	}
 	
 	
@@ -110,7 +116,7 @@ class DownloadManager
 	 * @return boolean
 	 * @throws InvalidFileModifiedDateException
 	 */
-	public static function IsModifiedSince($File,$SendHeader=true)
+	protected static function IsModifiedSince($File,$SendHeader=true)
 	{
 		$lastModified = filemtime($File);	//get the time when the file was last modified.
 		
@@ -148,7 +154,7 @@ class DownloadManager
 	 * To extract the range of the file specified in the header (Range) returned by the client.
 	 * @return IntArray
 	 */
-	public static function calculate_HTTP_Range()
+	protected static function calculateHttpRange()
 	{
 		
 		//Common example of "Range":      Range: bytes=500-999,1000-1999
@@ -188,12 +194,21 @@ class DownloadManager
 	 * @param boolean $Resumable
 	 * @return boolean
 	 */
-	public static function readFromFile($File, $seek_start, $seek_end, $Resumable = FALSE)
+	protected static function downloadSpeed($File, $seek_start, $seek_end, $Resumable = FALSE)
 	{
 		$FileSize = filesize($File);
-
+		
 		//Apply Download Limit
 		if (  (DownloadManager::$BandwidthLimitInitialSize > 0) && ($FileSize > DownloadManager::$BandwidthLimitInitialSize) )
+		{
+			$advanceBy = DownloadManager::$BandwidthLimitSpeed;	//only read 'n' bytes at a time, as specified by the "$BandwidthLimitSpeed"
+		}
+		else
+		{
+			$advanceBy = 1024*8;	//since no limit, read 1024*8 bytes at a time.
+		}
+		
+		if ($Resumable)
 		{
 			$f = fopen($File, "rb");
 			fseek($f, $seek_start);		//seek to the position from where the file needs to be read.
@@ -203,7 +218,6 @@ class DownloadManager
 			//read till you reach the $seek_end of the file.
 			while (ftell($f) <= $seek_end)
 			{
-				$advanceBy = DownloadManager::$BandwidthLimitSpeed;	//only read 'n' bytes at a time, as specified by the "$BandwidthLimitSpeed"
 				$currentPos = ftell($f);
 				
 				if ( ($advanceBy + $currentPos) > $seek_end )	//check if you have reached the position where you have to stop reading.
@@ -217,55 +231,24 @@ class DownloadManager
 				ob_flush();
 				sleep(1);
 			}
-			
-			fclose($f);
-			return true;
 		}
-		else //No download limit 
+		else
 		{
-			if ($Resumable)
-			{
-				$f = fopen($File, "rb");
-				fseek($f, $seek_start);		//seek to the position from where the file needs to be read.
-
-				set_time_limit(0);
-
-				//read till you reach the $seek_end of the file.
-				while (ftell($f) <= $seek_end)
-				{
-					$advanceBy = 1024*8;	//since no limit, read 1024*8 bytes at a time.
-					$currentPos = ftell($f);
-
-					if ( ($advanceBy + $currentPos) > $seek_end )	//check if you have reached the position where you have to stop reading.
-						$advanceBy = $seek_end - $currentPos;
-
-					echo fread($f, $advanceBy);	//read the specified number of bytes.
-
-					fseek($f, $advanceBy+1, SEEK_CUR);	//seek to the position till you have read.
-
-					flush();
-					ob_flush();
-					sleep(1);
-				}
-
-				fclose($f);
-			}
-			else
-				readfile($File);	//If resume is not supported, then read the whole file at once.
-			
-			return true;
+			readfile($File);	//If resume is not supported, then read the whole file at once.
 		}
+		
+		return true;
 	}
 	
 	
 	
 	/**
-	 * Function to feed a file to the user.
+	 * Function to download a file to the user.
 	 * @param String $RealFile
 	 * @param String $OutputFile
 	 * @return boolean
 	 */
-	public static function Feed($RealFile,$OutputFile=null)
+	public static function download($RealFile,$OutputFile=null)
 	{
 		$File = realpath($RealFile);	//get the file path of the real file.
 		
@@ -286,7 +269,7 @@ class DownloadManager
 		header("Content-Type: " . DownloadManager::MIME($OutputFile));	//specify the header for the file type.
 		header("Content-disposition: filename={$OutputFile}");	//specify the header for the file name.
 		
-		$extremes = DownloadManager::calculate_HTTP_Range();	//calculate the range, if present, till the file needs to be read.
+		$extremes = DownloadManager::calculateHttpRange();	//calculate the range, if present, till the file needs to be read.
 		
 		//check for the present of ranges that has to be read.
 		if (isset($extremes[0]))
@@ -313,18 +296,18 @@ class DownloadManager
 		header('Content-Range: bytes '.$seek_start.'-'.$seek_end.'/'.$FileSize);
 		header('Content-Length: '.($seek_end - $seek_start + 1));
 		
-		return DownloadManager::readFromFile($File, $seek_start, $seek_end, $Resumable);
+		return DownloadManager::downloadSpeed($File, $seek_start, $seek_end, $Resumable);
 	}
 	
 	
 	
 	/**
-	* Feeds some data to the client
+	* Serve some data to the client
 	* @param String $Data
 	* @param String $OutputFilename
 	* @return boolean
 	*/
-	public static function FeedData($Data, $OutputFilename)
+	public static function serveData($Data, $OutputFilename)
 	{
 		$Filename = $OutputFilename;
 		
