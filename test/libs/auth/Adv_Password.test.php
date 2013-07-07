@@ -24,8 +24,6 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function setUp()
 	{
-		Time::$realTime = true;
-
 		try
 		{
 			DatabaseManager::connect (new DatabaseConfig('pdo_mysql','OWASP','root','testing'));	//create DB connection.
@@ -58,12 +56,11 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 		try
 		{
 			//update the temp pass time to current time.
-			SQL("UPDATE PASSWORD SET TEMP_TIME = ? WHERE USERID = ?", array(Time::time(), $this->userID->getUserID()));
+			SQL("UPDATE PASSWORD SET TEMP_TIME = ? WHERE USERID = ?", array(time("SYS"), $this->userID->getUserID()));
 			
 			$firstTest = $this->obj->checkIfTempPassExpired();	//this check will provide false, since the temp password time has not expired.
 
-			Time::$realTime = false;
-			Time::setTime(1390706853);	//Now set the time to some distant future time.
+			time("SET", 1390706853);	//Now set the time to some distant future time.
 			
 			$secondTest = $this->obj->checkIfTempPassExpired();	//this check will provide true, since the temp password time has expired.
 			
@@ -90,7 +87,7 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 	{
 		try
 		{
-			$currentTime = Time::time();
+			$currentTime = time("SYS");
 			
 			AdvancedPasswordManagement::$tempPassExpiryTime = 900;
 			
@@ -98,19 +95,17 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 			
 			$result = SQL("SELECT TEMP_PASS FROM PASSWORD WHERE USERID = ?", array($this->userID->getUserID()));
 			
-			Time::$realTime = false;
-			
 			//firstTest
-			Time::setTime($currentTime + 500);	//set future time that has not passed.
+			time("SET", $currentTime + 500);	//set future time that has not passed.
 			$firstTest = $this->obj->tempPassword("qwert");	//This should return false since the password is wrong. Even though time has not expired.
 			
 			//secondTest
-			Time::setTime($currentTime + 500);
+			time("SET", $currentTime + 500);
 			$secondTest = $this->obj->tempPassword($result[0]['TEMP_PASS']);	//This should return true since the pasword is correct and time has not expired.
 			
 			//thirdTest
-			Time::setTime($currentTime + 1000);
-			$thirdTest = $this->obj->tempPassword($result[0]['TEMP_PASS']);
+			time("SET", $currentTime + 1000);
+			$thirdTest = $this->obj->tempPassword($result[0]['TEMP_PASS']);		//This should return false since time has expired.
 			
 			$this->userID->deleteUser();
 			
@@ -156,7 +151,7 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 		SQL("DELETE FROM PASSWORD WHERE USERID = ?", array($this->userID->getUserID()));
 		$this->userID->deleteUser();
 		
-		Time::$realTime = true;
+		time("RESET");
 	}
 }
 

@@ -93,7 +93,7 @@ class AdvancedPasswordManagement
 			throw $e;
 		}
 		
-		SQL("INSERT INTO PASSWORD (`TEMP_PASS`, `USE_FLAG`, `TEMP_TIME`, `TOTAL_LOGIN_ATTEMPTS`, `LAST_LOGIN_ATTEMPT`, `USERID`) VALUES (?, ?, ?, ?, ?, ?)", array(Rand::generateRandom(10), 1, 0, 0, Time::time(), $user));
+		SQL("INSERT INTO PASSWORD (`TEMP_PASS`, `USE_FLAG`, `TEMP_TIME`, `TOTAL_LOGIN_ATTEMPTS`, `LAST_LOGIN_ATTEMPT`, `USERID`) VALUES (?, ?, ?, ?, ?, ?)", array(Rand::generateRandom(10), 1, 0, 0, time("CURR"), $user));
 	}
 	
 	
@@ -106,13 +106,13 @@ class AdvancedPasswordManagement
 	 */
 	protected function isBruteForce($user)
 	{
-		$currentTime = Time::time();
+		$currentTime = time("CURR");
 			
 		$result = SQL("SELECT `TOTAL_LOGIN_ATTEMPTS`, `LAST_LOGIN_ATTEMPT` FROM PASSWORD WHERE USERID = ?", array($user));
 
 		if (count($result) < 1)
 		{
-			SQL("INSERT INTO PASSWORD (`TEMP_PASS`, `USE_FLAG`, `TEMP_TIME`, `TOTAL_LOGIN_ATTEMPTS`, `LAST_LOGIN_ATTEMPT`, `USERID`) VALUES (?, ?, ?, ?, ?, ?)", array(Rand::generateRandom(10), 1, 0, 1, Time::time(), $user));
+			SQL("INSERT INTO PASSWORD (`TEMP_PASS`, `USE_FLAG`, `TEMP_TIME`, `TOTAL_LOGIN_ATTEMPTS`, `LAST_LOGIN_ATTEMPT`, `USERID`) VALUES (?, ?, ?, ?, ?, ?)", array(Rand::generateRandom(10), 1, 0, 1, time("CURR"), $user));
 
 			return FALSE;
 		}
@@ -152,7 +152,7 @@ class AdvancedPasswordManagement
 	{
 		$result = SQL("SELECT `TEMP_TIME` FROM PASSWORD WHERE `USERID` = ?", array($this->userID));
 			
-		$currentTime = Time::time();
+		$currentTime = time("CURR");
 		
 		if ( ($currentTime - $result[0]['TEMP_TIME'])  >= AdvancedPasswordManagement::$tempPassExpiryTime)
 			return TRUE;
@@ -173,7 +173,7 @@ class AdvancedPasswordManagement
 		if ($tempPass == "")
 		{
 			$tempPass = hash("sha512", Rand::generateRandom(64));
-			$time = Time::time();
+			$time = time("CURR");
 
 			SQL("UPDATE PASSWORD SET `TEMP_PASS` = ?, `USE_FLAG` = ?, `TEMP_TIME` = ? WHERE USERID = ?", array($tempPass, 0, $time, $this->userID));
 
@@ -216,16 +216,16 @@ class AdvancedPasswordManagement
 		{
 			$newID = hash("sha512", Rand::generateRandom(64));
 				
-			SQL("INSERT INTO AUTH_STORAGE (`AUTH_ID`, `DATE_CREATED`, `USERID`) VALUES (?, ?, ?)", array($newID, Time::time(), $this->userID));
+			SQL("INSERT INTO AUTH_STORAGE (`AUTH_ID`, `DATE_CREATED`, `USERID`) VALUES (?, ?, ?)", array($newID, time("CURR"), $this->userID));
 
 			if ($secure && $httpOnly)
-				\setcookie("AUTHID", $newID, Time::time ( ) + 29999999, null, null, TRUE, TRUE);	//keep cookie for unlimited time because it doesn't matter. The time that cookie will be present in client's system will be determined from the $automaticLoginTimePeriod variable. Once this time has passed, the cookie will be cancelled from the server end.
+				\setcookie("AUTHID", $newID, time("CURR") + 29999999, null, null, TRUE, TRUE);	//keep cookie for unlimited time because it doesn't matter. The time that cookie will be present in client's system will be determined from the $automaticLoginTimePeriod variable. Once this time has passed, the cookie will be cancelled from the server end.
 			elseif (!$secure && !$httpOnly)
-				\setcookie("AUTHID", $newID, Time::time ( ) + 299999999, null, null, FALSE, FALSE);
+				\setcookie("AUTHID", $newID, time("CURR") + 299999999, null, null, FALSE, FALSE);
 			elseif ($secure && !$httpOnly)
-				\setcookie("AUTHID", $newID, Time::time ( ) + 299999999, null, null, TRUE, FALSE);
+				\setcookie("AUTHID", $newID, time("CURR") + 299999999, null, null, TRUE, FALSE);
 			elseif (!$secure && $httpOnly)
-				\setcookie("AUTHID", $newID, Time::time ( ) + 299999999, null, null, FALSE, TRUE);
+				\setcookie("AUTHID", $newID, time("CURR") + 299999999, null, null, FALSE, TRUE);
 
 			return TRUE;
 		}
@@ -237,7 +237,7 @@ class AdvancedPasswordManagement
 			{
 				if ($auth['AUTH_ID'] == $_COOKIE['AUTHID'])
 				{
-					$currentTime = Time::time();
+					$currentTime = time("CURR");
 
 					//If cookie time has expired, the delete the cookie from the DB and the user's browser.
 					if ( ($currentTime - $auth['DATE_CREATED']) >= AdvancedPasswordManagement::$automaticLoginTimePeriod)
