@@ -17,7 +17,6 @@ class SessionException extends \Exception {}
  */
 class SessionNotFoundException extends SessionException {}		//Use of sessions before setting them.
 class NoUserFoundException extends SessionException {}			//User not found to be associated with a session.
-class DBHandlerForSessionNotSetException extends SessionException {}	//Database handler to handle SQL queries is not set.
 
 class Session
 {
@@ -34,13 +33,6 @@ class Session
 	 * @var String
 	 */
 	protected $userID = null;	//for a session to present, there has to be a user. Without a user, a session cannot exist. So you have to create users in such a way that by the userID, the system can differentiate between a guest-user and a priviledged-user. Because you would need this distinction in RBAC.
-	
-	
-	/**
-	 * Database object to make SQL queries.
-	 * @var DatabaseObject
-	 */
-	protected $handler = null;
 	
 	
 	/**
@@ -63,19 +55,10 @@ class Session
 	 * @param String $user
 	 * @throws DBHandlerForSessionNotSetException
 	 */
-	public function __construct($dbConn, $user)
+	public function __construct($user)
 	{
-		$this -> handler = $dbConn;
-		
-		if ($this -> handler == null)
-		{
-			throw new DBHandlerForSessionNotSetException("<BR>ERROR: Connection to DB was not found.<BR>");
-		}
-		else
-		{
-			$this -> userID = $user;
-			$this -> newSession();	//get a new session ID for the current user.
-		}
+		$this -> userID = $user;
+		$this -> newSession();	//get a new session ID for the current user.
 	}
 	
 	
@@ -112,7 +95,7 @@ class Session
 		$this -> session = Rand :: generateRandom(32); //generate a new random string for the session ID of length 32.
 		$time = Time::time();	//get the current time.
 
-		$this -> handler -> SQL("INSERT INTO SESSION (`SESSION_ID`, `DATE_CREATED`, `LAST_ACTIVITY`, `USERID`) VALUES (?, ?, ?, ?)", array("{$this -> session}", $time, $time, "{$this -> userID}"));
+		SQL("INSERT INTO SESSION (`SESSION_ID`, `DATE_CREATED`, `LAST_ACTIVITY`, `USERID`) VALUES (?, ?, ?, ?)", array("{$this -> session}", $time, $time, "{$this -> userID}"));
 
 		$this -> updateTotalNoOfSessions();	//update the total number of sessions, since we just created one.
 
@@ -130,7 +113,7 @@ class Session
 
 		$totalCount = count($result);	//count the number of session IDs returned. Total number is the count of total number of sessions.
 
-		$this -> handler -> SQL("UPDATE USER SET `TOTAL_SESSIONS` = ? WHERE USERID = ?", array($totalCount, $this -> userID));
+		SQL("UPDATE USER SET `TOTAL_SESSIONS` = ? WHERE USERID = ?", array($totalCount, $this -> userID));
 
 		return TRUE;
 	}
@@ -142,7 +125,7 @@ class Session
 	 */
 	public function getAllSessions()
 	{
-		$result = $this -> handler -> SQL("SELECT SESSION_ID FROM SESSION WHERE USERID = ?", array($this -> userID));
+		$result = SQL("SELECT SESSION_ID FROM SESSION WHERE USERID = ?", array($this -> userID));
 
 		return $result;
 	}
@@ -170,11 +153,11 @@ class Session
 		//check if the key given by the user has already been set. If yes, then the value needs to be replaced and new record for key=>value is NOT needed.
 		if ( count( $prevSession = $this -> getData($key) ) > 0 )
 		{
-			$this -> handler -> SQL("UPDATE SESSION_DATA SET `VALUE` = ? WHERE `KEY` = ? AND SESSION_ID = ?", array($value, $key, "{$this -> session}"));
+			SQL("UPDATE SESSION_DATA SET `VALUE` = ? WHERE `KEY` = ? AND SESSION_ID = ?", array($value, $key, "{$this -> session}"));
 		}
 		else //If the key is not found, then a new record of key=>value pair needs to be created.
 		{
-			$this -> handler -> SQL("INSERT INTO SESSION_DATA (`SESSION_ID`, `KEY`, `VALUE`) VALUES (?, ?, ?)", array("{$this -> session}", $key, $value));
+			SQL("INSERT INTO SESSION_DATA (`SESSION_ID`, `KEY`, `VALUE`) VALUES (?, ?, ?)", array("{$this -> session}", $key, $value));
 		}
 
 		return TRUE;
@@ -199,7 +182,7 @@ class Session
 			$this->refreshSession();
 		}
 
-		$result = $this -> handler -> SQL("SELECT `KEY`, `VALUE` FROM SESSION_DATA WHERE `SESSION_ID` = ? and `KEY` = ?", array("{$this -> session}", $key));
+		$result = SQL("SELECT `KEY`, `VALUE` FROM SESSION_DATA WHERE `SESSION_ID` = ? and `KEY` = ?", array("{$this -> session}", $key));
 
 		return $result;
 	}
@@ -216,7 +199,7 @@ class Session
 
 		$currentActivityTime = Time::time();	//get current time.
 
-		$result = $this -> handler -> SQL("SELECT `LAST_ACTIVITY` FROM SESSION WHERE `SESSION_ID` = ?", array("{$this -> session}"));
+		$result = SQL("SELECT `LAST_ACTIVITY` FROM SESSION WHERE `SESSION_ID` = ?", array("{$this -> session}"));
 		$lastActivityTime = (int)$result[0]['LAST_ACTIVITY'];	//get the last time when the user was active.
 
 		$difference = $currentActivityTime - $lastActivityTime;	//get difference betwen the current time and the last active time.
@@ -242,7 +225,7 @@ class Session
 
 		$currentActivityTime = Time::time();	//get current time.
 
-		$result = $this -> handler -> SQL("SELECT `DATE_CREATED` FROM SESSION WHERE `SESSION_ID` = ?", array("{$this -> session}"));
+		$result = SQL("SELECT `DATE_CREATED` FROM SESSION WHERE `SESSION_ID` = ?", array("{$this -> session}"));
 		$lastActivityTime = (int)$result[0]['DATE_CREATED'];	//get the date when this session was created.
 
 		$difference = $currentActivityTime - $lastActivityTime;	//get difference betwen the current time and the creation time.
@@ -282,7 +265,7 @@ class Session
 			$currentTime = Time::time();
 
 			//exchange the old session's creation date and the last activity time with the current time.
-			$this -> handler -> SQL("UPDATE SESSION SET `DATE_CREATED` = ? , `LAST_ACTIVITY` = ? WHERE SESSION_ID = ?", array($currentTime, $currentTime, "{$this -> session}"));
+			SQL("UPDATE SESSION SET `DATE_CREATED` = ? , `LAST_ACTIVITY` = ? WHERE SESSION_ID = ?", array($currentTime, $currentTime, "{$this -> session}"));
 
 			return TRUE;
 		}
@@ -300,10 +283,10 @@ class Session
 			throw new SessionNotFoundException("<BR>WARNING: No session is set for this user.<BR>");
 
 		//delete all data associated with this session ID.
-		$this -> handler -> SQL("DELETE FROM SESSION_DATA WHERE `SESSION_ID` = ?", array("{$this -> session}"));
+		SQL("DELETE FROM SESSION_DATA WHERE `SESSION_ID` = ?", array("{$this -> session}"));
 
 		//delete this sessiom ID.
-		$this -> handler -> SQL("DELETE FROM SESSION WHERE `SESSION_ID` = ?", array("{$this -> session}"));
+		SQL("DELETE FROM SESSION WHERE `SESSION_ID` = ?", array("{$this -> session}"));
 
 		$this -> session = null;
 		$this -> updateTotalNoOfSessions();	//update the total sessions because we just deleted one.
@@ -325,9 +308,9 @@ class Session
 		{
 			$sess = $args['SESSION_ID'];
 
-			$this -> handler -> SQL("DELETE FROM SESSION_DATA WHERE `SESSION_ID` = ?", array("{$sess}"));
+			SQL("DELETE FROM SESSION_DATA WHERE `SESSION_ID` = ?", array("{$sess}"));
 
-			$this -> handler -> SQL("DELETE FROM SESSION WHERE `SESSION_ID` = ?", array("{$sess}"));
+			SQL("DELETE FROM SESSION WHERE `SESSION_ID` = ?", array("{$sess}"));
 		}
 
 		$this->session = null;
@@ -356,7 +339,7 @@ class Session
 		}
 
 		//get all the data that is stored by this session.
-		$result = $this -> handler -> SQL("SELECT `KEY`, `VALUE` FROM SESSION_DATA WHERE SESSION_ID = ?", array("{$this -> session}"));
+		$result = SQL("SELECT `KEY`, `VALUE` FROM SESSION_DATA WHERE SESSION_ID = ?", array("{$this -> session}"));
 
 		//destroy the current session.
 		$this -> destroySession();
