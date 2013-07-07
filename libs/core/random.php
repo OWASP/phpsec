@@ -24,7 +24,7 @@ function randint($min = 0, $max = null)
  */
 function randstr($len = 32)
 {
-	return Rand::generateRandom($len);
+	return Rand::randStr($len);
 }
 
 
@@ -106,7 +106,7 @@ class Rand
 	 * @param int $Length
 	 * @return String
 	 */
-	public static function generateRandom($Length=32)
+	public static function randStr($Length=32)
 	{
 		return substr(hash("sha512",  Rand::randRange()),0,$Length);
 	}
