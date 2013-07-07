@@ -1,6 +1,33 @@
 <?php
 namespace phpsec;
 
+
+/**
+ * Function to generate a random number of specified range.
+ * @param int $min
+ * @param int $max
+ * @return int
+ */
+function randint($min = 0, $max = null)
+{
+	//Case 1: Both Positive		Range(min, max-1)
+	//Case 2: Both Negative		Range(min+1, max)
+	//Case 3: Opposite Sign		Range(min+1, max)
+	return Rand::randRange($min, $max);
+}
+
+
+/**
+ * Function to generata a random string of specified length.
+ * @param int $len
+ * @return String
+ */
+function randstr($len = 32)
+{
+	return Rand::generateRandom($len);
+}
+
+
 class Rand
 {
 	
@@ -8,7 +35,7 @@ class Rand
 	 * The seed from which a random number will be generated.
 	 * @var int
 	 */
-	private static $randomSeed=null;
+	protected static $randomSeed=null;
 	
 	
 	
@@ -17,7 +44,7 @@ class Rand
 	 * if openssl is available, it is cryptographically secure. Otherwise all available entropy is gathered.
 	 * @return number
 	 */
-	private static function Random()
+	public static function random()
 	{
 		//If openssl is present, use that to generate random.
 		if (function_exists("openssl_random_pseudo_bytes"))
@@ -52,20 +79,25 @@ class Rand
 	
 	
 	/**
-	 * To generate a random number of specified length.
+	 * To generate a random number between the specified range.
 	 * @param int $min
 	 * @param int $max
 	 * @return number
 	 */
-	public static function randLen($min=0,$max=null)
+	public static function randRange($min=0,$max=null)
 	{
 		if ($max===null)
 			$max=1<<31;
 		
-		if ($min < 0)
-			return Rand::Random()%($max-$min)+$min;
+		if ($min > $max)
+		{
+			return Rand::randRange($max, $min);
+		}
+		
+		if ($min >= 0)
+			return abs(Rand::random())%($max-$min)+$min;
 		else
-			return abs(Rand::Random()%($max-$min)+$min);
+			return (abs(Rand::random())*-1)%($min - $max) + $max;
 	}
 	
 	
@@ -76,7 +108,7 @@ class Rand
 	 */
 	public static function generateRandom($Length=32)
 	{
-		return substr(hash("sha512",  Rand::randLen()),0,$Length);
+		return substr(hash("sha512",  Rand::randRange()),0,$Length);
 	}
 }
 
