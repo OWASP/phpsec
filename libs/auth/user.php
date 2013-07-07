@@ -398,7 +398,6 @@ class UserException extends \Exception {}
 /**
  * Child Exception Classes
  */
-class DBHandlerForUserNotSetException extends UserException {}		//Database handler to handle SQL queries is not set.
 class InvalidHashException extends UserException {}			//The hash returned is not valid. i.e. it is empty.
 class WrongPasswordException extends UserException {}			//The password provided for the existing user is not correct.
 class UserExistsException extends UserException {}			//No records were found with this userID in the database.
