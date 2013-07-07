@@ -132,7 +132,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		try
 		{
 			//create a new user with user provided static salt. This will set the static salt to this provided salt.
-			$this->obj2 = User::newUserObject("rahul", "owasp pass", hash("sha512", Rand::generateRandom(64)) );
+			$this->obj2 = User::newUserObject("rahul", "owasp pass", hash("sha512", randstr(64)) );
 			//delete this object.
 			$this->obj2 = null;
 			//revive this user's object again.

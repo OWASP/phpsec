@@ -46,7 +46,7 @@ class BasicPasswordManagement
 	{
 		//If dynamic salt is not present, create one.
 		if ($dynamicSalt == "")
-			$dynamicSalt = hash("sha512",Rand::generateRandom(64));
+			$dynamicSalt = hash("sha512",  randstr( 64));
 		
 		//If algo is not defined, use sha512 by default.
 		if ($algo == "")
@@ -383,7 +383,7 @@ class BasicPasswordManagement
 		//$char contains the string that has all the letters we can use in a password.
 		//The loop pics a character from $char in random and adds that character to the final $pass variable.
 		for ($i=0;$i<$Length;++$i)
-			$Pass.=$chars[Rand::randLen(0, strlen($chars)-1)];
+			$Pass.=$chars[randint(0, strlen($chars)-1)];
 		
 		return $Pass;
 	}
@@ -460,7 +460,7 @@ class User extends BasicPasswordManagement
 		$time = time("CURR");
 
 		//calculate the hash of the password.
-		$obj->dynamicSalt = hash("sha512", Rand::generateRandom(64));
+		$obj->dynamicSalt = hash("sha512", randstr(64));
 		$obj->hashedPassword = BasicPasswordManagement::hashPassword($pass, $obj->dynamicSalt, BasicPasswordManagement::$hashAlgo);
 
 		$count = SQL("INSERT INTO USER (`USERID`, `ACCOUNT_CREATED`, `HASH`, `DATE_CREATED`, `TOTAL_SESSIONS`, `ALGO`, `DYNAMIC_SALT`, `STATIC_SALT`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", array("{$obj->userID}", $time, $obj->hashedPassword, $time, 0, BasicPasswordManagement::$hashAlgo, $obj->dynamicSalt, BasicPasswordManagement::$staticSalt));
@@ -557,7 +557,7 @@ class User extends BasicPasswordManagement
 			throw new WrongPasswordException("<BR>ERROR: Wrong Password provided!!<BR>");
 		
 		//create a new dynamic salt.
-		$this->dynamicSalt = hash("sha512", Rand::generateRandom(64));
+		$this->dynamicSalt = hash("sha512", randstr(64));
 		//create the hash of the new password.
 		$newHash = BasicPasswordManagement::hashPassword($newPassword, $this->dynamicSalt, BasicPasswordManagement::$hashAlgo);
 		
