@@ -55,26 +55,6 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	
 	
 	/**
-	 * To check if we are getting hashed passwords.
-	 */
-	public function testGetHashedPassword()
-	{
-		try
-		{
-			$hash = $this->obj->getHashedPassword();
-		
-			//Since the algorithm can be anything, we are not sure what would be the length of the string. Hence length >1 because then we know there is a string and not NULL.
-			$this->assertTrue(strlen($hash) > 1);
-		}
-		catch(\Exception $e)
-		{
-			echo $e->getLine();
-			echo $e -> getMessage();
-		}
-	}
-	
-	
-	/**
 	 * To check if the passwords are validated on providing passwords.
 	 */
 	public function testValidatePassword()
@@ -82,9 +62,9 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		try
 		{
 			//provide correct password
-			$firstTest = BasicPasswordManagement::validatePassword("testing", $this->obj->getHashedPassword(), $this->obj->getDynamiSalt(), BasicPasswordManagement::$hashAlgo);
+			$firstTest = $this->obj->verifyPassword("testing");
 			//provide wrong password
-			$secondTest = BasicPasswordManagement::validatePassword("resting", $this->obj->getHashedPassword(), $this->obj->getDynamiSalt(), BasicPasswordManagement::$hashAlgo);
+			$secondTest = $this->obj->verifyPassword("resting");
 			
 			//first test would succeed and second won't.
 			$this->assertTrue($firstTest && !$secondTest);
@@ -108,7 +88,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 			$this->obj = User::existingUserObject($this->handler, "rash", "testing");	//get the object of this user again via this method.
 			
 			//try to run validate password function with this new object.
-			$test = BasicPasswordManagement::validatePassword("testing", $this->obj->getHashedPassword(), $this->obj->getDynamiSalt(), BasicPasswordManagement::$hashAlgo);
+			$test = $this->obj->verifyPassword("testing");
 			$this->assertTrue($test);
 		}
 		catch(\Exception $e)
@@ -129,17 +109,13 @@ class UserTest extends \PHPUnit_Framework_TestCase
 			$newPassword = "resting";
 			$oldPassword = "testing";
 			
-			$result = $this->handler->SQL("SELECT `HASH`, `DYNAMIC_SALT`, `ALGO` FROM USER WHERE USERID = ?", array($this->obj->getUserID()));
-			
 			//try to reset password by providing wrong password.
-			$firstAttempt = BasicPasswordManagement::validatePassword($newPassword, $result[0]['HASH'], $result[0]['DYNAMIC_SALT'], $result[0]['ALGO']);
+			$firstAttempt = $this->obj->verifyPassword($newPassword);
 			
 			$this->obj->resetPassword($oldPassword, $newPassword);
 			
-			$result = $this->handler->SQL("SELECT `HASH`, `DYNAMIC_SALT`, `ALGO` FROM USER WHERE USERID = ?", array($this->obj->getUserID()));
-			
 			//try to reset password by providing correct password.
-			$secondAttempt = BasicPasswordManagement::validatePassword($newPassword, $result[0]['HASH'], $result[0]['DYNAMIC_SALT'], $result[0]['ALGO']);
+			$secondAttempt = $this->obj->verifyPassword($newPassword);
 			
 			$this->assertTrue(!$firstAttempt && $secondAttempt);
 		}
@@ -166,9 +142,9 @@ class UserTest extends \PHPUnit_Framework_TestCase
 			$this->obj2 = User::existingUserObject($this->handler, "rahul", "owasp pass");
 			
 			//try to validate password by giving correct password. Note that the static salt has already been set.
-			$firstTest = BasicPasswordManagement::validatePassword("owasp pass", $this->obj2->getHashedPassword(), $this->obj2->getDynamiSalt(), BasicPasswordManagement::$hashAlgo);
+			$firstTest = $this->obj2->verifyPassword("owasp pass");
 			//try to validate password by giving wrong password. Note that the static salt has already been set.
-			$secondTest = BasicPasswordManagement::validatePassword("other password", $this->obj2->getHashedPassword(), $this->obj2->getDynamiSalt(), BasicPasswordManagement::$hashAlgo);
+			$secondTest = $this->obj2->verifyPassword("other password");
 			
 			$this->obj2->deleteUser();
 			
@@ -176,7 +152,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		}
 		catch(\Exception $e)
 		{
-			echo $e->getLine();
+			echo "\n" . $e->getLine() . "-->";
 			echo $e -> getMessage();
 		}
 	}

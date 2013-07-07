@@ -64,7 +64,7 @@ class BasicPasswordManagement
 	 * @param String $oldAlgo
 	 * @return boolean
 	 */
-	public static function validatePassword($newPassword, $oldHash, $oldSalt, $oldAlgo)
+	protected static function validatePassword($newPassword, $oldHash, $oldSalt, $oldAlgo)
 	{
 		$newHash = BasicPasswordManagement::hashPassword($newPassword, $oldSalt, $oldAlgo);
 		
@@ -427,14 +427,14 @@ class User extends BasicPasswordManagement
 	 * To store the hash of the user password.
 	 * @var String
 	 */
-	protected $hashedPassword = "";
+	private $hashedPassword = "";
 	
 	
 	/**
 	 * To store the dynamic salt used in creating the hash of the password.
 	 * @var String
 	 */
-	protected $dynamicSalt = "";
+	private $dynamicSalt = "";
 	
 	
 	/**
@@ -558,27 +558,9 @@ class User extends BasicPasswordManagement
 	}
 	
 	
-	/**
-	 * To get the hash of the current password of the user.
-	 * @return String
-	 * @throws InvalidHashException
-	 */
-	public function getHashedPassword()
+	public function verifyPassword($password)
 	{
-		if ($this->hashedPassword == "")
-			throw new InvalidHashException("<BR>WARNING: This hash seems invalid.<BR>");
-		else
-			return $this->hashedPassword;
-	}
-	
-	
-	/**
-	 * To get the dynamic salt that was used in the password generation.
-	 * @return String
-	 */
-	public function getDynamiSalt()
-	{
-		return $this->dynamicSalt;
+		return BasicPasswordManagement::validatePassword($password, $this->hashedPassword, $this->dynamicSalt, BasicPasswordManagement::$hashAlgo);
 	}
 	
 	
@@ -598,7 +580,7 @@ class User extends BasicPasswordManagement
 		//create a new dynamic salt.
 		$this->dynamicSalt = hash("sha512", Rand::generateRandom(64));
 		//create the hash of the new password.
-		$newHash = BasicPasswordManagement::hashPassword($newPassword, $this->getDynamiSalt(), BasicPasswordManagement::$hashAlgo);
+		$newHash = BasicPasswordManagement::hashPassword($newPassword, $this->dynamicSalt, BasicPasswordManagement::$hashAlgo);
 		
 		//update the old password with the new password.
 		$this->handler -> SQL("UPDATE USER SET `HASH` = ?, `DATE_CREATED` = ?, `DYNAMIC_SALT` = ?, `ALGO` = ? WHERE `USERID` = ?", array($newHash, Time::time(), $this->dynamicSalt, BasicPasswordManagement::$hashAlgo, $this->userID));
