@@ -457,7 +457,7 @@ class User extends BasicPasswordManagement
 		if ($staticSalt != "")
 			BasicPasswordManagement::$staticSalt = $staticSalt;
 
-		$time = Time::time();
+		$time = time("CURR");
 
 		//calculate the hash of the password.
 		$obj->dynamicSalt = hash("sha512", Rand::generateRandom(64));
@@ -562,7 +562,7 @@ class User extends BasicPasswordManagement
 		$newHash = BasicPasswordManagement::hashPassword($newPassword, $this->dynamicSalt, BasicPasswordManagement::$hashAlgo);
 		
 		//update the old password with the new password.
-		SQL("UPDATE USER SET `HASH` = ?, `DATE_CREATED` = ?, `DYNAMIC_SALT` = ?, `ALGO` = ? WHERE `USERID` = ?", array($newHash, Time::time(), $this->dynamicSalt, BasicPasswordManagement::$hashAlgo, $this->userID));
+		SQL("UPDATE USER SET `HASH` = ?, `DATE_CREATED` = ?, `DYNAMIC_SALT` = ?, `ALGO` = ? WHERE `USERID` = ?", array($newHash, time("CURR"), $this->dynamicSalt, BasicPasswordManagement::$hashAlgo, $this->userID));
 		
 		$this->hashedPassword = $newHash;
 
@@ -587,7 +587,7 @@ class User extends BasicPasswordManagement
 	{
 		$result = SQL("SELECT `DATE_CREATED` FROM USER WHERE `USERID` = ?", array($this->userID));
 			
-		$currentTime = Time::time();
+		$currentTime = time("CURR");
 
 		if ( ($currentTime - $result[0]['DATE_CREATED'])  > User::$passwordExpiryTime)
 			return TRUE;

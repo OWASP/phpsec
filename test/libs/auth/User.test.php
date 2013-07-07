@@ -7,6 +7,7 @@ namespace phpsec;
 require_once "../../../libs/db/dbmanager.php";
 require_once '../../../libs/core/random.php';
 require_once '../../../libs/auth/user.php';
+require_once '../../../libs/core/time.php';
 
 
 class UserTest extends \PHPUnit_Framework_TestCase
@@ -17,8 +18,6 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function setUp()
 	{
-		Time::$realTime = true;
-
 		try
 		{
 			DatabaseManager::connect (new DatabaseConfig('pdo_mysql','OWASP','root','testing'));
@@ -44,9 +43,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testGetAccountCreationDate()
 	{
-		Time::$realTime = TRUE;
-		
-		$currentTime = Time::time();	//get current time.
+		$currentTime = time("SYS");	//get current time.
 		$creationTime = $this->obj->getAccountCreationDate();
 		
 		//the current time must be greater than the time it was created.
@@ -165,11 +162,10 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	{
 		try
 		{
-			$currentTime = Time::time();
+			$currentTime = time("SYS");
 			
 			User::$passwordExpiryTime = 1000;	//set the password expiry time to 1000.
-			Time::$realTime = false;
-			Time::setTime($currentTime + 5000);	//set a new false time that is bound to exceed the expiry limit.
+			time("SET", $currentTime + 5000);	//set a new false time that is bound to exceed the expiry limit.
 			
 			$this->assertTrue($this->obj->isPasswordExpired());
 		}
