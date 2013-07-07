@@ -92,7 +92,7 @@ class Session
 		if($this->userID == null)
 			throw new NoUserFoundException("<BR>ERROR: No User was found. Session needs a user to be present.<BR>");
 
-		$this -> session = Rand :: generateRandom(32); //generate a new random string for the session ID of length 32.
+		$this -> session = randstr(32); //generate a new random string for the session ID of length 32.
 		$time = time("CURR");	//get the current time.
 
 		SQL("INSERT INTO SESSION (`SESSION_ID`, `DATE_CREATED`, `LAST_ACTIVITY`, `USERID`) VALUES (?, ?, ?, ?)", array("{$this -> session}", $time, $time, "{$this -> userID}"));
