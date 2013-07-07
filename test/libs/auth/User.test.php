@@ -4,7 +4,7 @@ namespace phpsec;
 /**
  * Required Files.
  */
-require_once "../../../libs/db/adapter/pdo_mysql.php";
+require_once "../../../libs/db/dbmanager.php";
 require_once '../../../libs/core/random.php';
 require_once '../../../libs/auth/user.php';
 
@@ -21,7 +21,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 
 		try
 		{
-			$this->handler = new \phpsec\Database_pdo_mysql ('OWASP', 'root', 'testing');
+			DatabaseManager::connect (new DatabaseConfig('pdo_mysql','OWASP','root','testing'));
 		}
 		catch (\Exception $e)
 		{
@@ -29,7 +29,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		}
 		
 		BasicPasswordManagement::$hashAlgo = "haval256,5";	//choose a hashing algo.
-		$this->obj = User::newUserObject($this->handler, "rash", "testing");	//create a new user.
+		$this->obj = User::newUserObject("rash", "testing");	//create a new user.
 	}
 	
 	
@@ -85,7 +85,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		try
 		{
 			$this->obj = null;	//destroy the object to current user.
-			$this->obj = User::existingUserObject($this->handler, "rash", "testing");	//get the object of this user again via this method.
+			$this->obj = User::existingUserObject("rash", "testing");	//get the object of this user again via this method.
 			
 			//try to run validate password function with this new object.
 			$test = $this->obj->verifyPassword("testing");
@@ -135,11 +135,11 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		try
 		{
 			//create a new user with user provided static salt. This will set the static salt to this provided salt.
-			$this->obj2 = User::newUserObject($this->handler, "rahul", "owasp pass", hash("sha512", Rand::generateRandom(64)) );
+			$this->obj2 = User::newUserObject("rahul", "owasp pass", hash("sha512", Rand::generateRandom(64)) );
 			//delete this object.
 			$this->obj2 = null;
 			//revive this user's object again.
-			$this->obj2 = User::existingUserObject($this->handler, "rahul", "owasp pass");
+			$this->obj2 = User::existingUserObject("rahul", "owasp pass");
 			
 			//try to validate password by giving correct password. Note that the static salt has already been set.
 			$firstTest = $this->obj2->verifyPassword("owasp pass");
@@ -314,7 +314,6 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		}
 		
 		$this->obj = null;
-		$this->handler = null;
 	}
 }
 
