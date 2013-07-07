@@ -93,7 +93,7 @@ class Session
 			throw new NoUserFoundException("<BR>ERROR: No User was found. Session needs a user to be present.<BR>");
 
 		$this -> session = Rand :: generateRandom(32); //generate a new random string for the session ID of length 32.
-		$time = Time::time();	//get the current time.
+		$time = time("CURR");	//get the current time.
 
 		SQL("INSERT INTO SESSION (`SESSION_ID`, `DATE_CREATED`, `LAST_ACTIVITY`, `USERID`) VALUES (?, ?, ?, ?)", array("{$this -> session}", $time, $time, "{$this -> userID}"));
 
@@ -197,7 +197,7 @@ class Session
 		if($this -> session == null)
 			return FALSE;
 
-		$currentActivityTime = Time::time();	//get current time.
+		$currentActivityTime = time("CURR");	//get current time.
 
 		$result = SQL("SELECT `LAST_ACTIVITY` FROM SESSION WHERE `SESSION_ID` = ?", array("{$this -> session}"));
 		$lastActivityTime = (int)$result[0]['LAST_ACTIVITY'];	//get the last time when the user was active.
@@ -223,7 +223,7 @@ class Session
 		if($this -> session == null)
 			return FALSE;
 
-		$currentActivityTime = Time::time();	//get current time.
+		$currentActivityTime = time("CURR");	//get current time.
 
 		$result = SQL("SELECT `DATE_CREATED` FROM SESSION WHERE `SESSION_ID` = ?", array("{$this -> session}"));
 		$lastActivityTime = (int)$result[0]['DATE_CREATED'];	//get the date when this session was created.
@@ -262,7 +262,7 @@ class Session
 				return TRUE;
 			}
 
-			$currentTime = Time::time();
+			$currentTime = time("CURR");
 
 			//exchange the old session's creation date and the last activity time with the current time.
 			SQL("UPDATE SESSION SET `DATE_CREATED` = ? , `LAST_ACTIVITY` = ? WHERE SESSION_ID = ?", array($currentTime, $currentTime, "{$this -> session}"));

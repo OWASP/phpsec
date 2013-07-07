@@ -7,6 +7,7 @@ namespace phpsec;
  */
 require_once "../../../libs/db/dbmanager.php";
 require_once "../../../libs/core/random.php";
+require_once "../../../libs/core/time.php";
 require_once "../../../libs/auth/user.php";
 require_once "../../../libs/session/session.php";
 
@@ -32,8 +33,8 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function setUp()
 	{
-		Time::$realTime = true;
-
+		time("RESET");
+		
 		try
 		{
 			DatabaseManager::connect (new DatabaseConfig('pdo_mysql','OWASP','root','testing'));	//create a new Db handler.
@@ -74,8 +75,6 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testDataStorage()
 	{
-		Time::$realTime = true;
-		
 		try
 		{
 			$key = "project";
@@ -100,8 +99,6 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testMultipleInsertionsOnOneKey()
 	{
-		Time::$realTime = true;
-		
 		try
 		{
 			$key = "OWASP";
@@ -132,8 +129,6 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testIfKeyNotExists()
 	{
-		Time::$realTime = true;
-		
 		try
 		{
 			$key = "project";
@@ -159,8 +154,6 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testAccessibility()
 	{
-		Time::$realTime = true;
-		
 		try
 		{
 			$key = "project";
@@ -197,8 +190,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	{
 		try
 		{
-			Time::$realTime = false;
-			Time::setTime(1380502880);	//set current time to a very dar future.
+			time("SET", 1380502880);	//set current time to a very far future.
 			
 			$this -> assertTrue( $this->session[1] -> inactivityTimeout() );	//By that time, the session must expire.
 		}
@@ -217,8 +209,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	{
 		try
 		{
-			Time::$realTime = false;
-			Time::setTime(1380502880);	//set current time to a very dar future.
+			time("SET", 1380502880);	//set current time to a very far future.
 			
 			$this -> assertTrue( $this->session[2] -> expireTimeout() );	//By that time, the session must expire.
 		}
@@ -237,8 +228,6 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	{
 		try
 		{
-			Time::$realTime = true;
-			
 			$key = "PHP";
 			$value = "library";
 			$this->session[0]->setData($key, $value);	//set data for session 0.
@@ -267,11 +256,8 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	{
 		try
 		{
-			Time::$realTime = true;
-			$newTime = Time::time() + 123;	//set a new future time.
-			
-			Time::$realTime = false;
-			Time::setTime($newTime);
+			$newTime = time("SYS") + 123;
+			time("SET", $newTime);	//set a new future time.
 			
 			$this->session[0]->refreshSession();	//refresh the session.
 			
@@ -295,8 +281,6 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	{
 		try
 		{
-			Time::$realTime = true;
-			
 			$this->session[0]->destroySession();
 			
 			$this -> assertTrue( $this->session[0]->getSessionID() === null );	//If session is deleted, then true is returned.
@@ -316,8 +300,6 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	{
 		try
 		{
-			Time::$realTime = true;
-			
 			$this->session[0]->destroyAllSessions();
 			
 			$result = SQL("SELECT TOTAL_SESSIONS FROM USER WHERE USERID = ?", array( "{$this -> session[0] ->getUserID()}" ));
@@ -341,8 +323,6 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	{
 		try
 		{
-			Time::$realTime = true;	//set clock to real time.
-			
 			//destroy all the created sessions.
 			if ($this->session[0]->getSessionID() != null)
 				$this->session[0] ->destroySession();
