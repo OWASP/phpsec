@@ -36,7 +36,7 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 		try
 		{
 			BasicPasswordManagement::$hashAlgo = "haval256,5";	//choose salting algo.
-			$this->userID = User::newUserObject(Rand::generateRandom(10), "testing");	//create a user.
+			$this->userID = User::newUserObject(randstr(10), "testing");	//create a user.
 			$this->obj = new AdvancedPasswordManagement($this->userID->getUserID(), "testing");	//create object to AdvancedPasswordManagement class.
 		}
 		catch (\Exception $e)

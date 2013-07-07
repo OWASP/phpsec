@@ -93,7 +93,7 @@ class AdvancedPasswordManagement
 			throw $e;
 		}
 		
-		SQL("INSERT INTO PASSWORD (`TEMP_PASS`, `USE_FLAG`, `TEMP_TIME`, `TOTAL_LOGIN_ATTEMPTS`, `LAST_LOGIN_ATTEMPT`, `USERID`) VALUES (?, ?, ?, ?, ?, ?)", array(Rand::generateRandom(10), 1, 0, 0, time("CURR"), $user));
+		SQL("INSERT INTO PASSWORD (`TEMP_PASS`, `USE_FLAG`, `TEMP_TIME`, `TOTAL_LOGIN_ATTEMPTS`, `LAST_LOGIN_ATTEMPT`, `USERID`) VALUES (?, ?, ?, ?, ?, ?)", array(  randstr(10), 1, 0, 0, time("CURR"), $user));
 	}
 	
 	
@@ -112,7 +112,7 @@ class AdvancedPasswordManagement
 
 		if (count($result) < 1)
 		{
-			SQL("INSERT INTO PASSWORD (`TEMP_PASS`, `USE_FLAG`, `TEMP_TIME`, `TOTAL_LOGIN_ATTEMPTS`, `LAST_LOGIN_ATTEMPT`, `USERID`) VALUES (?, ?, ?, ?, ?, ?)", array(Rand::generateRandom(10), 1, 0, 1, time("CURR"), $user));
+			SQL("INSERT INTO PASSWORD (`TEMP_PASS`, `USE_FLAG`, `TEMP_TIME`, `TOTAL_LOGIN_ATTEMPTS`, `LAST_LOGIN_ATTEMPT`, `USERID`) VALUES (?, ?, ?, ?, ?, ?)", array(  randstr(10), 1, 0, 1, time("CURR"), $user));
 
 			return FALSE;
 		}
@@ -172,7 +172,7 @@ class AdvancedPasswordManagement
 		//If a temp password has not been provided, then create a temp password.
 		if ($tempPass == "")
 		{
-			$tempPass = hash("sha512", Rand::generateRandom(64));
+			$tempPass = hash("sha512", randstr(64));
 			$time = time("CURR");
 
 			SQL("UPDATE PASSWORD SET `TEMP_PASS` = ?, `USE_FLAG` = ?, `TEMP_TIME` = ? WHERE USERID = ?", array($tempPass, 0, $time, $this->userID));
@@ -188,13 +188,13 @@ class AdvancedPasswordManagement
 				if ( $result[0]['TEMP_PASS'] != $tempPass )
 					return FALSE;
 
-				SQL("UPDATE PASSWORD SET TEMP_PASS = ?, USE_FLAG = ?, TEMP_TIME = ? WHERE USERID = ?", array(Rand::generateRandom(10), 1, 0, $this->userID));
+				SQL("UPDATE PASSWORD SET TEMP_PASS = ?, USE_FLAG = ?, TEMP_TIME = ? WHERE USERID = ?", array(randstr(10), 1, 0, $this->userID));
 
 				return TRUE;
 			}
 			else
 			{
-				SQL("UPDATE PASSWORD SET TEMP_PASS = ?, USE_FLAG = ?, TEMP_TIME = ? WHERE USERID = ?", array(Rand::generateRandom(10), 1, 0, $this->userID));
+				SQL("UPDATE PASSWORD SET TEMP_PASS = ?, USE_FLAG = ?, TEMP_TIME = ? WHERE USERID = ?", array(randstr(10), 1, 0, $this->userID));
 
 				return FALSE;
 			}
@@ -214,7 +214,7 @@ class AdvancedPasswordManagement
 		//If the cookie is not found, this implies that the cookie is not set. Hence set this cookie.
 		if ( !isset($_COOKIE['AUTHID']) )
 		{
-			$newID = hash("sha512", Rand::generateRandom(64));
+			$newID = hash("sha512", randstr(64));
 				
 			SQL("INSERT INTO AUTH_STORAGE (`AUTH_ID`, `DATE_CREATED`, `USERID`) VALUES (?, ?, ?)", array($newID, time("CURR"), $this->userID));
 
