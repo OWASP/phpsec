@@ -22,12 +22,12 @@
 
 	class DatabaseManager {
 
-		protected static $db;
+		public static $db;
 
 		static function connect (DatabaseConfig $dbConfig) {
 			try {
-				if(file_exists("adapter/{$dbConfig->adapter}.php"))
-					require (__DIR__ . "/adapter/{$dbConfig->adapter}.php");
+				if(file_exists(__DIR__ . "/adapter/{$dbConfig->adapter}.php"))
+					require_once (__DIR__ . "/adapter/{$dbConfig->adapter}.php");
 				else
 					throw new DatabaseUnsupportedAdapterException("{$dbConfig->adapter} is not a supported database adapter.");
 			}
@@ -35,10 +35,15 @@
 				echo $e->getMessage();
 				return false;
 			}
-			$db_class = "\Database_{$dbConfig->adapter}";
-			return self::$db = new $db_class($dbConfig);
+			$db_class = "phpsec\Database_{$dbConfig->adapter}";
+			return self::$db = new $db_class($dbConfig->dbname, $dbConfig->username, $dbConfig->password, $dbConfig->host);
 		}
 
+	}
+	
+	function SQL($query, $args)
+	{
+		return DatabaseManager::$db->SQL($query, $args);
 	}
 
 ?>

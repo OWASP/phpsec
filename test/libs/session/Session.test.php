@@ -5,8 +5,9 @@ namespace phpsec;
 /**
  * Required Files.
  */
-require_once "../../../libs/db/adapter/pdo_mysql.php";
+require_once "../../../libs/db/dbmanager.php";
 require_once "../../../libs/core/random.php";
+require_once "../../../libs/core/time.php";
 require_once "../../../libs/auth/user.php";
 require_once "../../../libs/session/session.php";
 
@@ -28,22 +29,15 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	
 	
 	/**
-	 * To store the handler to handle all the SQL queries.
-	 * @var type Database Object
-	 */
-	public $conn = null;
-	
-	
-	/**
 	 * Function to be run before every test*() functions.
 	 */
 	public function setUp()
 	{
-		Time::$realTime = true;
-
+		time("RESET");
+		
 		try
 		{
-			$this->conn = new \phpsec\Database_pdo_mysql ('OWASP', 'root', 'testing');	//create a new Db handler.
+			DatabaseManager::connect (new DatabaseConfig('pdo_mysql','OWASP','root','testing'));	//create a new Db handler.
 		}
 		catch (\Exception $e)
 		{
@@ -53,8 +47,8 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		try
 		{
 			//Create users.
-			$this->user[0] = User::newUserObject($this->conn, \phpsec\Rand::generateRandom(10), "resting");
-			$this->user[1] = User::newUserObject($this->conn, \phpsec\Rand::generateRandom(10), "owasp");
+			$this->user[0] = User::newUserObject(\phpsec\randstr(10), "resting");
+			$this->user[1] = User::newUserObject(\phpsec\randstr(10), "owasp");
 		}
 		catch(\Exception $e)
 		{
@@ -64,9 +58,9 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		try
 		{
 			//create new sessions associated with each user.
-			$this->session[0] = new Session($this->conn, $this->user[0]->getUserID());	//session for user 0.
-			$this->session[1] = new Session($this->conn, $this->user[0]->getUserID());	//session for user 0.
-			$this->session[2] = new Session($this->conn, $this->user[1]->getUserID());	//session for user 1.
+			$this->session[0] = new Session($this->user[0]->getUserID());	//session for user 0.
+			$this->session[1] = new Session($this->user[0]->getUserID());	//session for user 0.
+			$this->session[2] = new Session($this->user[1]->getUserID());	//session for user 1.
 		}
 		catch(\Exception $e)
 		{
@@ -81,8 +75,6 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testDataStorage()
 	{
-		Time::$realTime = true;
-		
 		try
 		{
 			$key = "project";
@@ -107,8 +99,6 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testMultipleInsertionsOnOneKey()
 	{
-		Time::$realTime = true;
-		
 		try
 		{
 			$key = "OWASP";
@@ -139,8 +129,6 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testIfKeyNotExists()
 	{
-		Time::$realTime = true;
-		
 		try
 		{
 			$key = "project";
@@ -166,8 +154,6 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testAccessibility()
 	{
-		Time::$realTime = true;
-		
 		try
 		{
 			$key = "project";
@@ -204,8 +190,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	{
 		try
 		{
-			Time::$realTime = false;
-			Time::setTime(1380502880);	//set current time to a very dar future.
+			time("SET", 1380502880);	//set current time to a very far future.
 			
 			$this -> assertTrue( $this->session[1] -> inactivityTimeout() );	//By that time, the session must expire.
 		}
@@ -224,8 +209,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	{
 		try
 		{
-			Time::$realTime = false;
-			Time::setTime(1380502880);	//set current time to a very dar future.
+			time("SET", 1380502880);	//set current time to a very far future.
 			
 			$this -> assertTrue( $this->session[2] -> expireTimeout() );	//By that time, the session must expire.
 		}
@@ -244,8 +228,6 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	{
 		try
 		{
-			Time::$realTime = true;
-			
 			$key = "PHP";
 			$value = "library";
 			$this->session[0]->setData($key, $value);	//set data for session 0.
@@ -274,15 +256,12 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	{
 		try
 		{
-			Time::$realTime = true;
-			$newTime = Time::time() + 123;	//set a new future time.
-			
-			Time::$realTime = false;
-			Time::setTime($newTime);
+			$newTime = time("SYS") + 123;
+			time("SET", $newTime);	//set a new future time.
 			
 			$this->session[0]->refreshSession();	//refresh the session.
 			
-			$result = $this -> conn -> SQL("SELECT LAST_ACTIVITY FROM SESSION WHERE SESSION_ID = ?", array( "{$this -> session[0] -> getSessionID()}" ));
+			$result = SQL("SELECT LAST_ACTIVITY FROM SESSION WHERE SESSION_ID = ?", array( "{$this -> session[0] -> getSessionID()}" ));
 			$sessionActivityTime = $result[0]['LAST_ACTIVITY'];
 			
 			$this -> assertTrue( (int)$sessionActivityTime >= $newTime );	//the new time for the session must be greater than or equal to the fake time we set.
@@ -302,8 +281,6 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	{
 		try
 		{
-			Time::$realTime = true;
-			
 			$this->session[0]->destroySession();
 			
 			$this -> assertTrue( $this->session[0]->getSessionID() === null );	//If session is deleted, then true is returned.
@@ -323,11 +300,9 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	{
 		try
 		{
-			Time::$realTime = true;
-			
 			$this->session[0]->destroyAllSessions();
 			
-			$result = $this -> conn -> SQL("SELECT TOTAL_SESSIONS FROM USER WHERE USERID = ?", array( "{$this -> session[0] ->getUserID()}" ));
+			$result = SQL("SELECT TOTAL_SESSIONS FROM USER WHERE USERID = ?", array( "{$this -> session[0] ->getUserID()}" ));
 			$totalSessions = $result[0]['TOTAL_SESSIONS'];
 			
 			$this -> assertTrue( $totalSessions == 0 );	//The total sessions must be 0 for this user after this operation.
@@ -348,8 +323,6 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	{
 		try
 		{
-			Time::$realTime = true;	//set clock to real time.
-			
 			//destroy all the created sessions.
 			if ($this->session[0]->getSessionID() != null)
 				$this->session[0] ->destroySession();
