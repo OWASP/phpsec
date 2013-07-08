@@ -10,6 +10,8 @@ class ErrorHandler
 	 * @var integer
 	 */
 	static private $backupErrorReportingState=null;
+	
+	static protected $isShutdownRegistered=null;
 	/**
 	 * Sets the phpsec error handler as error handler
 	 * @throws ErrorHandlerAlreadySetException
@@ -20,7 +22,13 @@ class ErrorHandler
 			throw new ErrorHandlerAlreadySetException("This function shouldn't be called twice.");
 		self::$backupErrorReportingState=error_reporting();
 		set_error_handler(__NAMESPACE__."\\ErrorHandler::_errorToException");
-		register_shutdown_function(__NAMESPACE__."\\ErrorHandler::_shutdown");
+		
+		if (!self::$isShutdownRegistered)
+		{
+			//no matter how many times enable is called, add shutdown function once
+			register_shutdown_function(__NAMESPACE__."\\ErrorHandler::_shutdown");
+			self::$isShutdownRegistered=true;
+		}
 		error_reporting(0);
 	}
 	/**
@@ -49,6 +57,9 @@ class ErrorHandler
 	 */
 	public static function _shutdown()
 	{
+		//if error handler is not enabled, just ignore
+		if (!self::isActive()) return;
+		
 		$e=error_get_last();
 		if ($e===null) return; //no errors yet!
 		$type=$e['type'];
