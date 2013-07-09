@@ -383,7 +383,7 @@ class BasicPasswordManagement
 		//$char contains the string that has all the letters we can use in a password.
 		//The loop pics a character from $char in random and adds that character to the final $pass variable.
 		for ($i=0;$i<$Length;++$i)
-			$Pass.=$chars[randint(0, strlen($chars)-1)];
+			$Pass.=$chars[rand(0, strlen($chars)-1)];
 		
 		return $Pass;
 	}
@@ -457,7 +457,7 @@ class User extends BasicPasswordManagement
 		if ($staticSalt != "")
 			BasicPasswordManagement::$staticSalt = $staticSalt;
 
-		$time = time("CURR");
+		$time = time();
 
 		//calculate the hash of the password.
 		$obj->dynamicSalt = hash("sha512", randstr(64));
@@ -562,7 +562,7 @@ class User extends BasicPasswordManagement
 		$newHash = BasicPasswordManagement::hashPassword($newPassword, $this->dynamicSalt, BasicPasswordManagement::$hashAlgo);
 		
 		//update the old password with the new password.
-		SQL("UPDATE USER SET `HASH` = ?, `DATE_CREATED` = ?, `DYNAMIC_SALT` = ?, `ALGO` = ? WHERE `USERID` = ?", array($newHash, time("CURR"), $this->dynamicSalt, BasicPasswordManagement::$hashAlgo, $this->userID));
+		SQL("UPDATE USER SET `HASH` = ?, `DATE_CREATED` = ?, `DYNAMIC_SALT` = ?, `ALGO` = ? WHERE `USERID` = ?", array($newHash, time(), $this->dynamicSalt, BasicPasswordManagement::$hashAlgo, $this->userID));
 		
 		$this->hashedPassword = $newHash;
 
@@ -587,7 +587,7 @@ class User extends BasicPasswordManagement
 	{
 		$result = SQL("SELECT `DATE_CREATED` FROM USER WHERE `USERID` = ?", array($this->userID));
 			
-		$currentTime = time("CURR");
+		$currentTime = time();
 
 		if ( ($currentTime - $result[0]['DATE_CREATED'])  > User::$passwordExpiryTime)
 			return TRUE;

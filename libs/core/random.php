@@ -8,7 +8,7 @@ namespace phpsec;
  * @param int $max
  * @return int
  */
-function randint($min = 0, $max = null)
+function rand($min = 0, $max = null)
 {
 	//Case 1: Both Positive		Range(min, max-1)
 	//Case 2: Both Negative		Range(min+1, max)

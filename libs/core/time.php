@@ -7,7 +7,7 @@ namespace phpsec;
  * @param boolean $realTime
  * @return int
  */
-function time($mode, $givenTime = 0)
+function time($mode = "CURR", $givenTime = 0)
 {
 	if (strtoupper($mode) == "CURR")	//If mode is "CURR", return the correct user specified time.
 		return Time::time ();
