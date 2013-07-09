@@ -4,6 +4,7 @@
 
 	class DatabaseException extends \Exception {}
 	class DatabaseUnsupportedAdapterException extends DatabaseException {}
+	class DatabaseNotSet extends DatabaseException {}
 
 	/**
 	 * This class is not being used currently.
@@ -43,6 +44,9 @@
 	
 	function SQL($query, $args)
 	{
+		if (DatabaseManager::$db == NULL)
+			throw new DatabaseNotSet("<BR>ERROR: Database is not set/configured properly.<BR>");
+		
 		return DatabaseManager::$db->SQL($query, $args);
 	}
 
