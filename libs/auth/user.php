@@ -400,8 +400,8 @@ class UserException extends \Exception {}
  */
 class InvalidHashException extends UserException {}			//The hash returned is not valid. i.e. it is empty.
 class WrongPasswordException extends UserException {}			//The password provided for the existing user is not correct.
-class UserExistsException extends UserException {}			//No records were found with this userID in the database.
-class UserObjectNotReturnedException extends UserException {}		//Cannot return the userObject.
+class UserExistsException extends UserException {}			//Records were found with this userID in the database.
+class UserNotExistsException extends UserException {}			//Records were NOT found with this userID in the database.
 class SaltAlreadyPresentInDB extends UserException {}			//The provided salt is already present in the DB.
 
 
@@ -480,7 +480,7 @@ class User extends BasicPasswordManagement
 	 * @param String $pass
 	 * @return \phpsec\User
 	 * @throws DBHandlerForUserNotSetException
-	 * @throws UserObjectNotReturnedException
+	 * @throws UserNotExistsException
 	 * @throws WrongPasswordException
 	 */
 	public static function existingUserObject($id, $pass)
@@ -491,7 +491,7 @@ class User extends BasicPasswordManagement
 
 		//If no record is returned for this user, then this user does not exist in the system.
 		if (count($result) < 1)
-			throw new UserObjectNotReturnedException("<BR>ERROR: User Object not returned.<BR>");
+			throw new UserNotExistsException("<BR>ERROR: User Not found.<BR>");
 
 		//extract static salt used while password generation
 		BasicPasswordManagement::$staticSalt = $result[0]['STATIC_SALT'];
