@@ -22,13 +22,13 @@ echo "<PRE>";
  * 1) Uncomment the lines that you commented out above.
  * 2) Comment out the first function and the second last line where this function is called.
  * 2) Then run the PHP file. Wait for 3-4 seconds, the run the file again. You should see the message that test passed or failed.
- * 3) Check your browser cookies. You should not see a cookie of name "rash" under your TEST_SITE.
+ * 3) Check your browser cookies. You should NOT see a cookie of name "rash" under your TEST_SITE.
  * 
  * 
  * 
  */
 
-require_once "../../../libs/db/adapter/pdo_mysql.php";
+require_once "../../../libs/db/dbmanager.php";
 require_once '../../../libs/core/random.php';
 require_once '../../../libs/core/time.php';
 require_once '../../../libs/auth/user.php';
@@ -36,17 +36,14 @@ require_once '../../../libs/auth/adv_password.php';
 
 class TestRememberMe
 {
-	private $_handler = "";
 	private $_userID = "";
 	private $obj = "";
 	
 	public function setUp()
 	{
-		Time::$realTime = true;
-
 		try
 		{
-			$this->_handler = new \phpsec\Database_pdo_mysql ('OWASP', 'root', 'testing');
+			DatabaseManager::connect (new DatabaseConfig('pdo_mysql','OWASP','root','testing'));	//create DB connection.
 		}
 		catch (\Exception $e)
 		{
@@ -56,13 +53,13 @@ class TestRememberMe
 		try
 		{
 			BasicPasswordManagement::$hashAlgo = "haval256,5";
-			$this->_userID = User::newUserObject($this->_handler, "rash", "testing");
-			$this->obj = new AdvancedPasswordManagement($this->_handler, "rash", "testing");
+			$this->_userID = User::newUserObject("rash", "testing");
+			$this->obj = new AdvancedPasswordManagement("rash", "testing");
 		}
 		catch (\Exception $e)
 		{
-			$this->_userID = User::existingUserObject($this->_handler, "rash", "testing");
-			$this->obj = new AdvancedPasswordManagement($this->_handler, "rash", "testing");
+			$this->_userID = User::existingUserObject("rash", "testing");
+			$this->obj = new AdvancedPasswordManagement("rash", "testing");
 		}
 	}
 	
@@ -94,7 +91,7 @@ class TestRememberMe
 	{
 		try
 		{
-			$this->obj->setAutomaticLoginTimePeriod(3);
+			AdvancedPasswordManagement::$automaticLoginTimePeriod = 3;
 			
 			if (!isset($_COOKIE["AUTHID"]))
 			{
@@ -106,9 +103,7 @@ class TestRememberMe
 				
 				if (!$this->obj->rememberMe())	//At this point the cookie will be deleted because the time frame has passed.
 				{
-					$query = "SELECT `AUTH_ID` FROM AUTH_STORAGE WHERE USERID = ? AND `AUTH_ID` = ?";
-					$args = array($this->_userID->getUserID(), $authID);
-					$result = $this->_handler->SQL($query, $args);
+					$result = SQL("SELECT `AUTH_ID` FROM AUTH_STORAGE WHERE USERID = ? AND `AUTH_ID` = ?", array($this->_userID->getUserID(), $authID));
 					
 					if (count($result) != 0)
 						echo "<BR>" . "TEST FAILED 2.1." . "<BR>";
