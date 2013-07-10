@@ -148,7 +148,6 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function tearDown()
 	{
-		SQL("DELETE FROM PASSWORD WHERE USERID = ?", array($this->userID->getUserID()));
 		$this->userID->deleteUser();
 		
 		time("RESET");

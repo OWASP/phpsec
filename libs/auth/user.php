@@ -602,10 +602,15 @@ class User extends BasicPasswordManagement
 	 */
 	public function deleteUser()
 	{
+		//Delete user Data from Session Table.
 		if (User::$session[0] !== FALSE)
 			User::$session[0]->destroyAllSessions();
 		
-		SQL("DELETE FROM USER WHERE USERID = ?", array("{$this->userID}"));
+		//Delete user Data from from Password Table.
+		SQL("DELETE FROM PASSWORD WHERE USERID = ?", array($this->userID));
+		
+		//Delete user Data from from User Table.
+		SQL("DELETE FROM USER WHERE USERID = ?", array($this->userID));
 		
 		return TRUE;
 	}
