@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jul 04, 2013 at 03:05 PM
+-- Generation Time: Jul 09, 2013 at 10:01 PM
 -- Server version: 5.5.22
 -- PHP Version: 5.3.10-1ubuntu3
 
@@ -23,21 +23,6 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `AUTH_STORAGE`
---
-
-CREATE TABLE IF NOT EXISTS `AUTH_STORAGE` (
-  `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `AUTH_ID` varchar(128) DEFAULT NULL,
-  `DATE_CREATED` int(10) NOT NULL,
-  `USERID` varchar(32) NOT NULL,
-  PRIMARY KEY (`ID`),
-  KEY `USERID` (`USERID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=22 ;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `PASSWORD`
 --
 
@@ -50,9 +35,8 @@ CREATE TABLE IF NOT EXISTS `PASSWORD` (
   `LAST_LOGIN_ATTEMPT` int(10) DEFAULT NULL,
   `USERID` varchar(32) NOT NULL,
   PRIMARY KEY (`ID`),
-  UNIQUE KEY `USERID_2` (`USERID`),
-  KEY `USERID` (`USERID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=855 ;
+  UNIQUE KEY `USERID` (`USERID`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1019 ;
 
 -- --------------------------------------------------------
 
@@ -67,9 +51,8 @@ CREATE TABLE IF NOT EXISTS `SESSION` (
   `LAST_ACTIVITY` int(10) NOT NULL,
   `USERID` varchar(32) NOT NULL,
   PRIMARY KEY (`ID`),
-  UNIQUE KEY `SESSION_ID` (`SESSION_ID`),
-  KEY `USERID` (`USERID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=776 ;
+  UNIQUE KEY `SESSION_ID` (`SESSION_ID`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2970 ;
 
 -- --------------------------------------------------------
 
@@ -82,9 +65,8 @@ CREATE TABLE IF NOT EXISTS `SESSION_DATA` (
   `SESSION_ID` varchar(32) NOT NULL,
   `KEY` varchar(32) NOT NULL,
   `VALUE` varchar(64) DEFAULT NULL,
-  PRIMARY KEY (`ID`),
-  KEY `SESSION_ID` (`SESSION_ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=201 ;
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=617 ;
 
 -- --------------------------------------------------------
 
@@ -104,35 +86,7 @@ CREATE TABLE IF NOT EXISTS `USER` (
   `STATIC_SALT` varchar(128) NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `USERID` (`USERID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2287 ;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `AUTH_STORAGE`
---
-ALTER TABLE `AUTH_STORAGE`
-  ADD CONSTRAINT `AUTH_STORAGE_ibfk_1` FOREIGN KEY (`USERID`) REFERENCES `USER` (`USERID`) ON DELETE NO ACTION;
-
---
--- Constraints for table `PASSWORD`
---
-ALTER TABLE `PASSWORD`
-  ADD CONSTRAINT `PASSWORD_ibfk_3` FOREIGN KEY (`USERID`) REFERENCES `USER` (`USERID`) ON DELETE NO ACTION;
-
---
--- Constraints for table `SESSION`
---
-ALTER TABLE `SESSION`
-  ADD CONSTRAINT `SESSION_ibfk_2` FOREIGN KEY (`USERID`) REFERENCES `USER` (`USERID`) ON DELETE NO ACTION;
-
---
--- Constraints for table `SESSION_DATA`
---
-ALTER TABLE `SESSION_DATA`
-  ADD CONSTRAINT `SESSION_DATA_ibfk_5` FOREIGN KEY (`SESSION_ID`) REFERENCES `SESSION` (`SESSION_ID`) ON DELETE NO ACTION;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5232 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
