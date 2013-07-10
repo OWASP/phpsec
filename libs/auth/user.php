@@ -438,7 +438,29 @@ class User extends BasicPasswordManagement
 	 * An array to hold the sessions generated within this file.
 	 * @var Array phpsec\Session
 	 */
-	public static $session = array();
+	public $session = array();
+	
+	
+	
+	/**
+	 * Constructor for the User class. The role of this constructor is to check if session Library is present or not. If present, a new "DEV" session is added in the Session Table.
+	 */
+	private function __construct($userID)
+	{
+		//Create a session for the user. A min of 1 session present will denote that the user is logged in to the system from atleast one device.
+		if ( \file_exists(__DIR__ . "/../session/session.php") )
+		{
+			require_once (__DIR__ . "/../session/session.php");
+			/**
+			 * Sessions Starting with keyword "DEV" are sessionIDs used to show that a used is logged in from some DEVICE. These are special sessions. These must not be used to store data.
+			 */
+			$this->session[0] = new Session($userID, "DEV" . randstr(29));
+		}
+		else
+		{
+			$this->session[0] = FALSE;	//denotes that the session library is not present.
+		}
+	}
 	
 	
 	
@@ -454,7 +476,7 @@ class User extends BasicPasswordManagement
 	 */
 	public static function newUserObject($id, $pass, $staticSalt = "")
 	{
-		$obj = new User();
+		$obj = new User($id);
 		
 		$obj->userID = $id;
 			
@@ -474,17 +496,6 @@ class User extends BasicPasswordManagement
 		if ($count == 0)
 			throw new UserExistsException("<BR>ERROR: This User already exists in the DB.<BR>");
 		
-		//Create a session for the new user. A min of 1 session present will denote that the user is logged in to the system from atleast one device.
-		if ( \file_exists(__DIR__ . "/../session/session.php") )
-		{
-			require_once (__DIR__ . "/../session/session.php");
-			User::$session[0] = new Session($obj->getUserID());
-		}
-		else
-		{
-			User::$session[0] = FALSE;	//denotes that the session library is not present.
-		}
-
 		return $obj;
 	}
 	
@@ -501,7 +512,7 @@ class User extends BasicPasswordManagement
 	 */
 	public static function existingUserObject($id, $pass)
 	{
-		$obj = new User();
+		$obj = new User($id);
 		
 		$result = SQL("SELECT `HASH`, `ALGO`, `DYNAMIC_SALT`, `STATIC_SALT` FROM USER WHERE `USERID` = ?", array($id));
 
@@ -521,20 +532,36 @@ class User extends BasicPasswordManagement
 		$obj->dynamicSalt = $result[0]['DYNAMIC_SALT'];
 		$obj->hashedPassword = $result[0]['HASH'];
 		BasicPasswordManagement::$hashAlgo = $result[0]['ALGO'];
-		
-		//Create a session for the existing user. A min of 1 session present will denote that the user is logged in to the system from atleast one device.
-		if ( \file_exists(__DIR__ . "/../session/session.php") )
-		{
-			require_once (__DIR__ . "/../session/session.php");
-			User::$session[0] = new Session($obj->getUserID());
-		}
-		else
-		{
-			User::$session[0] = FALSE;	//denotes that the session library is not present.
-		}
 
 		return $obj;
 	}
+	
+	
+	
+	/**
+	 * Function to provide userObject forcefully (i.e. without password).
+	 * @param String $userID
+	 * @return \phpsec\User
+	 * @throws UserNotExistsException
+	 */
+	public static function forceLogin($id)
+	{
+		$obj = new User($id);
+		
+		$result = SQL("SELECT `HASH`, `ALGO`, `DYNAMIC_SALT`, `STATIC_SALT` FROM USER WHERE `USERID` = ?", array($id));
+
+		//If no record is returned for this user, then this user does not exist in the system.
+		if (count($result) < 1)
+			throw new UserNotExistsException("<BR>ERROR: User Not found.<BR>");
+		
+		$obj->userID = $id;
+		$obj->dynamicSalt = $result[0]['DYNAMIC_SALT'];
+		$obj->hashedPassword = $result[0]['HASH'];
+		BasicPasswordManagement::$hashAlgo = $result[0]['ALGO'];
+
+		return $obj;
+	}
+	
 	
 	
 	/**
@@ -603,8 +630,8 @@ class User extends BasicPasswordManagement
 	public function deleteUser()
 	{
 		//Delete user Data from Session Table.
-		if (User::$session[0] !== FALSE)
-			User::$session[0]->destroyAllSessions();
+		if ($this->session[0] !== FALSE)
+			$this->session[0]->destroyAllSessions();
 		
 		//Delete user Data from from Password Table.
 		SQL("DELETE FROM PASSWORD WHERE USERID = ?", array($this->userID));
@@ -643,22 +670,25 @@ class User extends BasicPasswordManagement
 	public function rememberMe($secure = TRUE, $httpOnly = TRUE)
 	{
 		//If the session library is present, then only we can use this functionality.
-		if (User::$session[0] !== FALSE)
+		if ($this->session[0] !== FALSE)
 		{
 			//If the cookie is not found, this implies that the cookie is not set. Hence set this cookie.
 			if ( !isset($_COOKIE['AUTHID']) )
 			{
-				User::$session[1] = new Session($this->userID);		//create a new session.
+				/**
+				 * Sessions Starting with keyword "REM" are sessionIDs used for "Remember Me" functionality. These must not be used to store data.
+				 */
+				$this->session[1] = new Session($this->userID, "REM" . randstr(29));		//create a new session.
 
 				//store the newly created session into the user cookie.
 				if ($secure && $httpOnly)
-					\setcookie("AUTHID", User::$session[1]->getSessionID(), time() + 29999999, null, null, TRUE, TRUE);	//keep cookie for unlimited time because it doesn't matter. The time that cookie will be present in client's system will be determined from the $automaticLoginTimePeriod variable. Once this time has passed, the cookie will be cancelled from the server end.
+					\setcookie("AUTHID", $this->session[1]->getSessionID(), time() + 29999999, null, null, TRUE, TRUE);	//keep cookie for unlimited time because it doesn't matter. The time that cookie will be present in client's system will be determined from the $automaticLoginTimePeriod variable. Once this time has passed, the cookie will be cancelled from the server end.
 				elseif (!$secure && !$httpOnly)
-					\setcookie("AUTHID", User::$session[1]->getSessionID(), time() + 299999999, null, null, FALSE, FALSE);
+					\setcookie("AUTHID", $this->session[1]->getSessionID(), time() + 299999999, null, null, FALSE, FALSE);
 				elseif ($secure && !$httpOnly)
-					\setcookie("AUTHID", User::$session[1]->getSessionID(), time() + 299999999, null, null, TRUE, FALSE);
+					\setcookie("AUTHID", $this->session[1]->getSessionID(), time() + 299999999, null, null, TRUE, FALSE);
 				elseif (!$secure && $httpOnly)
-					\setcookie("AUTHID", User::$session[1]->getSessionID(), time() + 299999999, null, null, FALSE, TRUE);
+					\setcookie("AUTHID", $this->session[1]->getSessionID(), time() + 299999999, null, null, FALSE, TRUE);
 
 				return TRUE;
 			}

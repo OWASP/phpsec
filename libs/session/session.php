@@ -55,10 +55,10 @@ class Session
 	 * @param String $user
 	 * @throws DBHandlerForSessionNotSetException
 	 */
-	public function __construct($user)
+	public function __construct($user, $sessionName = "")
 	{
 		$this -> userID = $user;
-		$this -> newSession();	//get a new session ID for the current user.
+		$this -> newSession($sessionName);	//get a new session ID for the current user.
 	}
 	
 	
@@ -87,12 +87,16 @@ class Session
 	 * @return boolean
 	 * @throws NoUserFoundException
 	 */
-	protected function newSession()
+	protected function newSession($sessionName = "")
 	{
 		if($this->userID == null)
 			throw new NoUserFoundException("<BR>ERROR: No User was found. Session needs a user to be present.<BR>");
 
-		$this -> session = randstr(32); //generate a new random string for the session ID of length 32.
+		if ($sessionName == "")
+			$this -> session = randstr(32); //generate a new random string for the session ID of length 32.
+		else
+			$this -> session = $sessionName;
+		
 		$time = time();	//get the current time.
 
 		SQL("INSERT INTO SESSION (`SESSION_ID`, `DATE_CREATED`, `LAST_ACTIVITY`, `USERID`) VALUES (?, ?, ?, ?)", array("{$this -> session}", $time, $time, "{$this -> userID}"));
