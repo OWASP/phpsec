@@ -47,8 +47,8 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		try
 		{
 			//Create users.
-			$this->user[0] = User::newUserObject(\phpsec\randstr(10), "resting");
-			$this->user[1] = User::newUserObject(\phpsec\randstr(10), "owasp");
+			$this->user[0] = User::newUserObject("1234", "resting");
+			$this->user[1] = User::newUserObject("5678", "owasp");
 		}
 		catch(\Exception $e)
 		{

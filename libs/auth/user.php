@@ -398,11 +398,9 @@ class UserException extends \Exception {}
 /**
  * Child Exception Classes
  */
-class InvalidHashException extends UserException {}			//The hash returned is not valid. i.e. it is empty.
 class WrongPasswordException extends UserException {}			//The password provided for the existing user is not correct.
 class UserExistsException extends UserException {}			//Records were found with this userID in the database.
 class UserNotExistsException extends UserException {}			//Records were NOT found with this userID in the database.
-class SaltAlreadyPresentInDB extends UserException {}			//The provided salt is already present in the DB.
 
 
 class User extends BasicPasswordManagement
@@ -434,6 +432,13 @@ class User extends BasicPasswordManagement
 	 * @var int
 	 */
 	public static $passwordExpiryTime = 15552000;	//approx 6 months.
+	
+	
+	/**
+	 * An array to hold the sessions generated within this file.
+	 * @var Array phpsec\Session
+	 */
+	public static $session = array();
 	
 	
 	
@@ -468,6 +473,17 @@ class User extends BasicPasswordManagement
 		//If the user is already present in the database, then a duplicate won't be created and no rows will be affected. Hence 0 will be returned.
 		if ($count == 0)
 			throw new UserExistsException("<BR>ERROR: This User already exists in the DB.<BR>");
+		
+		//Create a session for the new user. A min of 1 session present will denote that the user is logged in to the system from atleast one device.
+		if ( \file_exists(__DIR__ . "/../session/session.php") )
+		{
+			require_once (__DIR__ . "/../session/session.php");
+			User::$session[0] = new Session($obj->getUserID());
+		}
+		else
+		{
+			User::$session[0] = FALSE;	//denotes that the session library is not present.
+		}
 
 		return $obj;
 	}
@@ -505,6 +521,17 @@ class User extends BasicPasswordManagement
 		$obj->dynamicSalt = $result[0]['DYNAMIC_SALT'];
 		$obj->hashedPassword = $result[0]['HASH'];
 		BasicPasswordManagement::$hashAlgo = $result[0]['ALGO'];
+		
+		//Create a session for the existing user. A min of 1 session present will denote that the user is logged in to the system from atleast one device.
+		if ( \file_exists(__DIR__ . "/../session/session.php") )
+		{
+			require_once (__DIR__ . "/../session/session.php");
+			User::$session[0] = new Session($obj->getUserID());
+		}
+		else
+		{
+			User::$session[0] = FALSE;	//denotes that the session library is not present.
+		}
 
 		return $obj;
 	}
@@ -575,7 +602,12 @@ class User extends BasicPasswordManagement
 	 */
 	public function deleteUser()
 	{
+		if (User::$session[0] !== FALSE)
+			User::$session[0]->destroyAllSessions();
+		
 		SQL("DELETE FROM USER WHERE USERID = ?", array("{$this->userID}"));
+		
+		return TRUE;
 	}
 	
 	
@@ -593,6 +625,71 @@ class User extends BasicPasswordManagement
 			return TRUE;
 		else
 			return FALSE;
+	}
+	
+	
+	
+	/**
+	 * Function to implement "Remember Me" functionality.
+	 * @param boolean $secure	//If set, the cookies will only set for HTTPS connections.
+	 * @param boolean $httpOnly	//If set, the cookies will only be accessible via HTTP Methods and not via Javascript and other means.
+	 * @return boolean
+	 */
+	public function rememberMe($secure = TRUE, $httpOnly = TRUE)
+	{
+		//If the session library is present, then only we can use this functionality.
+		if (User::$session[0] !== FALSE)
+		{
+			//If the cookie is not found, this implies that the cookie is not set. Hence set this cookie.
+			if ( !isset($_COOKIE['AUTHID']) )
+			{
+				User::$session[1] = new Session($this->userID);		//create a new session.
+
+				//store the newly created session into the user cookie.
+				if ($secure && $httpOnly)
+					\setcookie("AUTHID", User::$session[1]->getSessionID(), time() + 29999999, null, null, TRUE, TRUE);	//keep cookie for unlimited time because it doesn't matter. The time that cookie will be present in client's system will be determined from the $automaticLoginTimePeriod variable. Once this time has passed, the cookie will be cancelled from the server end.
+				elseif (!$secure && !$httpOnly)
+					\setcookie("AUTHID", User::$session[1]->getSessionID(), time() + 299999999, null, null, FALSE, FALSE);
+				elseif ($secure && !$httpOnly)
+					\setcookie("AUTHID", User::$session[1]->getSessionID(), time() + 299999999, null, null, TRUE, FALSE);
+				elseif (!$secure && $httpOnly)
+					\setcookie("AUTHID", User::$session[1]->getSessionID(), time() + 299999999, null, null, FALSE, TRUE);
+
+				return TRUE;
+			}
+			else	//If the cookie is already set, then validate it.
+			{
+				//get all the sessions associated with this user.
+				$result = SQL("SELECT `SESSION_ID`, `DATE_CREATED` FROM `SESSION` WHERE `USERID` = ?", array($this->userID));
+
+				//If any of the session IDs matches the user sent cookie, then we know that the user is validated.
+				foreach ($result as $auth)
+				{
+					if ($auth['SESSION_ID'] == $_COOKIE['AUTHID'])
+					{
+						$currentTime = time();
+
+						//If cookie time has expired, the delete the cookie from the DB and the user's browser.
+						if ( ($currentTime - $auth['DATE_CREATED']) >= Session::$expireMaxTime)
+						{
+							SQL("DELETE FROM `SESSION` WHERE USERID = ? AND `SESSION_ID` = ?", array($this->userID, $_COOKIE['AUTHID']));
+
+							setcookie("AUTHID", "");
+
+							return FALSE;
+						}
+						else
+							return TRUE;
+					}
+				}
+
+				return FALSE;
+			}
+		}
+		else	//If the session library is not present, then we cannot use this function.
+		{
+			throw new SessionNotFoundException("<BR>ERROR: Session is not Found. Session Library is needed to use this function.<BR>");
+		}
 	}
 }
 

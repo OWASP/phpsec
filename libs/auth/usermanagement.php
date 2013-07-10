@@ -49,10 +49,12 @@ class UserManagement
 	 * @param String $userID
 	 * @return boolean
 	 */
-	public static function deleteUser($userID)
+	public static function deleteUser($userID, $password)
 	{
-		$count = SQL("DELETE FROM USER WHERE USERID = ?", array($userID));
-		return ($count == 1);
+		$userObj = User::existingUserObject($userID, $password);
+		$deleted = $userObj->deleteUser();
+		
+		return ($deleted == TRUE);
 	}
 	
 	

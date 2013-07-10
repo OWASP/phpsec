@@ -48,13 +48,6 @@ class AdvancedPasswordManagement
 	public static $bruteForceLockTimePeriod = 5;	//5 SEC  - This defines the time-period after which next login attempt must be carried out. E.g if the time is 5 sec, then time-period between two login attempts must minimum be 5 sec, otherwise it will be considered brute-force attack.
 	
 	
-	/**
-	 * It denotes the time till which the "remember me" option will be valid. After this period, the user must provide their credentials again.
-	 * @var int
-	 */
-	public static $automaticLoginTimePeriod = 604800;	//1 week - This defines the "remember me" time. So within this period, if the user does not logs out, he can't get into the system without providing their credetials.
-	
-	
 	
 	/**
 	 * Constructor for the AdvancedPasswordManagement Class.
@@ -198,62 +191,6 @@ class AdvancedPasswordManagement
 
 				return FALSE;
 			}
-		}
-	}
-	
-	
-	
-	/**
-	 * Function to implement "Remember Me" functionality.
-	 * @param boolean $secure	//If set, the cookies will only set for HTTPS connections.
-	 * @param boolean $httpOnly	//If set, the cookies will only be accessible via HTTP Methods and not via Javascript and other means.
-	 * @return boolean
-	 */
-	public function rememberMe($secure = TRUE, $httpOnly = TRUE)
-	{
-		//If the cookie is not found, this implies that the cookie is not set. Hence set this cookie.
-		if ( !isset($_COOKIE['AUTHID']) )
-		{
-			$newID = hash("sha512", randstr(64));
-				
-			SQL("INSERT INTO AUTH_STORAGE (`AUTH_ID`, `DATE_CREATED`, `USERID`) VALUES (?, ?, ?)", array($newID, time(), $this->userID));
-
-			if ($secure && $httpOnly)
-				\setcookie("AUTHID", $newID, time() + 29999999, null, null, TRUE, TRUE);	//keep cookie for unlimited time because it doesn't matter. The time that cookie will be present in client's system will be determined from the $automaticLoginTimePeriod variable. Once this time has passed, the cookie will be cancelled from the server end.
-			elseif (!$secure && !$httpOnly)
-				\setcookie("AUTHID", $newID, time() + 299999999, null, null, FALSE, FALSE);
-			elseif ($secure && !$httpOnly)
-				\setcookie("AUTHID", $newID, time() + 299999999, null, null, TRUE, FALSE);
-			elseif (!$secure && $httpOnly)
-				\setcookie("AUTHID", $newID, time() + 299999999, null, null, FALSE, TRUE);
-
-			return TRUE;
-		}
-		else	//If the cookie is already set, then validate it.
-		{
-			$result = SQL("SELECT `AUTH_ID`, `DATE_CREATED` FROM `AUTH_STORAGE` WHERE `USERID` = ?", array($this->userID));
-				
-			foreach ($result as $auth)
-			{
-				if ($auth['AUTH_ID'] == $_COOKIE['AUTHID'])
-				{
-					$currentTime = time();
-
-					//If cookie time has expired, the delete the cookie from the DB and the user's browser.
-					if ( ($currentTime - $auth['DATE_CREATED']) >= AdvancedPasswordManagement::$automaticLoginTimePeriod)
-					{
-						SQL("DELETE FROM `AUTH_STORAGE` WHERE USERID = ? AND `AUTH_ID` = ?", array($this->userID, $_COOKIE['AUTHID']));
-
-						setcookie("AUTHID", "");
-
-						return FALSE;
-					}
-					else
-						return TRUE;
-				}
-			}
-
-			return FALSE;
 		}
 	}
 }
