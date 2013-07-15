@@ -108,9 +108,9 @@ class HttpRequest extends HttpRequestArray
 		if (self::isCLI())
 			return NULL;
 		if ($QueryString && self::QueryString() )
-			return (self::Protocol()."://".self::ServerName().self::PortReadable().self::RequestURI()."?".self::QueryString());
+			return (self::Protocol()."://".self::ServerName().self::PortReadable().self::Path()."?".self::QueryString());
 		else
-			return (self::Protocol()."://".self::ServerName().self::PortReadable().self::RequestURI());
+			return (self::Protocol()."://".self::ServerName().self::PortReadable().self::Path());
 	}
 
 	/**
@@ -174,9 +174,9 @@ class HttpRequest extends HttpRequestArray
 		if (self::isCLI())
 			return self::URL();
 		if (self::isHTTPS())
-			return (self::PROTOCOL_HTTP."://".self::ServerName().self::PortReadable().self::RequestURI()."?".self::QueryString());
+			return (self::PROTOCOL_HTTP."://".self::ServerName().self::PortReadable().self::RequestURI());
 		else
-			return (self::PROTOCOL_HTTPS."://".self::ServerName().self::PortReadable().self::RequestURI()."?".self::QueryString());
+			return (self::PROTOCOL_HTTPS."://".self::ServerName().self::PortReadable().self::RequestURI());
 	}
 
 	/**
