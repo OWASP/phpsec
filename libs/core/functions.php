@@ -65,3 +65,76 @@ function echo_br($data)
 }
 
 /** @decontaminated_end **/
+
+
+class Encryption
+{
+	private static $cipher = MCRYPT_RIJNDAEL_256;
+	private static $key = "qgyXyjD5YpF";
+	private static $mode = "cbc";
+	private static $iv = "akfhaR*(3RFn";
+	
+	public static function getCipher()
+	{
+		return Encryption::$cipher;
+	}
+	
+	public static function getKey()
+	{
+		return Encryption::$key;
+	}
+	
+	public static function getMode()
+	{
+		return Encryption::$mode;
+	}
+	
+	public static function getIV()
+	{
+		return Encryption::$iv;
+	}
+}
+
+function confidentialString()
+{
+	$trace = debug_backtrace();
+	
+	$arraySlot = 0;
+	
+	if ( count($trace[$arraySlot]['args']) == 0 )
+		return "";
+	
+	if ( $trace[$arraySlot]['args'][0][0] == ":" )
+	{
+		$decodedString = substr($trace[$arraySlot]['args'][0], 1);
+		$decodedString = base64_decode($decodedString);
+		
+		$decryptedString = mcrypt_decrypt(Encryption::getCipher(), Encryption::getKey(), $decodedString, Encryption::getMode(), Encryption::getIV());
+		
+		return $decryptedString;
+	}
+	else
+	{
+		$origString = $trace[$arraySlot]['args'][0];
+		
+		$encryptedString = mcrypt_encrypt(Encryption::getCipher(), Encryption::getKey(), $trace[$arraySlot]['args'][0], Encryption::getMode(), Encryption::getIV());
+		$enc = base64_encode( $encryptedString );
+		$encryptedString = ":" . $encryptedString;
+		
+		$fileData = file(__FILE__);
+		
+		$prevLine = $fileData[(int)$trace[$arraySlot]['line'] - 1];
+		$pos = strpos($prevLine, __FUNCTION__);
+		
+		$newLine = substr($prevLine, 0, $pos) . __FUNCTION__ . "('{$enc}');";
+		
+		$fileData[(int)$trace[$arraySlot]['line'] - 1] = $newLine;
+		$fileData = implode("", $fileData);
+		
+		$fp = fopen(__FILE__, 'w');
+		fwrite($fp, $fileData);
+		fclose($fp);
+		
+		return $origString;
+	}
+}
