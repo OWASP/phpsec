@@ -60,12 +60,19 @@ abstract class HttpRequestArray implements \ArrayAccess
 class HttpRequest extends HttpRequestArray
 {
 	/**
+	 * Protocol constants
+	 */
+	const PROTOCOL_CLI   = 'cli';
+	const PROTOCOL_HTTP  = 'http';
+	const PROTOCOL_HTTPS = 'https';
+
+	/**
 	 * Checks if script is being called from command line
 	 * @return boolean
 	 */
 	protected static function isCLI()
 	{
-		if (php_sapi_name() === "cli" || !isset($_SERVER['REMOTE_ADDR']))
+		if (php_sapi_name() === self::PROTOCOL_CLI || !isset($_SERVER['REMOTE_ADDR']))
 			return true;
 		else
 			return false;
@@ -121,12 +128,12 @@ class HttpRequest extends HttpRequestArray
 	static function Protocol()
 	{
 		if (self::isCLI())
-			return 'cli';
+			return self::PROTOCOL_CLI;
 		$x = (isset($_SERVER['HTTPS'])) ? $_SERVER['HTTPS'] : '';
 		if ($x == "off" or $x == "")
-			return "http";
+			return self::PROTOCOL_HTTP;
 		else
-			return "https";
+			return self::PROTOCOL_HTTPS;
 	}
 
 	/**
@@ -135,7 +142,7 @@ class HttpRequest extends HttpRequestArray
 	 */
 	static function isHTTPS()
 	{
-		return (self::Protocol() === 'https');
+		return (self::Protocol() === self::PROTOCOL_HTTPS);
 	}
 
 	/**
@@ -144,7 +151,7 @@ class HttpRequest extends HttpRequestArray
 	 */
 	static function isHTTP()
 	{
-		return (self::Protocol() === 'http');
+		return (self::Protocol() === self::PROTOCOL_HTTP);
 	}
 
 	/**
@@ -161,9 +168,9 @@ class HttpRequest extends HttpRequestArray
 	static function PortReadable()
 	{
 		$port = self::Port();
-		if ($port=="80" && strtolower(self::Protocol())=="http")
+		if ($port=="80" && strtolower(self::Protocol())==self::PROTOCOL_HTTP)
 			$port="";
-		else if ($port=="443" && strtolower(self::Protocol())=="https")
+		else if ($port=="443" && strtolower(self::Protocol())==self::PROTOCOL_HTTPS)
 			$port="";
 		else
 			$port=":".$port;
