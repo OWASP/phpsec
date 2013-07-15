@@ -165,6 +165,21 @@ class HttpRequest extends HttpRequestArray
 	}
 
 	/**
+	 * Changes protocol/scheme of current URL
+	 * 
+	 * @return string URL
+	 */
+	static function ChangeProtocol()
+	{
+		if (self::isCLI())
+			return self::URL();
+		if (self::isHTTPS())
+			return (self::PROTOCOL_HTTP."://".self::ServerName().self::PortReadable().self::RequestURI()."?".self::QueryString());
+		else
+			return (self::PROTOCOL_HTTPS."://".self::ServerName().self::PortReadable().self::RequestURI()."?".self::QueryString());
+	}
+
+	/**
 	 * Returns port of client connection
 	 * @return string Port
 	 */
