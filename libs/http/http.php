@@ -67,6 +67,16 @@ class HttpRequest extends HttpRequestArray
 	const PROTOCOL_HTTPS = 'https';
 
 	/**
+	 * Request method constants
+	 */
+	const METHOD_GET    = 'GET';
+	const METHOD_POST   = 'POST';
+	const METHOD_PUT    = 'PUT';
+	const METHOD_DELETE = 'DELETE';
+	const METHOD_PATCH  = 'PATCH';
+	const METHOD_OTHER  = 'OTHER';
+
+	/**
 	 * Checks if script is being called from command line
 	 * @return boolean
 	 */
@@ -207,15 +217,35 @@ class HttpRequest extends HttpRequestArray
 	}
 
 	/**
-	 * Request method, either GET/POST
+	 * Request method, GET/POST/PUT/DELETE/PATCH
 	 *
 	 * @return string RequestMethod
 	 */
 	static function Method()
 	{
 		if (self::IsCLI())
-			return "GET";
-		return $_SERVER['REQUEST_METHOD'];
+			return self::METHOD_GET;
+		switch ($_SERVER['REQUEST_METHOD'])
+		{
+			case 'GET':
+				return self::METHOD_GET;
+				break;
+			case 'POST':
+				return self::METHOD_POST;
+				break;
+			case 'PUT':
+				return self::METHOD_PUT;
+				break;
+			case 'DELETE':
+				return self::METHOD_DELETE;
+				break;
+			case 'PATCH':
+				return self::METHOD_PATCH;
+				break;
+			default:
+				return self::METHOD_OTHER;
+				break;
+		}
 	}
 
 	/**
