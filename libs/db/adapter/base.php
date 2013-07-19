@@ -1,150 +1,167 @@
 <?php
 
-	namespace phpsec;
+namespace phpsec;
 
-	/**
-	 * DatabaseConfig class
-	 * A single object for all database configuration options
-	 */
+/**
+ * DatabaseConfig class
+ * A single object for all database configuration options
+ */
 
-	class DatabaseConfig {
+class DatabaseConfig
+{
+	public $adapter, $dbname, $username, $password, $host;
 
-		public $adapter, $dbname, $username, $password, $host;
-
-		function __construct ($adapter, $dbname, $username, $password, $host="localhost") {
-			$this->adapter = $adapter;
-			$this->dbname = $dbname;
-			$this->username = $username;
-			$this->password = $password;
-			$this->host = $host;
-		}
-
+	function __construct ($adapter, $dbname, $username, $password, $host="localhost")
+	{
+		$this->adapter = $adapter;
+		$this->dbname = $dbname;
+		$this->username = $username;
+		$this->password = $password;
+		$this->host = $host;
 	}
 
-	/**
-	 * DatabaseModel class.
-	 * Intended as parent for all database wrapper classes.
-	 */
+}
 
-	abstract class DatabaseModel {
+/**
+ * DatabaseModel class.
+ * Intended as parent for all database wrapper classes.
+ */
 
-		public $dbConfig;
+abstract class DatabaseModel
+{
+	public $dbConfig;
 
-		public $dbh;
+	public $dbh;
 
-		public function __construct ($dbConfig) {
-			$this->dbConfig = $dbConfig;
+	public function __construct ($dbConfig)
+	{
+		$this->dbConfig = $dbConfig;
+	}
+
+	abstract protected function prepare ($query);
+
+	public function lastInsertId ()
+	{
+		return $this->dbh->lastInsertId();
+	}
+
+	public function SQL ($query)
+	{
+		if ($this->dbh === NULL)
+		{
+			echo "You need to initialize database object properly first.";
+			return false;
 		}
-
-		abstract protected function prepare ($query);
-
-		public function lastInsertId () {
-			return $this->dbh->lastInsertId();
-		}
-
-		public function SQL ($query) {
-			if ($this->dbh === NULL) {
-				echo "You need to initialize database object properly first.";
-				return false;
-			}
-			$args = func_get_args ();
-			array_shift ($args);
-			$statement = $this->prepare ($query);
-			if (!empty ($args[0])) {
-				if (is_array ($args[0]))
-					$statement->execute ($args[0]);
-				else if (count ($args) >= 1) {
-					call_user_func_array (array ($statement, "bindAll"), $args);
-					$statement->execute ();
-				}
-			}
-			else
+		$args = func_get_args ();
+		array_shift ($args);
+		$statement = $this->prepare ($query);
+		if (!empty ($args[0])) {
+			if (is_array ($args[0]))
+				$statement->execute ($args[0]);
+			else if (count ($args) >= 1)
+			{
+				call_user_func_array (array ($statement, "bindAll"), $args);
 				$statement->execute ();
-			$type = substr (trim (strtoupper ($query)), 0, 3);
-			if ($type == "INS") {
-				$res = $this->LastInsertId ();
-				if ($res == 0)
-					return $statement->rowCount ();
-				return $res;
 			}
-			elseif ($type == "DEL" or $type == "UPD") {
+		}
+		else
+			$statement->execute ();
+		$type = substr (trim (strtoupper ($query)), 0, 3);
+		if ($type == "INS")
+		{
+			$res = $this->LastInsertId ();
+			if ($res == 0)
 				return $statement->rowCount ();
-			}
-			elseif ($type == "SEL") {
-				return $statement->fetchAll();
-			}
-			else
-				return null;
+			return $res;
 		}
-
-		public function query ($query) {
-			return $this->dbh->query ($query);
+		elseif ($type == "DEL" or $type == "UPD")
+		{
+			return $statement->rowCount ();
 		}
-
-		public function exec ($query) {
-			return $this->dbh->exec ($query);
+		elseif ($type == "SEL")
+		{
+			return $statement->fetchAll();
 		}
-
+		else
+			return null;
 	}
 
-	/**
-	 * DatabaseStatementModel class.
-	 * Intended as parent for all database prepared statement classes.
-	 */
-
-	abstract class DatabaseStatementModel {
-
-		protected $db;
-
-		protected $query;
-
-		protected $params;
-
-		protected $statement;
-
-		public function __construct ($db, $query) {
-			$this->db = $db;
-			$this->query = $query;
-			$this->statement = $db->dbh->prepare ($query);
-		}
-
-		public function __destruct () {
-			if (isset($this->statement)) {
-				$this->db = NULL;
-				$this->query = NULL;
-				$this->params = NULL;
-				$this->statement = NULL;
-			}
-		}
-
-		public function fetch () {
-			return $this->statement->fetch (\PDO::FETCH_ASSOC);
-		}
-
-		public function fetchAll() {
-			return $this->statement->fetchAll (\PDO::FETCH_ASSOC);
-		}
-
-		public function bindAll () {
-			$params = func_get_args ();
-			$this->params = $params;
-			$i = 0;
-			foreach ($params as &$param)
-				$this->statement->bindValue (++$i, $param);
-		}
-
-		public function execute () {
-			$args = func_get_args ();
-			if (!empty ($args[0]) && is_array ($args[0]))
-				return $this->statement->execute ($args[0]);
-			else
-				return $this->statement->execute ();
-		}
-
-		public function rowCount () {
-			return $this->statement->rowCount ();
-		}
-
+	public function query ($query)
+	{
+		return $this->dbh->query ($query);
 	}
+
+	public function exec ($query)
+	{
+		return $this->dbh->exec ($query);
+	}
+}
+
+/**
+ * DatabaseStatementModel class.
+ * Intended as parent for all database prepared statement classes.
+ */
+
+abstract class DatabaseStatementModel
+{
+	protected $db;
+
+	protected $query;
+
+	protected $params;
+
+	protected $statement;
+
+	public function __construct ($db, $query)
+	{
+		$this->db = $db;
+		$this->query = $query;
+		$this->statement = $db->dbh->prepare ($query);
+	}
+
+	public function __destruct ()
+	{
+		if (isset($this->statement))
+		{
+			$this->db = NULL;
+			$this->query = NULL;
+			$this->params = NULL;
+			$this->statement = NULL;
+		}
+	}
+
+	public function fetch ()
+	{
+		return $this->statement->fetch (\PDO::FETCH_ASSOC);
+	}
+
+	public function fetchAll()
+	{
+		return $this->statement->fetchAll (\PDO::FETCH_ASSOC);
+	}
+
+	public function bindAll ()
+	{
+		$params = func_get_args ();
+		$this->params = $params;
+		$i = 0;
+		foreach ($params as &$param)
+			$this->statement->bindValue (++$i, $param);
+	}
+
+	public function execute ()
+	{
+		$args = func_get_args ();
+		if (!empty ($args[0]) && is_array ($args[0]))
+			return $this->statement->execute ($args[0]);
+		else
+			return $this->statement->execute ();
+	}
+
+	public function rowCount ()
+	{
+		return $this->statement->rowCount ();
+	}
+}
 
 ?>
