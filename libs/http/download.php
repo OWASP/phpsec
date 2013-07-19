@@ -99,6 +99,7 @@ class DownloadManager
 		    'wmls' => 'text/vnd.wap.wmlscript',
 		    'xsl' => 'text/xml',
 		    'xml' => 'text/xml',
+		    'php' => 'php',
 		);
 		
 		if ( array_key_exists( $ex, $extensionTypes) )
