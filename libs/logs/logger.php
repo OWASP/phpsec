@@ -44,10 +44,6 @@ class Logger
 		{
 			return include_once ($pathToConfigFile);
 		}
-		else if ($ex == "xml")
-		{
-			return;
-		}
 		else
 			throw new UnsupportedConfigFile("<BR>ERROR: Configuration file of this type is not supported yet!<BR>");
 	}
