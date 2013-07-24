@@ -11,7 +11,7 @@ class Logger
 	protected $handler = null;
 	protected $config = null;
 	
-	public function __construct( $pathToConfigFile = "media/default_file_config.php" )
+	public function __construct( $pathToConfigFile = "media/default_db_config.php" )
 	{
 		$this->config = Logger::getConfig($pathToConfigFile);
 		

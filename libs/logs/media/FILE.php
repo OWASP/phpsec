@@ -2,7 +2,6 @@
 namespace phpsec;
 
 require_once 'template.php';
-require_once (__DIR__ . '/../../core/time.php');
 
 class FILE extends Template
 {
@@ -21,7 +20,6 @@ class FILE extends Template
 		$message = $this->changeTemplate($args);
 		
 		fwrite($this->fp, $message);
-		fclose($this->fp);
 	}
 	
 	protected function changeTemplate($args)
@@ -31,7 +29,9 @@ class FILE extends Template
 		$i = 0;
 		$message = "";
 		
-		foreach(  Template::$template as $value)
+		$myTemplate = $this->template;
+		
+		foreach(  $myTemplate as $value)
 		{
 			if (isset($args[$i]) && $args[$i] !== "")
 			{

@@ -3,7 +3,7 @@ namespace phpsec;
 
 abstract class Template
 {
-	public static $template = array(
+	public $template = array(
 	    "MESSAGE"	=> "",
 	    "FILENAME"	=> "",
 	    "TYPE"	=> "",
@@ -13,9 +13,9 @@ abstract class Template
 	
 	protected function setDefaults()
 	{
-		Template::$template["TYPE"] = "ERROR";
-		Template::$template["PRIORITY"] = "NORMAL";
-		Template::$template["DATETIME"] = date("m-d-Y H:i:s", time());
+		$this->template["TYPE"] = "ERROR";
+		$this->template["PRIORITY"] = "NORMAL";
+		$this->template["DATETIME"] = date("m-d-Y H:i:s", time());
 	}
 	
 	abstract public function log($args);
