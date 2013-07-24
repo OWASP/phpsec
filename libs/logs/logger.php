@@ -27,9 +27,11 @@ class Logger
 			throw new MediaNotSupported("<BR>ERROR: This media is not supported yet. Please try a different medium of storage.<BR>");
 	}
 	
-	public function log($message)
+	public function log()
 	{
-		$this->handler->log($message);
+		$args = func_get_args();
+		
+		$this->handler->log($args);
 	}
 	
 	public static function getConfig($pathToConfigFile)
