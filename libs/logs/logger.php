@@ -11,7 +11,7 @@ class Logger
 	protected $handler = null;
 	protected $config = null;
 	
-	public function __construct( $pathToConfigFile = "media/default_file_config.php" )
+	public function __construct( $pathToConfigFile = "media/default_db_config.php" )
 	{
 		$this->config = Logger::getConfig($pathToConfigFile);
 		
@@ -27,9 +27,11 @@ class Logger
 			throw new MediaNotSupported("<BR>ERROR: This media is not supported yet. Please try a different medium of storage.<BR>");
 	}
 	
-	public function log($message)
+	public function log()
 	{
-		$this->handler->log($message);
+		$args = func_get_args();
+		
+		$this->handler->log($args);
 	}
 	
 	public static function getConfig($pathToConfigFile)
@@ -41,10 +43,6 @@ class Logger
 		if ($ex == "php")
 		{
 			return include_once ($pathToConfigFile);
-		}
-		else if ($ex == "xml")
-		{
-			return;
 		}
 		else
 			throw new UnsupportedConfigFile("<BR>ERROR: Configuration file of this type is not supported yet!<BR>");
