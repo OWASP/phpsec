@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jul 09, 2013 at 10:01 PM
+-- Generation Time: Jul 25, 2013 at 03:34 AM
 -- Server version: 5.5.22
 -- PHP Version: 5.3.10-1ubuntu3
 
@@ -23,6 +23,39 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `LOGS`
+--
+
+CREATE TABLE IF NOT EXISTS `LOGS` (
+  `MESSAGE` text,
+  `FILENAME` text,
+  `TYPE` text,
+  `PRIORITY` text,
+  `DATETIME` text
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `LOGS`
+--
+
+INSERT INTO `LOGS` (`MESSAGE`, `FILENAME`, `TYPE`, `PRIORITY`, `DATETIME`) VALUES
+('This is the first message', '/var/www/phpsec/test/libs/logs/Logs.db.test.php', 'WARNING', 'LOW', '07-24-2013 01:52:11'),
+('This is the second message', '/var/www/phpsec/test/libs/logs/Logs.db.test.php', 'ERROR', 'NORMAL', '07-24-2013 01:52:11'),
+('This is the first message', '/var/www/phpsec/test/libs/logs/Logs.db.test.php', 'WARNING', 'LOW', '07-24-2013 01:52:13'),
+('This is the second message', '/var/www/phpsec/test/libs/logs/Logs.db.test.php', 'ERROR', 'NORMAL', '07-24-2013 01:52:13'),
+('This is the first messageeee', '', 'ERROR', 'NORMAL', '07-24-2013 01:52:31'),
+('This is the first message', '/var/www/phpsec/test/libs/logs/Logs.db.test.php', 'WARNING', 'LOW', '07-24-2013 02:20:05'),
+('This is the second message', '', 'ERROR', 'NORMAL', '07-24-2013 02:20:05'),
+('This is the first message', '/var/www/phpsec/test/libs/logs/Logs.db.test.php', 'WARNING', 'LOW', '07-24-2013 03:57:40'),
+('This is the second message', '/var/www/phpsec/test/libs/logs/Logs.db.test.php', 'ERROR', 'NORMAL', '07-24-2013 03:57:40'),
+('This is the first message', '/var/www/phpsec/test/libs/logs/Logs.db.test.php', 'WARNING', 'LOW', '07-25-2013 03:03:07'),
+('This is the second message', '/var/www/phpsec/test/libs/logs/Logs.db.test.php', 'ERROR', 'NORMAL', '07-25-2013 03:03:07'),
+('This is the first message', '/var/www/phpsec/test/libs/logs/Logs.db.test.php', 'WARNING', 'LOW', '07-25-2013 03:04:26'),
+('This is the second message', '/var/www/phpsec/test/libs/logs/Logs.db.test.php', 'ERROR', 'NORMAL', '07-25-2013 03:04:26');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `PASSWORD`
 --
 
@@ -36,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `PASSWORD` (
   `USERID` varchar(32) NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `USERID` (`USERID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1019 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -52,7 +85,7 @@ CREATE TABLE IF NOT EXISTS `SESSION` (
   `USERID` varchar(32) NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `SESSION_ID` (`SESSION_ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2970 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -66,7 +99,7 @@ CREATE TABLE IF NOT EXISTS `SESSION_DATA` (
   `KEY` varchar(32) NOT NULL,
   `VALUE` varchar(64) DEFAULT NULL,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=617 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
 
 -- --------------------------------------------------------
 
@@ -86,7 +119,7 @@ CREATE TABLE IF NOT EXISTS `USER` (
   `STATIC_SALT` varchar(128) NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `USERID` (`USERID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5232 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
