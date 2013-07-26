@@ -24,7 +24,7 @@ class Logger
 			$this->handler = new $storageType($this->config);
 		}
 		else
-			throw new MediaNotSupported("<BR>ERROR: This media is not supported yet. Please try a different medium of storage.<BR>");
+			throw new MediaNotSupported("ERROR: This media is not supported yet. Please try a different medium of storage.");
 	}
 	
 	public function log()
@@ -45,7 +45,7 @@ class Logger
 			return include_once ($pathToConfigFile);
 		}
 		else
-			throw new UnsupportedConfigFile("<BR>ERROR: Configuration file of this type is not supported yet!<BR>");
+			throw new UnsupportedConfigFile("ERROR: Configuration file of this type is not supported yet!");
 	}
 }
 
