@@ -20,8 +20,8 @@ class LoggerTest extends \PHPUnit_Framework_TestCase
 	{
 		try
 		{
-			$this->myLogger->log("This is the first message", __FILE__, "WARNING", "LOW");
-			$this->myLogger->log("This is the second message", __FILE__);
+			$this->myLogger->log("This is the first message", "WARNING", "LOW");
+			$this->myLogger->log("This is the second message");
 			
 			$this->assertTrue(TRUE);
 		}
