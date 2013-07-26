@@ -24,6 +24,21 @@ namespace phpsec;
  *	 //Incorrect because values are not provided in order. This will cause values to be exchanged with each other.
  *	 log($message, $priority, $type);
  *	 log($message, $datetime);
+ * 
+ * 
+ * 
+ * 					******************NOTE 2******************
+ * 
+ * How to Change this template.
+ * ------------------------------------
+ * 
+ * Changing this template to your own needs is very easy. All you need to do is add/delete the data in the array according to priority. So lets say you want
+ * to add data "CLASS" after "MESSAGE", then you will add the value "CLASS" after message and will provide the default value if needed. Later when you call the
+ * log function, then you have to remember calling them using the correct order. i.e.
+ * log($message, $class, $type, ... );
+ * 
+ * If you are just using files, then no more additional change needs to be done.
+ * However, if you are using the DB, or maybe will use in future, you need to add this extra column "CLASS" in the DB inside your appropriate "tableName (default 'LOGS')".
  */
 
 
