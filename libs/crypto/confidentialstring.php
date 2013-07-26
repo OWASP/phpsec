@@ -151,7 +151,7 @@ function confidentialString()
 		
 		//check if file is writable or not.
 		if ( !is_writable($trace[$arraySlot]['file']) )
-			throw new FileNotWritable("<BR>ERROR: This file is not Writable!! <BR>");
+			throw new FileNotWritable("ERROR: This file is not Writable!!");
 		
 		//write this new data to file.
 		$fp = fopen($trace[$arraySlot]['file'], 'w');
