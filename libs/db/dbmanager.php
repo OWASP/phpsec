@@ -45,7 +45,7 @@
 	function SQL($query, $args)
 	{
 		if (DatabaseManager::$db == NULL)
-			throw new DatabaseNotSet("<BR>ERROR: Database is not set/configured properly.<BR>");
+			throw new DatabaseNotSet("ERROR: Database is not set/configured properly.");
 		
 		return DatabaseManager::$db->SQL($query, $args);
 	}
