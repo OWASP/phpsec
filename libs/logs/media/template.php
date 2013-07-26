@@ -9,6 +9,7 @@ abstract class Template
 	    "PRIORITY"	=> "",
 	    "DATETIME"	=> "",
 	    "FILENAME"	=> "",
+	    "LINE"	=> "",
 	);
 	
 	protected function setDefaults()
@@ -16,16 +17,19 @@ abstract class Template
 		$backtrace = debug_backtrace();
 		
 		$fileGeneratingLog = "";
+		$lineGeneratingLog = "";
 		foreach ($backtrace as $func)
 		{
 			if ( strpos($func['class'], 'Logger') )
 			{
 				$fileGeneratingLog = $func['file'];
+				$lineGeneratingLog = $func['line'];
 				break;
 			}
 		}
 		
 		$this->template["FILENAME"] = $fileGeneratingLog;
+		$this->template["LINE"] = $lineGeneratingLog;
 		$this->template["TYPE"] = "ERROR";
 		$this->template["PRIORITY"] = "NORMAL";
 		$this->template["DATETIME"] = date("m-d-Y H:i:s", time());

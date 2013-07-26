@@ -16,9 +16,6 @@ class LoggerTest extends \PHPUnit_Framework_TestCase
 			$myLogger = new Logger("testFileConfig.php");
 			$myLogger->log("This is the first message", "WARNING", "LOW");
 			$myLogger->log("This is the second message");
-			
-			$myLogger = new Logger();
-			$myLogger->log("This is the first messageeee");
 		}
 		catch (\Exception $e)
 		{
