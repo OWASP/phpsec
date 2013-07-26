@@ -153,7 +153,7 @@ class UserManagement
 			return TRUE;
 		}
 		else
-			throw new SessionNotFoundException("<BR>ERROR: Session is not Found. Session Library is needed to use this function.<BR>");
+			throw new SessionNotFoundException("ERROR: Session is not Found. Session Library is needed to use this function.");
 	}
 	
 	
@@ -176,7 +176,7 @@ class UserManagement
 			return TRUE;
 		}
 		else
-			throw new SessionNotFoundException("<BR>ERROR: Session is not Found. Session Library is needed to use this function.<BR>");
+			throw new SessionNotFoundException("ERROR: Session is not Found. Session Library is needed to use this function.");
 	}
 }
 
