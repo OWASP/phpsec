@@ -193,12 +193,17 @@ class HttpRequest extends HttpRequestArray
 	static function PortReadable()
 	{
 		$port = self::Port();
-		if ($port=="80" && strtolower(self::Protocol())==self::PROTOCOL_HTTP)
+		if ($port=="80" && strtolower(self::Protocol())==self::PROTOCOL_HTTP) {
 			$port="";
-		else if ($port=="443" && strtolower(self::Protocol())==self::PROTOCOL_HTTPS)
-			$port="";
-		else
-			$port=":".$port;
+        }
+		elseif ($port=="443" && strtolower(self::Protocol())==self::PROTOCOL_HTTPS) {
+            $port="";
+        }
+		else {
+            $port=":".$port;
+        }
+
+        return $port;
 	}
 
 	/**
