@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jul 09, 2013 at 10:01 PM
+-- Generation Time: Jul 26, 2013 at 06:03 AM
 -- Server version: 5.5.22
 -- PHP Version: 5.3.10-1ubuntu3
 
@@ -23,6 +23,21 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `LOGS`
+--
+
+CREATE TABLE IF NOT EXISTS `LOGS` (
+  `MESSAGE` text,
+  `FILENAME` text,
+  `TYPE` text,
+  `PRIORITY` text,
+  `DATETIME` text,
+  `LINE` int(10) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `PASSWORD`
 --
 
@@ -36,7 +51,7 @@ CREATE TABLE IF NOT EXISTS `PASSWORD` (
   `USERID` varchar(32) NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `USERID` (`USERID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1019 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -52,7 +67,7 @@ CREATE TABLE IF NOT EXISTS `SESSION` (
   `USERID` varchar(32) NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `SESSION_ID` (`SESSION_ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2970 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -66,7 +81,7 @@ CREATE TABLE IF NOT EXISTS `SESSION_DATA` (
   `KEY` varchar(32) NOT NULL,
   `VALUE` varchar(64) DEFAULT NULL,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=617 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
 
 -- --------------------------------------------------------
 
@@ -86,7 +101,7 @@ CREATE TABLE IF NOT EXISTS `USER` (
   `STATIC_SALT` varchar(128) NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `USERID` (`USERID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5232 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

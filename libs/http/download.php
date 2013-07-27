@@ -122,7 +122,7 @@ class DownloadManager
 		$lastModified = filemtime($File);	//get the time when the file was last modified.
 		
 		if ($lastModified === FALSE)	//If it cannot be determined, then throw an exception.
-			throw new InvalidFileModifiedDateException("<BR>ERROR: The last modified date of the file: {$File} cannot be determined.<BR>");
+			throw new InvalidFileModifiedDateException("ERROR: The last modified date of the file: {$File} cannot be determined.");
 
 		$gmdate_mod = gmdate('D, d M Y H:i:s', $lastModified) . ' GMT';		//convert the filetime to proper format.
 		

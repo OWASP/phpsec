@@ -90,7 +90,7 @@ class Session
 	protected function newSession($sessionName = "")
 	{
 		if($this->userID == null)
-			throw new NoUserFoundException("<BR>ERROR: No User was found. Session needs a user to be present.<BR>");
+			throw new NoUserFoundException("ERROR: No User was found. Session needs a user to be present.");
 
 		if ($sessionName == "")
 			$this -> session = randstr(32); //generate a new random string for the session ID of length 32.
@@ -145,7 +145,7 @@ class Session
 	public function setData($key, $value)	
 	{
 		if($this -> session == null)
-			throw new SessionNotFoundException("<BR>WARNING: No session is set for this user.<BR>");
+			throw new SessionNotFoundException("WARNING: No session is set for this user.");
 
 		//check before setting data, if the session has expired.
 		if($this->inactivityTimeout() || $this->expireTimeout())
@@ -177,7 +177,7 @@ class Session
 	public function getData($key)
 	{
 		if($this -> session == null)
-			throw new SessionNotFoundException("<BR>WARNING: No session is set for this user.<BR>");
+			throw new SessionNotFoundException("WARNING: No session is set for this user.");
 
 		//check before retrieving data, if the session has expired.
 		if($this->inactivityTimeout() || $this->expireTimeout())
@@ -284,7 +284,7 @@ class Session
 	public function destroySession()
 	{
 		if($this -> session == null)
-			throw new SessionNotFoundException("<BR>WARNING: No session is set for this user.<BR>");
+			throw new SessionNotFoundException("WARNING: No session is set for this user.");
 
 		//delete all data associated with this session ID.
 		SQL("DELETE FROM SESSION_DATA WHERE `SESSION_ID` = ?", array("{$this -> session}"));
@@ -332,7 +332,7 @@ class Session
 	public function rollSession()
 	{
 		if($this -> session == null)
-			throw new SessionNotFoundException("<BR>WARNING: No session is set for this user.<BR>");
+			throw new SessionNotFoundException("WARNING: No session is set for this user.");
 
 		//check for session expiry.
 		if($this->inactivityTimeout() || $this->expireTimeout())

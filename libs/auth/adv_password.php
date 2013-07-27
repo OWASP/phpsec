@@ -76,7 +76,7 @@ class AdvancedPasswordManagement
 				$bruteFound = $this->isBruteForce($user);
 				
 				if ($bruteFound)
-					throw new BruteForceAttackDetectedException($e->getMessage ( ) . "<BR>" . "<BR>WARNING: Brute Force Attack Detected. We Recommend you use captcha.<BR>");
+					throw new BruteForceAttackDetectedException($e->getMessage ( ) . "WARNING: Brute Force Attack Detected. We Recommend you use captcha.");
 			}
 			else
 				throw $e;
