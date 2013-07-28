@@ -5,9 +5,9 @@ namespace phpsec;
 /**
  * Required Files.
  */
-require_once "../../../libs/db/dbmanager.php";
-require_once "../../../libs/core/random.php";
+require_once "../testconfig.php";
 require_once "../../../libs/core/time.php";
+require_once "../../../libs/core/random.php";
 require_once "../../../libs/auth/user.php";
 require_once "../../../libs/session/session.php";
 
@@ -35,15 +35,6 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	{
 		time("RESET");
 		
-		try
-		{
-			DatabaseManager::connect (new DatabaseConfig('pdo_mysql','OWASP','root','testing'));	//create a new Db handler.
-		}
-		catch (\Exception $e)
-		{
-			echo $e->getMessage();
-		}
-
 		try
 		{
 			//Create users.
