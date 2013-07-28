@@ -3,6 +3,13 @@ namespace phpsec;
 
 
 /**
+ * Required Files
+ */
+require_once (__DIR__ . '/../core/random.php');
+require_once (__DIR__ . '/../core/time.php');
+
+
+/**
  * Parent Exception Class
  */
 class SessionException extends \Exception {}
