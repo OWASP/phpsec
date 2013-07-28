@@ -5,31 +5,13 @@ namespace phpsec;
 /**
  * Required Files.
  */
-require_once "../../../libs/db/dbmanager.php";
+require_once "../testconfig.php";
 require_once "../../../libs/auth/usermanagement.php";
-
+require_once '../../../libs/core/random.php';
 
 
 class UserManagementTest extends \PHPUnit_Framework_TestCase
 {
-	
-	
-	/**
-	 * Function to be run before every test*() functions.
-	 */
-	public function setUp()
-	{
-		try
-		{
-			DatabaseManager::connect (new DatabaseConfig('pdo_mysql','OWASP','root','testing'));	//create a DB connection.
-		}
-		catch (\Exception $e)
-		{
-			echo $e->getMessage();
-		}
-	}
-	
-	
 	
 	
 	/**
