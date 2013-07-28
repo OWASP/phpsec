@@ -50,12 +50,17 @@ class MAIL extends Template
 	public function log($args)
 	{
 		$message = $this->changeTemplate($args);	//change the user given message appropriate to the template of the log files. This is necessary to maintain consistency among all the log files.
-			
+		
+		$message = wordwrap($message, 70, "\r\n");
+		
 		$send = mail(	$this->mailConfig['TO'],
 				$this->mailConfig['SUBJECT'],
 				$this->mailConfig['MESSAGE'] . "\r\n" . $message,
 				"FROM: " . $this->mailConfig['FROM'] . "\r\n" .
-				"Reply-To: " . $this->mailConfig['REPLYTO']
+				"CC: " . $this->mailConfig['CC'] . "\r\n" .
+				"BCC: " . $this->mailConfig['BCC'] . "\r\n" .
+				"Reply-To: " . $this->mailConfig['REPLYTO'] . "\r\n" .
+				$this->mailConfig['OPTIONAL']
 			    );
 		
 		if ( !$send )
