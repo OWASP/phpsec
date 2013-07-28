@@ -31,7 +31,7 @@ class DBLogs extends Template
 		$this->dbConfig = $config;	//store the config file.
 		
 		//Make a connection to the DB. DB Credentials are provided inside the configuration file.
-		DatabaseManager::connect (new DatabaseConfig($config['adapter'], $config['dbname'], $config['username'], $config['password']));	//create a new Db handler.
+		DatabaseManager::connect (new DatabaseConfig($config['ADAPTER'], $config['DBNAME'], $config['USERNAME'], $config['PASSWORD']));	//create a new Db handler.
 	}
 	
 	
@@ -47,7 +47,7 @@ class DBLogs extends Template
 		$noOfEntries = count($this->template);	//get the how many entries are in the template. This is same as number of columns present in the DB and this helps in preparing the SQL statement.
 		
 		//Prepare the SQL statement.
-		$SQLStatement = "INSERT INTO " . $this->dbConfig['tablename'] . " (";
+		$SQLStatement = "INSERT INTO " . $this->dbConfig['TABLENAME'] . " (";
 		foreach ($this->template as $key=>$value)
 		{
 			$SQLStatement = $SQLStatement . $key . ",";	//Add all the column names.

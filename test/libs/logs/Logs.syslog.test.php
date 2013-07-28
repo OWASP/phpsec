@@ -26,6 +26,10 @@ class LoggerTest extends \PHPUnit_Framework_TestCase
 			$myLogger->log("This is the second message");	//store this log.
 			
 			$this->assertTrue( TRUE );	//You can see the results in the console.
+			//You can also check using this command in your shell:
+								//grep -R "This is the first message" /var/log
+			//You should see entries containing message "This is the first message"
+
 		}
 		catch (\Exception $e)
 		{

@@ -35,7 +35,7 @@ class FILE extends Template
 	{
 		$this->fileConfig = $config;	//store the file configuration file.
 		
-		$this->fp = fopen($config['filename'], $config['mode']);	//from the configuration, extract the file that needs to be written and then open that file in the mode specified by the user.
+		$this->fp = fopen($config['FILENAME'], $config['MODE']);	//from the configuration, extract the file that needs to be written and then open that file in the mode specified by the user.
 	}
 	
 	

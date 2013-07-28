@@ -9,9 +9,9 @@ namespace phpsec;
  * NOTE: THIS IS THE DEFAULT CONFIGURATION FILE.
  */
 return array(
-    "filename"	=> "logs.txt",	//FileName denotes the name of the file where the logs will be stored.
-    "media"	=> "FILE",	//Media denotes that the logs must be stored in file.
-    "mode"	=> "a",		//Mode denotes the mode in which the files must be opened. For a full list of modes, see http://php.net/manual/en/function.fopen.php
+    "FILENAME"	=> "logs.txt",	//FileName denotes the name of the file where the logs will be stored.
+    "MEDIA"	=> "FILE",	//Media denotes that the logs must be stored in file.
+    "MODE"	=> "a",		//Mode denotes the mode in which the files must be opened. For a full list of modes, see http://php.net/manual/en/function.fopen.php
 );
 
 ?>
