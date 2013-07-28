@@ -81,10 +81,6 @@ class AdvancedPasswordManagement
 			else
 				throw $e;
 		}
-		catch(  \phpsec\UserException $e)
-		{
-			throw $e;
-		}
 		
 		SQL("INSERT INTO PASSWORD (`TEMP_PASS`, `USE_FLAG`, `TEMP_TIME`, `TOTAL_LOGIN_ATTEMPTS`, `LAST_LOGIN_ATTEMPT`, `USERID`) VALUES (?, ?, ?, ?, ?, ?)", array(  randstr(10), 1, 0, 0, time(), $user));
 	}
