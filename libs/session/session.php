@@ -201,7 +201,7 @@ class Session
 	public function inactivityTimeout()
 	{
 		if($this -> session == null)
-			return FALSE;
+			return TRUE;
 
 		$currentActivityTime = time();	//get current time.
 
@@ -227,7 +227,7 @@ class Session
 	public function expireTimeout()
 	{
 		if($this -> session == null)
-			return FALSE;
+			return TRUE;
 
 		$currentActivityTime = time();	//get current time.
 
