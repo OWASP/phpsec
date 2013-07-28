@@ -13,7 +13,7 @@ class HttpRequest_Test extends \PHPUnit_Framework_TestCase
 
     public function testPortReadable()
     {
-        // The CLI has no port, but the current code adds a colon to NULL in this case. This is debatable.
-        $this->assertEquals(":", HttpRequest::PortReadable());
+        // The CLI has no port, the return value should be NULL then.
+        $this->assertNull(HttpRequest::PortReadable());
     }
 }

@@ -192,6 +192,9 @@ class HttpRequest extends HttpRequestArray
 
 	static function PortReadable()
 	{
+        if (self::isCLI()) {
+            return NULL;
+        }
 		$port = self::Port();
 		if ($port=="80" && strtolower(self::Protocol())==self::PROTOCOL_HTTP) {
 			$port="";
