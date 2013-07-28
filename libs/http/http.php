@@ -2,16 +2,11 @@
 
 namespace phpsec;
 
-class HttpRequestException extends \Exception
-{
-}
-
-class HttpRequestInsecureParameterException extends HttpRequestException
-{
-}
+class HttpRequestException extends \Exception {}
+class HttpRequestInsecureParameterException extends HttpRequestException {}
 
 
-require_once(__DIR__ . '/tainted.php');
+require_once (__DIR__ . '/tainted.php');
 
 /**
  * HttpRequestArray class
@@ -23,7 +18,7 @@ abstract class HttpRequestArray implements \ArrayAccess
 
 	public function __construct($data = null)
 	{
-		$this->data = $data;
+		$this->data=$data;
 	}
 
 	public function offsetSet($offset, $value)
@@ -46,12 +41,14 @@ abstract class HttpRequestArray implements \ArrayAccess
 
 	public function offsetGet($offset)
 	{
-		if (isset($this->data[$offset])) {
-			if (substr($offset, 0, 4) === 'HTTP')
+		if (isset($this->data[$offset]))
+		{
+			if (substr($offset,0,4) === 'HTTP')
 				return new TaintedString($this->data[$offset]);
 			else
 				return $this->data[$offset];
-		} else
+		}
+		else
 			return NULL;
 	}
 }
@@ -65,19 +62,19 @@ class HttpRequest extends HttpRequestArray
 	/**
 	 * Protocol constants
 	 */
-	const PROTOCOL_CLI = 'cli';
-	const PROTOCOL_HTTP = 'http';
+	const PROTOCOL_CLI   = 'cli';
+	const PROTOCOL_HTTP  = 'http';
 	const PROTOCOL_HTTPS = 'https';
 
 	/**
 	 * Request method constants
 	 */
-	const METHOD_GET = 'GET';
-	const METHOD_POST = 'POST';
-	const METHOD_PUT = 'PUT';
+	const METHOD_GET    = 'GET';
+	const METHOD_POST   = 'POST';
+	const METHOD_PUT    = 'PUT';
 	const METHOD_DELETE = 'DELETE';
-	const METHOD_PATCH = 'PATCH';
-	const METHOD_OTHER = 'OTHER';
+	const METHOD_PATCH  = 'PATCH';
+	const METHOD_OTHER  = 'OTHER';
 
 	/**
 	 * Checks if script is being called from command line
@@ -106,14 +103,14 @@ class HttpRequest extends HttpRequestArray
 	 * Returns the current URL
 	 * @return  string URL
 	 */
-	static function URL($QueryString = true)
+	static function URL($QueryString=true)
 	{
 		if (self::isCLI())
 			return NULL;
-		if ($QueryString && self::QueryString())
-			return (self::Protocol() . "://" . self::ServerName() . self::PortReadable() . self::Path() . "?" . self::QueryString());
+		if ($QueryString && self::QueryString() )
+			return (self::Protocol()."://".self::ServerName().self::PortReadable().self::Path()."?".self::QueryString());
 		else
-			return (self::Protocol() . "://" . self::ServerName() . self::PortReadable() . self::Path());
+			return (self::Protocol()."://".self::ServerName().self::PortReadable().self::Path());
 	}
 
 	/**
@@ -131,7 +128,7 @@ class HttpRequest extends HttpRequestArray
 	static function ServerName()
 	{
 		return isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '';
-
+		
 	}
 
 	/**
@@ -169,7 +166,7 @@ class HttpRequest extends HttpRequestArray
 
 	/**
 	 * Changes protocol/scheme of current URL
-	 *
+	 * 
 	 * @return string URL
 	 */
 	static function ChangeProtocol()
@@ -177,9 +174,9 @@ class HttpRequest extends HttpRequestArray
 		if (self::isCLI())
 			return self::URL();
 		if (self::isHTTPS())
-			return (self::PROTOCOL_HTTP . "://" . self::ServerName() . self::PortReadable() . self::RequestURI());
+			return (self::PROTOCOL_HTTP."://".self::ServerName().self::PortReadable().self::RequestURI());
 		else
-			return (self::PROTOCOL_HTTPS . "://" . self::ServerName() . self::PortReadable() . self::RequestURI());
+			return (self::PROTOCOL_HTTPS."://".self::ServerName().self::PortReadable().self::RequestURI());
 	}
 
 	/**
@@ -229,15 +226,17 @@ class HttpRequest extends HttpRequestArray
 	 *
 	 * @return String QueryString
 	 */
-	static function QueryString()
+	static function QueryString ()
 	{
 		if (self::IsCLI())
 			return http_build_query($_GET);
-		if (isset($_SERVER['REDIRECT_QUERY_STRING'])) {
+		if (isset($_SERVER['REDIRECT_QUERY_STRING']))
+		{
 			$a = explode("&", $_SERVER['REDIRECT_QUERY_STRING']);
 			$x = array_shift($a);
 			return substr($_SERVER['REDIRECT_QUERY_STRING'], strlen($x) + 1);
-		} else
+		}
+		else
 			return isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : "";
 	}
 
@@ -250,7 +249,8 @@ class HttpRequest extends HttpRequestArray
 	{
 		if (self::IsCLI())
 			return self::METHOD_GET;
-		switch ($_SERVER['REQUEST_METHOD']) {
+		switch ($_SERVER['REQUEST_METHOD'])
+		{
 			case 'GET':
 				return self::METHOD_GET;
 				break;
@@ -282,8 +282,8 @@ class HttpRequest extends HttpRequestArray
 		if (self::IsCLI())
 			return NULL;
 		$RequestURI = $_SERVER['REQUEST_URI'];
-		if (strpos($RequestURI, "?") !== false)
-			$Path = substr($RequestURI, 0, strpos($RequestURI, "?"));
+		if (strpos($RequestURI,"?") !== false)
+			$Path = substr($RequestURI,0,strpos($RequestURI,"?"));
 		else
 			$Path = $RequestURI;
 		return $Path;
@@ -298,7 +298,7 @@ class HttpRequest extends HttpRequestArray
 	{
 		if (self::IsCLI())
 			return NULL;
-		$root = self::Protocol() . "://" . self::Host() . self::PortReadable() . self::Path();
+		$root = self::Protocol()."://".self::Host().self::PortReadable().self::Path();
 		return $root;
 	}
 
