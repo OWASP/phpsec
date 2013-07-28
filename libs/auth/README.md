@@ -4,7 +4,7 @@ placeholder for authentication library, including password management and user m
 Advanced Password Management Library:
 --------------------------------------------
 
-Stand Alone	: NO
+Stand Alone	: NO<BR>
 Depends On	: User
 Reason		: The constructor needs userID. This can be provided by developer. So this is not the issue.
 		  However, we also try to get the user object with the given password. This generates "WrongPasswordException" which is crucial for "Brute Force" function to work.
