@@ -46,7 +46,7 @@ class Logger
 		$this->config = Logger::getConfig($pathToConfigFile);
 		
 		//extract the desired storage medium.
-		$storageType = $this->config["media"];
+		$storageType = $this->config["MEDIA"];
 		if ( file_exists( __DIR__ . "/media/" . $storageType . ".php" ) )	//IF that storage medium is supported, then
 		{
 			require_once (__DIR__ . "/media/" . $storageType . ".php");	//get that storage medium.
