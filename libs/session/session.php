@@ -261,7 +261,6 @@ class Session
 			//check for session expiry.
 			if($this->inactivityTimeout() || $this->expireTimeout())
 			{
-				echo "<BR>Session Timeout.!!!!<BR>";
 				$this -> newSession();
 				return TRUE;
 			}
