@@ -39,7 +39,7 @@ class LoggerTest extends \PHPUnit_Framework_TestCase
 			$this->myLogger->log("This is the first message", "WARNING", "LOW");	//store this log.
 			$this->myLogger->log("This is the second message");	//store this log.
 			
-			DatabaseManager::connect (new DatabaseConfig("pdo_mysql", "OWASP", "root", "testing"));	//create a new Db handler.
+			require_once "../testconfig.php";
 			
 			$result = SQL("SELECT * FROM LOGS", array());	//get how many records are there in the log DB.
 			

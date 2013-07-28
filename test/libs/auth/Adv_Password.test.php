@@ -5,7 +5,7 @@ namespace phpsec;
 /**
  * Required Files
  */
-require_once "../../../libs/db/dbmanager.php";
+require_once "../testconfig.php";
 require_once '../../../libs/core/random.php';
 require_once '../../../libs/core/time.php';
 require_once '../../../libs/auth/user.php';
@@ -24,15 +24,6 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function setUp()
 	{
-		try
-		{
-			DatabaseManager::connect (new DatabaseConfig('pdo_mysql','OWASP','root','testing'));	//create DB connection.
-		}
-		catch (\Exception $e)
-		{
-			echo $e->getMessage();
-		}
-		
 		try
 		{
 			BasicPasswordManagement::$hashAlgo = "haval256,5";	//choose salting algo.
