@@ -1,12 +1,6 @@
 <?php
 namespace phpsec;
 
-/**
- * Required Files.
- */
-require_once (__DIR__ . '/../core/time.php');
-require_once (__DIR__ . '/../core/random.php');
-
 
 class BasicPasswordManagement
 {
