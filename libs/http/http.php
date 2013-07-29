@@ -190,15 +190,24 @@ class HttpRequest extends HttpRequestArray
 		return isset ($_SERVER['SERVER_PORT']) ? $_SERVER['SERVER_PORT'] : "";
 	}
 
+	/**
+	 * @return null|string
+	 */
 	static function PortReadable()
 	{
+		if (self::isCLI()) {
+			return NULL;
+		}
 		$port = self::Port();
-		if ($port=="80" && strtolower(self::Protocol())==self::PROTOCOL_HTTP)
-			$port="";
-		else if ($port=="443" && strtolower(self::Protocol())==self::PROTOCOL_HTTPS)
-			$port="";
-		else
-			$port=":".$port;
+		if ($port == "80" && strtolower(self::Protocol()) == self::PROTOCOL_HTTP) {
+			$port = "";
+		} elseif ($port == "443" && strtolower(self::Protocol()) == self::PROTOCOL_HTTPS) {
+			$port = "";
+		} else {
+			$port = ":" . $port;
+		}
+
+		return $port;
 	}
 
 	/**
