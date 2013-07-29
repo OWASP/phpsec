@@ -76,14 +76,10 @@ class AdvancedPasswordManagement
 				$bruteFound = $this->isBruteForce($user);
 				
 				if ($bruteFound)
-					throw new BruteForceAttackDetectedException($e->getMessage ( ) . "<BR>" . "<BR>WARNING: Brute Force Attack Detected. We Recommend you use captcha.<BR>");
+					throw new BruteForceAttackDetectedException($e->getMessage ( ) . "WARNING: Brute Force Attack Detected. We Recommend you use captcha.");
 			}
 			else
 				throw $e;
-		}
-		catch(  \phpsec\UserException $e)
-		{
-			throw $e;
 		}
 		
 		SQL("INSERT INTO PASSWORD (`TEMP_PASS`, `USE_FLAG`, `TEMP_TIME`, `TOTAL_LOGIN_ATTEMPTS`, `LAST_LOGIN_ATTEMPT`, `USERID`) VALUES (?, ?, ?, ?, ?, ?)", array(  randstr(10), 1, 0, 0, time(), $user));

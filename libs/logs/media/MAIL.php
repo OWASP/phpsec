@@ -8,22 +8,27 @@ namespace phpsec;
 require_once 'template.php';
 
 
+/**
+ * Parent Exception
+ */
+class MailException extends \Exception {}
 
-class FILE extends Template
+
+/**
+ * Child Exceptions
+ */
+class MailNotSendException extends MailException {}
+
+
+
+class MAIL extends Template
 {
 	
 	/**
 	 * Variable to store the configuration file of the user.
 	 * @var Array
 	 */
-	protected $fileConfig = null;
-	
-	
-	/**
-	 * This variable keeps the file pointer necessary to write to files.
-	 * @var file_pointer 
-	 */
-	protected $fp = null;
+	protected $mailConfig = null;
 	
 	
 	
@@ -33,22 +38,35 @@ class FILE extends Template
 	 */
 	public function __construct($config)
 	{
-		$this->fileConfig = $config;	//store the file configuration file.
-		
-		$this->fp = fopen($config['FILENAME'], $config['MODE']);	//from the configuration, extract the file that needs to be written and then open that file in the mode specified by the user.
+		$this->mailConfig = $config;	//store the file configuration file.
 	}
 	
 	
 	
 	/**
-	 * Function to write the log messages to the file.
-	 * @param Array $args	Array of messages as given by the user to be written in log files.
+	 * Function to write the log messages to the mail.
+	 * @param Array $args	Array of messages as given by the user to be send in mail.
 	 */
 	public function log($args)
 	{
 		$message = $this->changeTemplate($args);	//change the user given message appropriate to the template of the log files. This is necessary to maintain consistency among all the log files.
-			
-		fwrite($this->fp, $message);	//write the log message to the log file.
+		
+		$message = wordwrap($message, 70, "\r\n");
+		
+		$send = mail(	$this->mailConfig['TO'],
+				$this->mailConfig['SUBJECT'],
+				$this->mailConfig['MESSAGE'] . "\r\n" . $message,
+				"FROM: " . $this->mailConfig['FROM'] . "\r\n" .
+				"CC: " . $this->mailConfig['CC'] . "\r\n" .
+				"BCC: " . $this->mailConfig['BCC'] . "\r\n" .
+				"Reply-To: " . $this->mailConfig['REPLYTO'] . "\r\n" .
+				$this->mailConfig['OPTIONAL']
+			    );
+		
+		if ( !$send )
+		{
+			throw new MailNotSendException("ERROR: Mail was not send!");
+		}
 	}
 	
 	

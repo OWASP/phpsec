@@ -9,21 +9,14 @@ require_once 'template.php';
 
 
 
-class FILE extends Template
+class SYSLOG extends Template
 {
 	
 	/**
 	 * Variable to store the configuration file of the user.
 	 * @var Array
 	 */
-	protected $fileConfig = null;
-	
-	
-	/**
-	 * This variable keeps the file pointer necessary to write to files.
-	 * @var file_pointer 
-	 */
-	protected $fp = null;
+	protected $syslogConfig = null;
 	
 	
 	
@@ -33,22 +26,22 @@ class FILE extends Template
 	 */
 	public function __construct($config)
 	{
-		$this->fileConfig = $config;	//store the file configuration file.
-		
-		$this->fp = fopen($config['FILENAME'], $config['MODE']);	//from the configuration, extract the file that needs to be written and then open that file in the mode specified by the user.
+		$this->syslogConfig = $config;	//store the file configuration file.
 	}
 	
 	
 	
 	/**
-	 * Function to write the log messages to the file.
+	 * Function to write the log messages to the syslog.
 	 * @param Array $args	Array of messages as given by the user to be written in log files.
 	 */
 	public function log($args)
 	{
 		$message = $this->changeTemplate($args);	//change the user given message appropriate to the template of the log files. This is necessary to maintain consistency among all the log files.
 			
-		fwrite($this->fp, $message);	//write the log message to the log file.
+		openlog($this->syslogConfig['PHP_OPENLOG_IDENT'], $this->syslogConfig['PHP_OPENLOG_OPTION'], $this->syslogConfig['PHP_OPENLOG_FACILITY']);	//open syslog with proper "OPTION" and "FACILITY"
+		syslog($this->syslogConfig['PHP_SYSLOG_PRIORITY'], $message);		//Write to SYSLOG with proper "priority"
+		closelog();		//close the SYSLOG after writing.
 	}
 	
 	

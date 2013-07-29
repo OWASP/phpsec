@@ -4,7 +4,7 @@ namespace phpsec;
 /**
  * Required Files.
  */
-require_once "../../../libs/db/dbmanager.php";
+require_once "../testconfig.php";
 require_once '../../../libs/core/random.php';
 require_once '../../../libs/auth/user.php';
 require_once '../../../libs/core/time.php';
@@ -18,15 +18,6 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function setUp()
 	{
-		try
-		{
-			DatabaseManager::connect (new DatabaseConfig('pdo_mysql','OWASP','root','testing'));
-		}
-		catch (\Exception $e)
-		{
-			echo $e->getMessage();
-		}
-		
 		BasicPasswordManagement::$hashAlgo = "haval256,5";	//choose a hashing algo.
 		$this->obj = User::newUserObject("rash", "testing");	//create a new user.
 	}

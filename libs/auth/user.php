@@ -2,10 +2,10 @@
 namespace phpsec;
 
 /**
- * Required Files.
+ * Required Files
  */
-require_once (__DIR__ . '/../core/time.php');
 require_once (__DIR__ . '/../core/random.php');
+require_once (__DIR__ . '/../core/time.php');
 
 
 class BasicPasswordManagement
@@ -494,7 +494,7 @@ class User extends BasicPasswordManagement
 
 		//If the user is already present in the database, then a duplicate won't be created and no rows will be affected. Hence 0 will be returned.
 		if ($count == 0)
-			throw new UserExistsException("<BR>ERROR: This User already exists in the DB.<BR>");
+			throw new UserExistsException("ERROR: This User already exists in the DB.");
 		
 		return $obj;
 	}
@@ -518,14 +518,14 @@ class User extends BasicPasswordManagement
 
 		//If no record is returned for this user, then this user does not exist in the system.
 		if (count($result) < 1)
-			throw new UserNotExistsException("<BR>ERROR: User Not found.<BR>");
+			throw new UserNotExistsException("ERROR: User Not found.");
 
 		//extract static salt used while password generation
 		BasicPasswordManagement::$staticSalt = $result[0]['STATIC_SALT'];
 
 		//validate the given password with that stored in the DB.
 		if (!BasicPasswordManagement::validatePassword( $pass, $result[0]['HASH'], $result[0]['DYNAMIC_SALT'], $result[0]['ALGO']))
-			throw new WrongPasswordException("<BR>ERROR: Wrong Password. User Object not returned.<BR>");
+			throw new WrongPasswordException("ERROR: Wrong Password. User Object not returned.");
 
 		//If all goes right, then set the local variables and return the user object.
 		$obj->userID = $id;
@@ -552,7 +552,7 @@ class User extends BasicPasswordManagement
 
 		//If no record is returned for this user, then this user does not exist in the system.
 		if (count($result) < 1)
-			throw new UserNotExistsException("<BR>ERROR: User Not found.<BR>");
+			throw new UserNotExistsException("ERROR: User Not found.");
 		
 		$obj->userID = $id;
 		$obj->dynamicSalt = $result[0]['DYNAMIC_SALT'];
@@ -608,7 +608,7 @@ class User extends BasicPasswordManagement
 	{
 		//If given password ($oldPassword) is not matched with the one stored in the DB.
 		if (! BasicPasswordManagement::validatePassword( $oldPassword, $this->hashedPassword, $this->dynamicSalt, BasicPasswordManagement::$hashAlgo))
-			throw new WrongPasswordException("<BR>ERROR: Wrong Password provided!!<BR>");
+			throw new WrongPasswordException("ERROR: Wrong Password provided!!");
 		
 		//create a new dynamic salt.
 		$this->dynamicSalt = hash("sha512", randstr(64));
@@ -723,7 +723,7 @@ class User extends BasicPasswordManagement
 		}
 		else	//If the session library is not present, then we cannot use this function.
 		{
-			throw new SessionNotFoundException("<BR>ERROR: Session is not Found. Session Library is needed to use this function.<BR>");
+			throw new SessionNotFoundException("ERROR: Session is not Found. Session Library is needed to use this function.");
 		}
 	}
 }

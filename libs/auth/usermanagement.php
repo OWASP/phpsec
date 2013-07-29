@@ -6,6 +6,8 @@ namespace phpsec;
  * Required Files.
  */
 require_once 'user.php';
+require_once (__DIR__ . '/../core/random.php');
+require_once (__DIR__ . '/../core/time.php');
 
 
 
@@ -153,7 +155,7 @@ class UserManagement
 			return TRUE;
 		}
 		else
-			throw new SessionNotFoundException("<BR>ERROR: Session is not Found. Session Library is needed to use this function.<BR>");
+			throw new SessionNotFoundException("ERROR: Session is not Found. Session Library is needed to use this function.");
 	}
 	
 	
@@ -176,7 +178,7 @@ class UserManagement
 			return TRUE;
 		}
 		else
-			throw new SessionNotFoundException("<BR>ERROR: Session is not Found. Session Library is needed to use this function.<BR>");
+			throw new SessionNotFoundException("ERROR: Session is not Found. Session Library is needed to use this function.");
 	}
 }
 
