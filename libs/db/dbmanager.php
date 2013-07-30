@@ -42,12 +42,18 @@
 
 	}
 	
-	function SQL($query, $args)
+	function SQL($query)
 	{
 		if (DatabaseManager::$db == NULL)
 			throw new DatabaseNotSet("ERROR: Database is not set/configured properly.");
 		
-		return DatabaseManager::$db->SQL($query, $args);
+		$args = func_get_args();
+		array_shift(&$args);
+		
+		if ( is_array($args[0]) )
+			return DatabaseManager::$db->SQL($query, $args[0]);
+		else
+			return DatabaseManager::$db->SQL($query, $args);
 	}
 
 ?>
