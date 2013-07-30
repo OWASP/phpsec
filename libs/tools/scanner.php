@@ -20,14 +20,6 @@ class Scanner
 	
 	
 	/**
-	 * Path to parent directory from where the scanner will start scanning all the files.
-	 * @var String
-	 */
-	public static $parentDirectory = NULL;
-	
-	
-	
-	/**
 	 * Array to hold all the words that are considered unsafe.
 	 * @var Array
 	 */
@@ -62,19 +54,19 @@ class Scanner
 	 * @return Array
 	 * @throws DirectoryNotFoundException
 	 */
-	public static function startScan()
+	public static function scanDir($parentDirectory)
 	{
 		$occurences = array(array());
 		
 		//if the directory does not exists, then throw and error.
-		if ( !file_exists( Scanner::$parentDirectory ) )
+		if ( !file_exists( $parentDirectory ) )
 		{
 			throw new DirectoryNotFoundException("ERROR: Directory not found!");
 		}
 		
 		
 		//get the list of all the files inside this directory.
-		$allFiles = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(Scanner::$parentDirectory));
+		$allFiles = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($parentDirectory));
 		
 		$fileList = array();
 		

@@ -6,11 +6,11 @@ namespace phpsec;
 /**
  * Required Files.
  */
-require_once "../../../libs/scanner/scanner.php";
+require_once "../../../libs/tools/scanner.php";
 
 
 
-class LoggerTest extends \PHPUnit_Framework_TestCase
+class ScannerTest extends \PHPUnit_Framework_TestCase
 {
 	
 	
@@ -21,11 +21,8 @@ class LoggerTest extends \PHPUnit_Framework_TestCase
 	{
 		try
 		{
-			//set the parent directory to scan.
-			Scanner::$parentDirectory = "../../../libs/scanner";
-			
 			//start the scan.
-			$errors = Scanner::startScan();
+			$errors = Scanner::scanDir("../../../libs/tools");
 			
 			//print the results.
 			print_r($errors);
