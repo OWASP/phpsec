@@ -5,8 +5,8 @@ namespace phpsec;
 /**
  * Required Files
  */
-require_once(__DIR__ . "../../libs/db/dbmanager.php");
-require_once(__DIR__ . "../../libs/crypto/confidentialstring.php");
+require_once(__DIR__ . "/../../libs/db/dbmanager.php");
+require_once(__DIR__ . "/../../libs/crypto/confidentialstring.php");
 
 
 try {
