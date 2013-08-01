@@ -59,5 +59,3 @@ class Database_pdo_mysql_Test extends \PHPUnit_Framework_TestCase
 	}
 
 }
-
-?>

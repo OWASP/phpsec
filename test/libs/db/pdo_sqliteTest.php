@@ -52,8 +52,4 @@ class Database_pdo_sqlite_Test extends \PHPUnit_Framework_TestCase
 		$result = $this->database->SQL("INSERT INTO `TEST` (`FIRST_NAME`,`LAST_NAME`) VALUES (:first,:last)", array(':first' => 'Abbas', ':last' => 'Naderi'));
 		$this->assertInternalType('string', $result, 'Row insertion failed!');
 	}
-
-
 }
-
-?>
