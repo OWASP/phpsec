@@ -145,8 +145,9 @@ abstract class DatabaseStatementModel
 		$params = func_get_args ();
 		$this->params = $params;
 		$i = 0;
-		foreach ($params as &$param)
+		foreach ($params as &$param) {
 			$this->statement->bindValue (++$i, $param);
+		}
 	}
 
 	public function execute ()

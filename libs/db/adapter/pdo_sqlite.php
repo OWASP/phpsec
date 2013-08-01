@@ -20,15 +20,8 @@ class Database_pdo_sqlite extends DatabaseModel
 		{
 			$dbConfig = new DatabaseConfig ('pdo_sqlite',NULL,NULL,NULL);
 			parent::__construct ($dbConfig);
-			try
-			{
-				$this->dbh = new \PDO ("sqlite::memory:");
-			}
-			catch (\PDOException $e)
-			{
-				echo $e->getMessage();
-				die();
-			}
+
+			$this->dbh = new \PDO ("sqlite::memory:");
 		}
 		$this->dbh->setAttribute (\PDO::ATTR_ERRMODE, \PDO::ERRMODE_SILENT);
 	}
