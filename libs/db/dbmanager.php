@@ -48,7 +48,7 @@
 			throw new DatabaseNotSet("ERROR: Database is not set/configured properly.");
 		
 		$args = func_get_args();
-		$query = array_shift(&$args);
+		$query = array_shift($args);
 		
 		if ( count($args) == 0)
 			return DatabaseManager::$db->SQL($query, array());
