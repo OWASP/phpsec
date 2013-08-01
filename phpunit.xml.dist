@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit>
+<phpunit
+        strict="true"
+        verbose="true">
     <php>
         <ini name="memory_limit" value="1024M" />
     </php>
