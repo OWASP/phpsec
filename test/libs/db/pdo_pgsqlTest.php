@@ -18,7 +18,6 @@ class Database_pdo_pgsql_Test extends \PHPUnit_Framework_TestCase
 
 	public function setUp()
 	{
-		$this->markTestIncomplete('Database is failing somehow...');
 		$this->database = new Database_pdo_pgsql ($this->DB_NAME, $this->DB_USER, $this->DB_PASS);
 		$this->database->SQL(
 			"CREATE TABLE IF NOT EXISTS `TEST` (
@@ -32,7 +31,11 @@ class Database_pdo_pgsql_Test extends \PHPUnit_Framework_TestCase
 
 	public function tearDown()
 	{
-		$this->database->SQL("DROP TABLE `TEST`");
+		if ($this->database instanceof Database_pdo_pgsql) {
+			$this->database->SQL("DROP TABLE `TEST`");
+		} else {
+			$this->fail('Database object got lost!');
+		}
 	}
 
 	public function testDatabaseConnection()
