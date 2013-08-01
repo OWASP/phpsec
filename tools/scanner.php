@@ -139,19 +139,62 @@ class Scanner
 	
 	
 	
-	public static function displayErrors($errors)
+	/**
+	 * Function to display errors.
+	 * @param Array $errors
+	 * @param String $customErrorMessage
+	 */
+	public static function displayErrors($errors, $customErrorMessage)
 	{
 		require_once (__DIR__ . '/../libs/core/functions.php');
 		
 		foreach ($errors as $listoferrors)
 		{
+			if (count($listoferrors[0]) == 0)
+				continue;
+			
 			echof("FILE:\t?\n", $listoferrors[1]);
 			
 			foreach ($listoferrors[0] as $error)
 			{
 				echof("LINE:\t?\n", $error);
 			}
+			echof("ERROR:\t?\n", $customErrorMessage);
 			echof("\n");
+		}
+	}
+	
+	
+	
+	/**
+	 * Function to display error in GCC style.
+	 * @param Array $errors
+	 * @param String $customErrorMessage
+	 */
+	public static function displayGCCStyleOutput($errors, $customErrorMessage)
+	{
+		require_once (__DIR__ . '/../libs/core/functions.php');
+		
+		$finalOutput = array();
+		
+		foreach ($errors as $listoferrors)
+		{
+			$file = $listoferrors[1];
+			
+			foreach ($listoferrors[0] as $error)
+			{
+				$errorMessage = "";
+				
+				$lineno = strpos($error, "[LINE");
+				$errorMessage .= $file . ":" . substr( $error, $lineno) . ": " . $customErrorMessage;
+				
+				array_push($finalOutput, $errorMessage);
+			}
+		}
+		
+		foreach ($finalOutput as $error)
+		{
+			echof($error . "\n");
 		}
 	}
 }
