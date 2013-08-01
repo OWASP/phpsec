@@ -12,9 +12,9 @@ class Database_pdo_mysql_Test extends \PHPUnit_Framework_TestCase
 	 */
 	private $database;
 
-	private $DB_NAME = 'owasp',
-		$DB_USER = 'root',
-		$DB_PASS = '';
+	private $DB_NAME = 'OWASP';
+	private $DB_USER = 'travis';
+	private $DB_PASS = '';
 
 	public function setUp()
 	{

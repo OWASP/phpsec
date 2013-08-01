@@ -12,8 +12,8 @@ class Database_pdo_pgsql_Test extends \PHPUnit_Framework_TestCase
 	 */
 	private $database;
 
-	private $DB_NAME = 'owasp',
-		$DB_USER = 'root',
+	private $DB_NAME = 'OWASP',
+		$DB_USER = 'travis',
 		$DB_PASS = '';
 
 	public function setUp()
