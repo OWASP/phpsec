@@ -6,7 +6,7 @@ namespace phpsec;
 /**
  * Required Files.
  */
-require_once "../../../libs/tools/scanner.php";
+require_once "../../tools/scanner.php";
 
 
 
@@ -22,7 +22,7 @@ class ScannerTest extends \PHPUnit_Framework_TestCase
 		try
 		{
 			//start the scan.
-			$errors = Scanner::scanDir("../../../libs/tools");
+			$errors = Scanner::scanDir("../../tools");
 			
 			//print the results.
 			print_r($errors);
