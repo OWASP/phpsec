@@ -5,5 +5,6 @@
     </php>
     <testsuite name="OWASP PHPSecurity library">
         <directory>./test/libs</directory>
+        <directory>./test/tools</directory>
     </testsuite>
 </phpunit>
