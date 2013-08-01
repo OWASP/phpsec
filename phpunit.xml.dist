@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit>
+    <php>
+        <ini name="memory_limit" value="1024M" />
+    </php>
+    <testsuite name="OWASP PHPSecurity library">
+        <directory>./test/libs</directory>
+    </testsuite>
+</phpunit>
