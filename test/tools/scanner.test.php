@@ -22,10 +22,10 @@ class ScannerTest extends \PHPUnit_Framework_TestCase
 		try
 		{
 			//start the scan.
-			$errors = Scanner::scanDir("../../tools");
+			$errors = Scanner::scanDir("../../tools/");
 			
 			//print the results.
-			print_r($errors);
+			Scanner::displayErrors($errors);
 			
 			//You can see the results in your screen.
 			$this->assertTrue(TRUE);

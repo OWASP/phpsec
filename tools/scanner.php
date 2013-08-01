@@ -136,6 +136,24 @@ class Scanner
 		
 		return $occurences;
 	}
+	
+	
+	
+	public static function displayErrors($errors)
+	{
+		require_once (__DIR__ . '/../libs/core/functions.php');
+		
+		foreach ($errors as $listoferrors)
+		{
+			echof("FILE:\t?\n", $listoferrors[1]);
+			
+			foreach ($listoferrors[0] as $error)
+			{
+				echof("LINE:\t?\n", $error);
+			}
+			echof("\n");
+		}
+	}
 }
 
 ?>
