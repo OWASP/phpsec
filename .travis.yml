@@ -7,3 +7,5 @@ php:
 before_script:
   - mysql -e 'create database OWASP;'
   - mysql OWASP < SQL/OWASP.sql
+
+script: phpunit --debug
