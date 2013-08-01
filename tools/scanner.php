@@ -11,7 +11,7 @@ class ScannerException extends \Exception {}
 /**
  * Child Exceptions
  */
-class DirectoryNotFoundException extends ScannerException {}
+class DirectoryORFileNotFoundException extends ScannerException {}
 
 
 
@@ -23,29 +23,7 @@ class Scanner
 	 * Array to hold all the words that are considered unsafe.
 	 * @var Array
 	 */
-	public static $blacklist = array("echo ", "print_r");
-	
-	
-	
-	/**
-	 * Variable to hold the progress so far in scanning.
-	 * @var int 
-	 */
-	public static $percentScanned = 0;
-	
-	
-	/**
-	 * Variable to keep the number of total files to scan.
-	 * @var int
-	 */
-	protected static $totalFilesToScan = NULL;
-	
-	
-	/**
-	 * Variable to keep track of total files that are scanned.
-	 * @var int
-	 */
-	private static $filesScanned = 0;
+	public static $blacklist = array("T_ECHO", "T_PRINT");
 	
 	
 	
@@ -58,10 +36,10 @@ class Scanner
 	{
 		$occurences = array(array());
 		
-		//if the directory does not exists, then throw and error.
+		//if the directory/file does not exists, then throw and error.
 		if ( !file_exists( $parentDirectory ) )
 		{
-			throw new DirectoryNotFoundException("ERROR: Directory not found!");
+			throw new DirectoryORFileNotFoundException("ERROR: Directory not found!");
 		}
 		
 		
@@ -84,8 +62,6 @@ class Scanner
 			$allFiles->next();
 		}
 		
-		Scanner::$totalFilesToScan = count($fileList);
-		
 		$i = 0;
 		foreach ($fileList as $file)	//add errors found to the results.
 		{
@@ -107,34 +83,54 @@ class Scanner
 	 */
 	public static function scanFile($pathToFile)
 	{
-		//get the contents of the file.
-		$fileContents = file($pathToFile);
-		
-		//variable to hold the results.
-		$occurences = array();
-		
-		//make a regular expression for all the blacklisted words.
-		$regex = '/(' . implode('|', Scanner::$blacklist) . ')+/';
-		
-		//This variable will keep track of the line numbers.
-		$lineNo = 0;
-		foreach ($fileContents as $line)	//take each line of file and search for the pattern
+		//if the directory/file does not exists, then throw and error.
+		if ( !file_exists( $pathToFile ) )
 		{
-			if (  preg_match( $regex, $line))	//If pattern is found
-			{
-				//normalize extra spaces
-				$line = preg_replace('/(\t|\n)+/', "", $line);
-				
-				array_push(&$occurences, htmlspecialchars_decode( $line . "\t[LINE: " . ($lineNo+1) . "]" ) );	//insert that line and the line number in the results.
-			}
-			
-			$lineNo++;
+			throw new DirectoryORFileNotFoundException("ERROR: Directory not found!");
 		}
 		
-		Scanner::$percentScanned = round(((Scanner::$filesScanned+1)/Scanner::$totalFilesToScan), 2) * 100;	//calculate progress.
-		Scanner::$filesScanned ++;
+		$filecontents = file($pathToFile);
+		
+		$allTokens = token_get_all( file_get_contents($pathToFile) );
+
+		//variable to hold the results.
+		$occurences = array(array());
+		$count = 0;
+		
+		foreach ($allTokens as $token)
+		{
+			if (!is_array( $token))
+				continue;
+			
+			$token[0] = token_name($token[0]);
+			
+			if (  in_array( $token[0], Scanner::$blacklist))
+			{
+				$line = array_pop($token);
+				$occurences[$count]["CONTENT"] = preg_replace('/(\t|\n)+/', "", $filecontents[$line-1]);
+				$occurences[$count]["LINE"] = $line;
+				$occurences[$count]["ERROR"] = $token[0];
+				
+				$count++;
+			}
+		}
 		
 		return $occurences;
+	}
+	
+	
+	
+	/**
+	 * Function to get custom error message.
+	 * @param String $error
+	 * @return String
+	 */
+	public static function getErrorMessage($error)
+	{
+		if ( ($error == "T_ECHO") || ($error == "T_PRINT") )
+		{
+			return "Keyword [{$error}] found in this statement. Using this statement can cause injection attacks!";
+		}
 	}
 	
 	
@@ -144,23 +140,27 @@ class Scanner
 	 * @param Array $errors
 	 * @param String $customErrorMessage
 	 */
-	public static function displayErrors($errors, $customErrorMessage)
+	public static function displayErrors($errors)
 	{
 		require_once (__DIR__ . '/../libs/core/functions.php');
 		
 		foreach ($errors as $listoferrors)
 		{
-			if (count($listoferrors[0]) == 0)
-				continue;
-			
-			echof("FILE:\t?\n", $listoferrors[1]);
-			
-			foreach ($listoferrors[0] as $error)
+			foreach ($listoferrors[0] as $individualErrors)
 			{
-				echof("LINE:\t?\n", $error);
+				if (count($individualErrors) == 0)
+					continue;
+				
+				$file = $listoferrors[1];
+				$line = $individualErrors["LINE"];
+				$content = $individualErrors["CONTENT"];
+				$errorType = $individualErrors["ERROR"];
+
+				echof("FILE:\t?\n", $file);
+				echof("LINE:\t?\n", $line);
+				echof("ERROR:\t?\n", Scanner::getErrorMessage($errorType));
+				echof("CONTENT:\t?\n\n", $content);
 			}
-			echof("ERROR:\t?\n", $customErrorMessage);
-			echof("\n");
 		}
 	}
 	
@@ -171,30 +171,25 @@ class Scanner
 	 * @param Array $errors
 	 * @param String $customErrorMessage
 	 */
-	public static function displayGCCStyleOutput($errors, $customErrorMessage)
+	public static function displayGCCStyleOutput($errors)
 	{
 		require_once (__DIR__ . '/../libs/core/functions.php');
 		
-		$finalOutput = array();
-		
 		foreach ($errors as $listoferrors)
 		{
-			$file = $listoferrors[1];
-			
-			foreach ($listoferrors[0] as $error)
+			foreach ($listoferrors[0] as $individualErrors)
 			{
-				$errorMessage = "";
+				if (count($individualErrors) == 0)
+					continue;
 				
-				$lineno = strpos($error, "[LINE");
-				$errorMessage .= $file . ":" . substr( $error, $lineno) . ": " . $customErrorMessage;
+				$file = $listoferrors[1];
+				$line = $individualErrors["LINE"];
+				$content = $individualErrors["CONTENT"];
+				$errorType = $individualErrors["ERROR"];
+				$errorMessage = Scanner::getErrorMessage($errorType);
 				
-				array_push($finalOutput, $errorMessage);
+				echof("?:?:?:\t?\n?\n\n", $file, $line, $errorType, $content, $errorMessage);
 			}
-		}
-		
-		foreach ($finalOutput as $error)
-		{
-			echof($error . "\n");
 		}
 	}
 }
