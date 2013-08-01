@@ -62,7 +62,7 @@ class DBLogs extends Template
 		$values = array();
 		foreach ($logValues as $k=>$v)
 		{
-			array_push(&$values, $v);	//create an array that contains values for all columns.
+			array_push($values, $v);	//create an array that contains values for all columns.
 		}
 		
 		SQL($SQLStatement, $values);	//execute the SQL statement.

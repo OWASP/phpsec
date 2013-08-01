@@ -55,7 +55,7 @@ class Scanner
 			{
 				if (!is_dir($allFiles->key()))
 				{
-					array_push(&$fileList, $allFiles->key());
+					array_push($fileList, $allFiles->key());
 				}
 			}
 
