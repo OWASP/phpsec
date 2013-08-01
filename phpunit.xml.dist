@@ -4,7 +4,6 @@
         <ini name="memory_limit" value="1024M" />
     </php>
     <testsuite name="OWASP PHPSecurity library">
-        <directory>./test/libs/core</directory>
-        <directory>./test/libs/crypto</directory>
+        <directory>./test/libs</directory>
     </testsuite>
 </phpunit>
