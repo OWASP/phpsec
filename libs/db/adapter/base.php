@@ -31,6 +31,9 @@ abstract class DatabaseModel
 {
 	public $dbConfig;
 
+	/**
+	 * @var \PDO
+	 */
 	public $dbh;
 
 	public function __construct ($dbConfig)
