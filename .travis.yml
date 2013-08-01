@@ -7,5 +7,6 @@ php:
 before_script:
   - mysql -e 'create database OWASP;'
   - mysql OWASP < SQL/OWASP.sql
+  - psql -c 'create database OWASP;' -U postgres
 
 script: phpunit --debug
