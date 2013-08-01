@@ -8,7 +8,7 @@ namespace phpsec;
 require_once __DIR__ . "/../../../libs/logs/logger.php";
 
 
-class LoggerTest extends \PHPUnit_Framework_TestCase
+class LoggerDbTest extends \PHPUnit_Framework_TestCase
 {
 
 	/**
