@@ -16,6 +16,8 @@ class LoggerMailTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testCreation()
 	{
+		$this->markTestSkipped('Mailing log results currently cannot be tested automatically.');
+		
 		$myLogger = new Logger(__DIR__ . "/../../../libs/logs/media/default_mail_config.php"); //create a handler to store the logs. Provide that logger with a configuration file.
 
 		$myLogger->log("This is the first message", "WARNING", "LOW"); //store this log.
