@@ -16,7 +16,7 @@ class LoggerFileTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testCreation()
 	{
-		$myLogger = new Logger("testFileConfig.php"); //create a handler to store the logs. Provide that logger with a configuration file.
+		$myLogger = new Logger(__DIR__."/testFileConfig.php"); //create a handler to store the logs. Provide that logger with a configuration file.
 
 		$myLogger->log("This is the first message", "WARNING", "LOW"); //store this log.
 		$myLogger->log("This is the second message"); //store this log.
