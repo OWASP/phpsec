@@ -2,30 +2,25 @@
 
 namespace phpsec;
 
-require_once(__DIR__ . '/../../../libs/db/adapter/pdo_pgsql.php');
+require_once(__DIR__ . '/../../../libs/db/adapter/pdo_sqlite.php');
 
-class Database_pdo_pgsql_Test extends \PHPUnit_Framework_TestCase
+class Database_pdo_sqlite_Test extends \PHPUnit_Framework_TestCase
 {
 
 	/**
-	 * @var Database_pdo_pgsql
+	 * @var Database_pdo_sqlite
 	 */
 	private $database;
 
-	private $DB_NAME = 'owasp',
-		$DB_USER = 'root',
-		$DB_PASS = '';
-
 	public function setUp()
 	{
-		$this->database = new Database_pdo_pgsql ($this->DB_NAME, $this->DB_USER, $this->DB_PASS);
+		$this->database = new Database_pdo_sqlite ();
 		$this->database->SQL(
 			"CREATE TABLE IF NOT EXISTS `TEST` (
-			  `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
-			  `FIRST_NAME` varchar(20) DEFAULT NULL,
-			  `LAST_NAME` varchar(20) DEFAULT NULL,
-			  PRIMARY KEY (`ID`)
-			) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;"
+			  ID INTEGER PRIMARY KEY,
+			  `FIRST_NAME` TEXT,
+			  `LAST_NAME` TEXT
+			)"
 		);
 	}
 
@@ -57,8 +52,4 @@ class Database_pdo_pgsql_Test extends \PHPUnit_Framework_TestCase
 		$result = $this->database->SQL("INSERT INTO `TEST` (`FIRST_NAME`,`LAST_NAME`) VALUES (:first,:last)", array(':first' => 'Abbas', ':last' => 'Naderi'));
 		$this->assertInternalType('string', $result, 'Row insertion failed!');
 	}
-
-
 }
-
-?>
