@@ -11,7 +11,7 @@ class DatabaseConfig
 {
 	public $adapter, $dbname, $username, $password, $host;
 
-	function __construct ($adapter, $dbname, $username, $password, $host="localhost")
+	function __construct ($adapter, $dbname, $username, $password, $host="127.0.0.1")
 	{
 		$this->adapter = $adapter;
 		$this->dbname = $dbname;

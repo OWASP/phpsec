@@ -19,7 +19,9 @@ class Database_pdo_pgsql_Test extends \PHPUnit_Framework_TestCase
 	public function setUp()
 	{
 		$this->database = new Database_pdo_pgsql ($this->DB_NAME, $this->DB_USER, $this->DB_PASS);
-		$this->database->SQL(
+		// Invalid Postgres SQL disabled
+		/*
+		 $this->database->SQL(
 			"CREATE TABLE IF NOT EXISTS `TEST` (
 			  `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
 			  `FIRST_NAME` varchar(20) DEFAULT NULL,
@@ -27,6 +29,7 @@ class Database_pdo_pgsql_Test extends \PHPUnit_Framework_TestCase
 			  PRIMARY KEY (`ID`)
 			) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;"
 		);
+		*/
 	}
 
 	public function tearDown()
