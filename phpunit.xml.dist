@@ -4,6 +4,7 @@
         verbose="true">
     <php>
         <ini name="memory_limit" value="1024M" />
+        <ini name="error_reporting" value="E_ALL"/>
     </php>
     <testsuite name="OWASP PHPSecurity library">
         <directory>./test/libs</directory>
