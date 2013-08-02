@@ -18,7 +18,7 @@ class ScannerTest extends \PHPUnit_Framework_TestCase
 	public function testScanning()
 	{
 		//start the scan.
-		$errors = Scanner::scanDir("../../libs/");
+		$errors = Scanner::scanDir(__DIR__."/../../libs/");
 
 		//print the results.
 		echo "\nNormal Display: \n--------------------------\n";
