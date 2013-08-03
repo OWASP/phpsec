@@ -203,8 +203,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * To check if the string is a date. (4 cases are checked)
-	 * @dataprovider provideValidDateStrings
+	 * @dataProvider provideValidDateStrings
 	 */
 	public function testIsDateShouldReturnTrue($date)
 	{
