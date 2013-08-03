@@ -10,6 +10,7 @@ require_once __DIR__ . "/../../../libs/core/random.php";
 require_once __DIR__ . "/../../../libs/core/time.php";
 require_once __DIR__ . "/../../../libs/auth/user.php";
 require_once __DIR__ . "/../../../libs/auth/adv_password.php";
+require_once (__DIR__ . "/../../../libs/crypto/confidentialstring.php");
 
 
 class AdvPasswordTest extends \PHPUnit_Framework_TestCase
@@ -23,11 +24,14 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function setUp()
 	{
-		try {
-			BasicPasswordManagement::$hashAlgo = "haval256,5"; //choose salting algo.
-			$this->userID = User::newUserObject(randstr(10), "testing"); //create a user.
-			$this->obj = new AdvancedPasswordManagement($this->userID->getUserID(), "testing"); //create object to AdvancedPasswordManagement class.
-		} catch (\Exception $e) {
+		try
+		{
+			BasicPasswordManagement::$hashAlgo = "haval256,5";	//choose salting algo.
+			$this->userID = User::newUserObject(randstr(10), confidentialString(':bpsY8XdMOZdO32Jnoh7wqh1Og3ogQkIs3e6k8Kvk1J0='));	//create a user.
+			$this->obj = new AdvancedPasswordManagement($this->userID->getUserID(), confidentialString(':bpsY8XdMOZdO32Jnoh7wqh1Og3ogQkIs3e6k8Kvk1J0='));	//create object to AdvancedPasswordManagement class.
+		}
+		catch (\Exception $e)
+		{
 			echo "\n" . $e->getLine() . "-->";
 			echo $e->getMessage() . "\n";
 		}
