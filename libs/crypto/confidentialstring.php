@@ -121,12 +121,12 @@ function confidentialString()
 
 		$decryptedString = mcrypt_decrypt(Encryption::getCipher(), Encryption::getKey(), $decodedString, Encryption::getMode(), Encryption::getIV()); //decrypt the string.
 
-		return str_replace("\0", "", $decryptedString); //return the decrypted string.
+		return unserialize(rtrim($decryptedString, "\0")); //return the decrypted string.
 	} else //This is the first run of this function for this string. We know this because this string is not encrypted.
 	{
 		$origString = $trace[$arraySlot]['args'][0]; //store the original value.
 
-		$encryptedString = mcrypt_encrypt(Encryption::getCipher(), Encryption::getKey(), $trace[$arraySlot]['args'][0], Encryption::getMode(), Encryption::getIV()); //encrypt the value.
+		$encryptedString = mcrypt_encrypt(Encryption::getCipher(), Encryption::getKey(), serialize($origString), Encryption::getMode(), Encryption::getIV()); //encrypt the value.
 		$encryptedString = base64_encode($encryptedString); //base 64 encode it.
 		$encryptedString = ":" . $encryptedString; //append ":" at the beginning of the encrypted string.
 

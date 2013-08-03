@@ -10,23 +10,16 @@ class ConfidentialStringTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testConfidentialStringIsBasicallyWorking()
 	{
-		$this->assertSame("root", confidentialString(':/X6NSUlAagxmmLNWRZBA8fyJbmQZmAB7VcgzHHfTxwA='));
-		$this->assertSame("testing", confidentialString(':bpsY8XdMOZdO32Jnoh7wqh1Og3ogQkIs3e6k8Kvk1J0='));
-		$this->assertSame("0123456789012345678901234567890123456789", confidentialString(':7ihOuK5EdTV0+SZYXQp/jPcsxZ0E2xyT86Mf8ykrgy2vtoIGFmKc4EmAqzrXzw9ZcYjUecSyzWLbL5zIGm80cQ=='));
+		$this->assertSame("root", confidentialString(':sENSt7jtm5WBRy14P95atM8qa8ttFt0COQwkvyIKca8='));
+		$this->assertSame("testing", confidentialString(':G7vkJRN2l0XEoPYpwxG6vAMJczDojOz2vMrVe9SW7Vo='));
+		$this->assertSame("0123456789012345678901234567890123456789", confidentialString(':70wEpmmYmIgYRRd3cPQj2CHmPIjoa8t+YdUkn02705ZmPK3o1+Yp627sKxOWTYO7yREZgUWT0zecT1oYjxA09w=='));
 	}
 
 	public function testConfidentialStringDoesNotHarmIntentionalZerobytes()
 	{
-		$this->assertSame("\0root", confidentialString(':+25AatjlbzvpXA0RIKW3RwdIEzhiTbxtsfyOD/QQizY='));
-		$this->assertSame("root\0", confidentialString(':/X6NSUlAagxmmLNWRZBA8fyJbmQZmAB7VcgzHHfTxwA='));
-		$this->assertSame("\0root\0", confidentialString(':+25AatjlbzvpXA0RIKW3RwdIEzhiTbxtsfyOD/QQizY='));
+		$this->assertSame("\0root", confidentialString(':1iixApMMhEWBAJbwuDwuYzlC0ienWPGtrBzRwnKORHM='));
+		$this->assertSame("root\0", confidentialString(':qa+VdvIdz+yzWhoroq2gC+NFZOz4b06JctQOp+dzZFg='));
+		$this->assertSame("\0root\0", confidentialString(':YWSVyb+oX78SOtkav7dYCcRzJ0tzyj2xfXKUaiQSPSU='));
 	}
 
-	public function testConfidentialStringDoesNotReplaceVariablesOrFunctionCalls()
-	{
-		$password = str_repeat('a', rand(2, 30));
-		// the next line should be:
-		// $this->assertSame($password, confidentialString($password));
-		$this->assertSame($password, confidentialString(':ddSTcsjF+oR+U0We583AIqVYhCmHulnLurBOiAJCX0A='));
-	}
 }
