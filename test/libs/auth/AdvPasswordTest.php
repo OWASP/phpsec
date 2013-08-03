@@ -91,7 +91,7 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 	/**
 	 * Function to test if brute force is detected.
 	 *
-	 * @expectedException BruteForceAttackDetectedException
+	 * @expectedException \phpsec\BruteForceAttackDetectedException
 	 */
 	public function testBruteForce()
 	{
