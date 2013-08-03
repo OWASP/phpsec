@@ -128,7 +128,7 @@ function confidentialString()
 		
 		$decryptedString = mcrypt_decrypt(Encryption::getCipher(), Encryption::getKey(), $decodedString, Encryption::getMode(), Encryption::getIV());	//decrypt the string.
 		
-		return $decryptedString;	//return the decrypted string.
+		return str_replace("\0", "", $decryptedString);	//return the decrypted string.
 	}
 	else	//This is the first run of this function for this string. We know this because this string is not encrypted.
 	{
@@ -143,10 +143,11 @@ function confidentialString()
 		$prevLine = $fileData[(int)$trace[$arraySlot]['line'] - 1];	//get the line that needs to be replaced i.e. the string that contains the plain-text sensitive data.
 		$functionName = str_replace(__NAMESPACE__ . "\\", '', __FUNCTION__);	//calculate the function name of this function (without any namespace).
 		$pos = strpos($prevLine, $functionName);	//find the position of this function-name in the original string.
+		$endPos = strpos($prevLine, ")", $pos);		//search where this function ends, but start the search from the start of the function.
 		
 		$newLine = substr($prevLine, 0, $pos) . $functionName . "('{$encryptedString}')";	//generate the new line i.e. with encrypted String.	
 		
-		$fileData[(int)$trace[$arraySlot]['line'] - 1] = $newLine . substr( $prevLine, strpos( $prevLine, ";"));	//replace the old line with the new line.
+		$fileData[(int)$trace[$arraySlot]['line'] - 1] = $newLine . substr( $prevLine, $endPos+1);	//replace the old line with the new line.
 		$fileData = implode("", $fileData);	//get the data from the array.
 		
 		//check if file is writable or not.
