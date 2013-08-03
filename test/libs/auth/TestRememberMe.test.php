@@ -32,6 +32,7 @@ require_once "../testconfig.php";
 require_once '../../../libs/core/random.php';
 require_once '../../../libs/core/time.php';
 require_once '../../../libs/auth/user.php';
+require_once (__DIR__ . "/../../../libs/crypto/confidentialstring.php");
 
 class TestRememberMe
 {
@@ -42,11 +43,11 @@ class TestRememberMe
 		try
 		{
 			BasicPasswordManagement::$hashAlgo = "haval256,5";
-			$this->user = User::newUserObject("rash", "testing");
+			$this->user = User::newUserObject("rash", confidentialString("testing"));
 		}
 		catch (\Exception $e)
 		{
-			$this->user = User::existingUserObject("rash", "testing");
+			$this->user = User::existingUserObject("rash", confidentialString("testing"));
 		}
 	}
 	

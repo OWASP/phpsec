@@ -10,6 +10,7 @@ require_once "../../../libs/core/time.php";
 require_once "../../../libs/core/random.php";
 require_once "../../../libs/auth/user.php";
 require_once "../../../libs/session/session.php";
+require_once (__DIR__ . "/../../../libs/crypto/confidentialstring.php");
 
 class SessionTest extends \PHPUnit_Framework_TestCase
 {
@@ -38,8 +39,8 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		try
 		{
 			//Create users.
-			$this->user[0] = User::newUserObject("1234", "resting");
-			$this->user[1] = User::newUserObject("5678", "owasp");
+			$this->user[0] = User::newUserObject("1234", confidentialString(':WrlJ9AaIfyl4thn1qHbD0p3TxAGKygQXkZGTHQurSjg='));
+			$this->user[1] = User::newUserObject("5678", confidentialString(':H7XOX/2A2VGJCR+znoBS7EpBQgr2DQ0psUBAkZQlepU='));
 		}
 		catch(\Exception $e)
 		{

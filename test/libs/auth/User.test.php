@@ -8,6 +8,7 @@ require_once "../testconfig.php";
 require_once '../../../libs/core/random.php';
 require_once '../../../libs/auth/user.php';
 require_once '../../../libs/core/time.php';
+require_once (__DIR__ . "/../../../libs/crypto/confidentialstring.php");
 
 
 class UserTest extends \PHPUnit_Framework_TestCase
@@ -19,7 +20,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	public function setUp()
 	{
 		BasicPasswordManagement::$hashAlgo = "haval256,5";	//choose a hashing algo.
-		$this->obj = User::newUserObject("rash", "testing");	//create a new user.
+		$this->obj = User::newUserObject("rash", confidentialString(':bpsY8XdMOZdO32Jnoh7wqh1Og3ogQkIs3e6k8Kvk1J0='));	//create a new user.
 	}
 	
 	
@@ -50,7 +51,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		try
 		{
 			//provide correct password
-			$firstTest = $this->obj->verifyPassword("testing");
+			$firstTest = $this->obj->verifyPassword(confidentialString(':bpsY8XdMOZdO32Jnoh7wqh1Og3ogQkIs3e6k8Kvk1J0='));
 			//provide wrong password
 			$secondTest = $this->obj->verifyPassword("resting");
 			
@@ -73,10 +74,10 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		try
 		{
 			$this->obj = null;	//destroy the object to current user.
-			$this->obj = User::existingUserObject("rash", "testing");	//get the object of this user again via this method.
+			$this->obj = User::existingUserObject("rash", confidentialString(':bpsY8XdMOZdO32Jnoh7wqh1Og3ogQkIs3e6k8Kvk1J0='));	//get the object of this user again via this method.
 			
 			//try to run validate password function with this new object.
-			$test = $this->obj->verifyPassword("testing");
+			$test = $this->obj->verifyPassword(confidentialString(':bpsY8XdMOZdO32Jnoh7wqh1Og3ogQkIs3e6k8Kvk1J0='));
 			$this->assertTrue($test);
 		}
 		catch(\Exception $e)
@@ -95,7 +96,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		try
 		{
 			$newPassword = "resting";
-			$oldPassword = "testing";
+			$oldPassword = confidentialString(':bpsY8XdMOZdO32Jnoh7wqh1Og3ogQkIs3e6k8Kvk1J0=');
 			
 			//try to reset password by providing wrong password.
 			$firstAttempt = $this->obj->verifyPassword($newPassword);
