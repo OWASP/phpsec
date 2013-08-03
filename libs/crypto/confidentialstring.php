@@ -100,16 +100,13 @@ function confidentialString()
 	$trace = debug_backtrace(); //get the trace of this function call.
 
 	//From this trace, find the proper sub-array which contains this function call. That call would be when the array's function parameter would contain this __FUNCTION__ value.
-	$count = 0;
-	foreach ($trace as $oncCall) {
+	$arraySlot = null;
+	foreach ($trace as $count => $oncCall) {
 		if ($oncCall['function'] == __FUNCTION__) {
 			$arraySlot = $count;
 			break;
 		}
-
-		$count = $count + 1;
 	}
-
 
 	//If no value is passed to this function, then there is nothing to protect. Hence exit.
 	if (count($trace[$arraySlot]['args']) == 0) {
