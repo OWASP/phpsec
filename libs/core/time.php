@@ -49,7 +49,8 @@ class Time
 	 */
 	public static function time()
 	{
-		$timeMoved = abs(\time() - Time::$lastFalseTimeSet);	//check how much the clock has moved since the last false time was set.
+                date_default_timezone_set("UTC");
+                $timeMoved = abs(\time() - Time::$lastFalseTimeSet);	//check how much the clock has moved since the last false time was set.
 		Time::$currentTime += $timeMoved;			//add that moveded time to the current user specified time.
 		Time::$lastFalseTimeSet = \time();
 		
@@ -63,7 +64,8 @@ class Time
 	 */
 	public static function setTime($time)
 	{
-		Time::$lastFalseTimeSet = \time();
+		date_default_timezone_set("UTC");
+                Time::$lastFalseTimeSet = \time();
 		Time::$currentTime = (int)$time;
 		
 		return Time::$currentTime;
@@ -75,7 +77,8 @@ class Time
 	 */
 	public static function resetTime()
 	{
-		Time::$currentTime = 0;
+		date_default_timezone_set("UTC");
+                Time::$currentTime = 0;
 		Time::$lastFalseTimeSet = 0;
 		
 		return \time();
@@ -88,7 +91,8 @@ class Time
 	 */
 	public static function moveTime($difference)
 	{
-		Time::$lastFalseTimeSet = \time();
+		date_default_timezone_set("UTC");
+                Time::$lastFalseTimeSet = \time();
 		Time::$currentTime = (int)\time() - (int)$difference;
 		
 		return Time::$currentTime;

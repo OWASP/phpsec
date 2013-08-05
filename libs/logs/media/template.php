@@ -1,6 +1,8 @@
 <?php
 namespace phpsec;
 
+require_once (__DIR__ . "/../../core/time.php");
+
 
 /**
  *					******************NOTE******************
@@ -87,7 +89,7 @@ abstract class Template
 		$this->template["LINE"] = $lineGeneratingLog;
 		$this->template["TYPE"] = "ERROR";
 		$this->template["PRIORITY"] = "NORMAL";
-		$this->template["DATETIME"] = date("m-d-Y H:i:s", time());
+		$this->template["DATETIME"] = date("m-d-Y H:i:s", \phpsec\time());
 	}
 	
 	
