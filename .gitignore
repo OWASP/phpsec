@@ -1,4 +1,5 @@
-nbproject
+nbproject/
 .settings/
 .project
 .buildpath
+.idea/

@@ -25,15 +25,8 @@ class Database_pdo_pgsql extends DatabaseModel
 		{
 			$dbConfig = new DatabaseConfig ('pdo_pgsql',$args[0],$args[1],$args[2]);
 			parent::__construct ($dbConfig);
-			try
-			{
-				$this->dbh = new \PDO ("pgsql:dbname={$dbConfig->dbname};host={$dbConfig->host};",$dbConfig->username,$dbConfig->password);
-			}
-			catch (\PDOException $e)
-			{
-				echo $e->getMessage();
-				die();
-			}
+
+			$this->dbh = new \PDO ("pgsql:dbname={$dbConfig->dbname};host={$dbConfig->host};",$dbConfig->username,$dbConfig->password);
 		}
 		else if (get_class($args[0]) === "PDO")
 		{

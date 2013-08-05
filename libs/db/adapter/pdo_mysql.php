@@ -2,7 +2,7 @@
 
 namespace phpsec;
 
-require_once (__DIR__ . "/base.php");
+require_once(__DIR__ . "/base.php");
 
 /**
  * PDO_MySQL wrapper class.
@@ -15,42 +15,30 @@ class Database_pdo_mysql extends DatabaseModel
 	 * @param db_name
 	 * @param db_user
 	 * @param db_pass
-	*/
-	public function __construct ()
+	 */
+	public function __construct()
 	{
-		$args = func_get_args ();
+		$args = func_get_args();
 		if (!isset($args[0]))
 			return false;
-		if (count($args) > 1)
-		{
-			$dbConfig = new DatabaseConfig ('pdo_mysql',$args[0],$args[1],$args[2]);
-			parent::__construct ($dbConfig);
-			try
-			{
-				$this->dbh = new \PDO ("mysql:dbname={$dbConfig->dbname};host={$dbConfig->host};",$dbConfig->username,$dbConfig->password);
-			}
-			catch (\PDOException $e)
-			{
-				echo $e->getMessage();
-				die();
-			}
-		}
-		else if (get_class($args[0]) === "PDO")
-		{
+		if (count($args) > 1) {
+			$dbConfig = new DatabaseConfig ('pdo_mysql', $args[0], $args[1], $args[2]);
+			parent::__construct($dbConfig);
+			$this->dbh = new \PDO ("mysql:dbname={$dbConfig->dbname};host={$dbConfig->host};", $dbConfig->username, $dbConfig->password);
+		} elseif (get_class($args[0]) === "PDO") {
 			$this->dbh = $args[0];
 		}
-		$this->dbh->setAttribute (\PDO::ATTR_ERRMODE, \PDO::ERRMODE_SILENT);
+		$this->dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_SILENT);
 	}
 
-	public function __destruct ()
+	public function __destruct()
 	{
-		if (isset($this->dbh))
-		{
+		if (isset($this->dbh)) {
 			$this->dbh = NULL;
 		}
 	}
 
-	function prepare ($query)
+	function prepare($query)
 	{
 		return new DatabaseStatement_pdo_mysql ($this, $query);
 	}
@@ -63,9 +51,9 @@ class Database_pdo_mysql extends DatabaseModel
 
 class DatabaseStatement_pdo_mysql extends DatabaseStatementModel
 {
-	public function __construct (Database_pdo_mysql $db, $query)
+	public function __construct(Database_pdo_mysql $db, $query)
 	{
-		parent::__construct ($db, $query);
+		parent::__construct($db, $query);
 	}
 }
 

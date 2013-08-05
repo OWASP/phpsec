@@ -11,6 +11,12 @@ require_once __DIR__ . "/../../../libs/core/time.php";
 class TimeTest extends \PHPUnit_Framework_TestCase
 {
 
+	protected function setUp()
+	{
+		// Other tests will affect the time.
+		time('RESET');
+	}
+
 	/**
 	 * Function to check if correct system time is returned or not.
 	 */
