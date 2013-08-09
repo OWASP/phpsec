@@ -89,7 +89,7 @@ abstract class Template
 		$this->template["LINE"] = $lineGeneratingLog;
 		$this->template["TYPE"] = "ERROR";
 		$this->template["PRIORITY"] = "NORMAL";
-		$this->template["DATETIME"] = date("m-d-Y H:i:s", \phpsec\time());
+                $this->template["DATETIME"] = date("m-d-Y H:i:s", \phpsec\time());
 	}
 	
 	

@@ -16,7 +16,6 @@ class DownloadManagerTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testMIME()
 	{
-		$this->markTestSkipped('Cannot test this in command line context');
 		$type = DownloadManager::MIME("myTestFile.bmp");
 
 		$this->assertSame('image/bmp', $type);

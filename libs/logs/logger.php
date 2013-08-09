@@ -88,7 +88,7 @@ class Logger
 		//if the extension is PHP, then call that configuration file to extract the configurations.
 		if ($ex == "php")
 		{
-			return include_once ($pathToConfigFile);
+			return include($pathToConfigFile);
 		}
 		else
 			throw new UnsupportedConfigFile("ERROR: Configuration file of this type is not supported yet!");	//throw an exception if the configuration file is not recognized.

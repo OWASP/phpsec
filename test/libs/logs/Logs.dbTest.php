@@ -6,6 +6,7 @@ namespace phpsec;
  * Required Files.
  */
 require_once __DIR__ . "/../../../libs/logs/logger.php";
+require_once(__DIR__ . "/../testconfig.php");
 
 
 class LoggerDbTest extends \PHPUnit_Framework_TestCase
@@ -35,9 +36,7 @@ class LoggerDbTest extends \PHPUnit_Framework_TestCase
 		$this->myLogger->log("This is the first message", "WARNING", "LOW"); //store this log.
 		$this->myLogger->log("This is the second message"); //store this log.
 
-		require_once __DIR__."/../testconfig.php";
-
-		$result = SQL("SELECT * FROM LOGS", array()); //get how many records are there in the log DB.
+		$result = SQL("SELECT * FROM LOGS"); //get how many records are there in the log DB.
 
 		if (count($result) > 0)
 			$this->assertTrue(TRUE); //More than 1 record present indicates that logs were inserted.
