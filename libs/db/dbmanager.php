@@ -1,6 +1,8 @@
 <?php
 
 	namespace phpsec;
+        
+        require_once (__DIR__ . "/../core/functions.php");
 
 	class DatabaseException extends \Exception {}
 	class DatabaseUnsupportedAdapterException extends DatabaseException {}
@@ -33,7 +35,7 @@
 					throw new DatabaseUnsupportedAdapterException("{$dbConfig->adapter} is not a supported database adapter.");
 			}
 			catch (DatabaseUnsupportedAdapterException $e) {
-				echo $e->getMessage();
+                                echof($e->getMessage());
 				return false;
 			}
 			$db_class = "phpsec\Database_{$dbConfig->adapter}";

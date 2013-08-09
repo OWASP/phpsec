@@ -1,6 +1,9 @@
 <?php
 namespace phpsec;
 
+require_once (__DIR__ . "/../core/functions.php");
+
+
 /**
  * Parent Exception
  */
@@ -224,7 +227,7 @@ class DownloadManager
 				if ( ($advanceBy + $currentPos) > $seek_end )	//check if you have reached the position where you have to stop reading.
 					$advanceBy = $seek_end - $currentPos;
 				
-				echo fread($f, $advanceBy);	//read the specified number of bytes.
+                                    echof(fread($f, $advanceBy));	//read the specified number of bytes.
 				
 				fseek($f, $advanceBy+1, SEEK_CUR);	//seek to the position till you have read.
 				
@@ -316,7 +319,7 @@ class DownloadManager
 		header('Content-disposition: attachment; filename=' . $Filename); //add attachment; here to force download
 		header('Content-length: '. strlen($Data));	//specify the browser the length of data it must expect.
 
-		echo $Data;
+		echof($Data);
 		flush();
 		
 		return true;

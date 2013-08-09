@@ -2,6 +2,8 @@
 
 namespace phpsec;
 
+require_once (__DIR__ . "/../../core/functions.php");
+
 /**
  * DatabaseConfig class
  * A single object for all database configuration options
@@ -52,7 +54,7 @@ abstract class DatabaseModel
 	{
 		if ($this->dbh === NULL)
 		{
-			echo "You need to initialize database object properly first.";
+                        echof("You need to initialize database object properly first.");
 			return false;
 		}
 		$args = func_get_args ();
