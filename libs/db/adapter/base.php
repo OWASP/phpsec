@@ -11,7 +11,7 @@ class DatabaseConfig
 {
 	public $adapter, $dbname, $username, $password, $host;
 
-	function __construct ($adapter, $dbname, $username, $password, $host="localhost")
+	function __construct ($adapter, $dbname, $username, $password, $host="127.0.0.1")
 	{
 		$this->adapter = $adapter;
 		$this->dbname = $dbname;
@@ -31,6 +31,9 @@ abstract class DatabaseModel
 {
 	public $dbConfig;
 
+	/**
+	 * @var \PDO
+	 */
 	public $dbh;
 
 	public function __construct ($dbConfig)
@@ -145,8 +148,9 @@ abstract class DatabaseStatementModel
 		$params = func_get_args ();
 		$this->params = $params;
 		$i = 0;
-		foreach ($params as &$param)
+		foreach ($params as &$param) {
 			$this->statement->bindValue (++$i, $param);
+		}
 	}
 
 	public function execute ()

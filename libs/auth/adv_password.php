@@ -71,8 +71,6 @@ class AdvancedPasswordManagement
 		{
 			if ($bruteLock == true)
 			{
-				$bruteFound = false;
-				
 				$bruteFound = $this->isBruteForce($user);
 				
 				if ($bruteFound)

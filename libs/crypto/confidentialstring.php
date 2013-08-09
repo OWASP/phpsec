@@ -5,48 +5,50 @@ namespace phpsec;
 /**
  * Parent Exception
  */
-class FileExceptions extends \Exception {}
+class FileExceptions extends \Exception
+{
+}
 
 /**
  * Child Exceptions
  */
-class FileNotWritable extends FileExceptions {}
+class FileNotWritable extends FileExceptions
+{
+}
 
 
 class Encryption
 {
-	
-	
+
+
 	/**
 	 * Cipher to be used for encryption.
 	 * @var String
 	 */
 	private static $cipher = MCRYPT_RIJNDAEL_256;
-	
-	
+
+
 	/**
 	 * Key to be used for enc/dec.
 	 * @var String
 	 */
 	private static $key = "qgyXyjD5YpF";
-	
-	
+
+
 	/**
 	 * Mode to be used for enc/dec such as "ebc", "cbc" etc.
 	 * @var String
 	 */
 	private static $mode = "cbc";
-	
-	
+
+
 	/**
 	 * IV to be used for modes other than "ebc".
 	 * @var String
 	 */
 	private static $iv = "12345678901234567890123456789012";
-	
-	
-	
-	
+
+
 	/**
 	 * Function to get the value of cipher.
 	 * @return String
@@ -55,9 +57,8 @@ class Encryption
 	{
 		return Encryption::$cipher;
 	}
-	
-	
-	
+
+
 	/**
 	 * Function to get the value of key.
 	 * @return String
@@ -66,9 +67,8 @@ class Encryption
 	{
 		return Encryption::$key;
 	}
-	
-	
-	
+
+
 	/**
 	 * Function to get the value of mode.
 	 * @return String
@@ -77,9 +77,8 @@ class Encryption
 	{
 		return Encryption::$mode;
 	}
-	
-	
-	
+
+
 	/**
 	 * Function to get the value of IV.
 	 * @return String
@@ -91,7 +90,6 @@ class Encryption
 }
 
 
-
 /**
  * Function to encrypt the sensitive data on its first run. For rest of the run, this function decrypts the encrypted data for use.
  * @return String
@@ -99,69 +97,62 @@ class Encryption
  */
 function confidentialString()
 {
-	$trace = debug_backtrace();	//get the trace of this function call.
-	
+	$trace = debug_backtrace(); //get the trace of this function call.
+
 	//From this trace, find the proper sub-array which contains this function call. That call would be when the array's function parameter would contain this __FUNCTION__ value.
-	$count = 0;
-	foreach ($trace as $oncCall)
-	{
-		if ($oncCall['function'] == __FUNCTION__)
-		{
+	$arraySlot = null;
+	foreach ($trace as $count => $oncCall) {
+		if ($oncCall['function'] == __FUNCTION__) {
 			$arraySlot = $count;
 			break;
 		}
-		
-		$count = $count + 1;
 	}
-	
-	
+
 	//If no value is passed to this function, then there is nothing to protect. Hence exit.
-	if ( count($trace[$arraySlot]['args']) == 0 )
+	if (count($trace[$arraySlot]['args']) == 0) {
 		return "";
-	
-	
-	//Every encrypted string will contain ":" in the beginning. If this character is found in the string, then this is an encrypted string.
-	if ( $trace[$arraySlot]['args'][0][0] == ":" )
-	{
-		$decodedString = substr($trace[$arraySlot]['args'][0], 1);	//remove the ":" character form the string.
-		$decodedString = base64_decode($decodedString);			//the string was base64 encoded. Hence decode it back.
-		
-		$decryptedString = mcrypt_decrypt(Encryption::getCipher(), Encryption::getKey(), $decodedString, Encryption::getMode(), Encryption::getIV());	//decrypt the string.
-		
-		return str_replace("\0", "", $decryptedString);	//return the decrypted string.
 	}
-	else	//This is the first run of this function for this string. We know this because this string is not encrypted.
+
+
+	//Every encrypted string will contain ":" in the beginning. If this character is found in the string, then this is an encrypted string.
+	if ($trace[$arraySlot]['args'][0][0] == ":") {
+		$decodedString = substr($trace[$arraySlot]['args'][0], 1); //remove the ":" character form the string.
+		$decodedString = base64_decode($decodedString); //the string was base64 encoded. Hence decode it back.
+
+		$decryptedString = mcrypt_decrypt(Encryption::getCipher(), Encryption::getKey(), $decodedString, Encryption::getMode(), Encryption::getIV()); //decrypt the string.
+
+		return unserialize(rtrim($decryptedString, "\0")); //return the decrypted string.
+	} else //This is the first run of this function for this string. We know this because this string is not encrypted.
 	{
-		$origString = $trace[$arraySlot]['args'][0];	//store the original value.
-		
-		$encryptedString = mcrypt_encrypt(Encryption::getCipher(), Encryption::getKey(), $trace[$arraySlot]['args'][0], Encryption::getMode(), Encryption::getIV());	//encrypt the value.
-		$encryptedString = base64_encode( $encryptedString );	//base 64 encode it.
-		$encryptedString = ":" . $encryptedString;		//append ":" at the beginning of the encrypted string.
-		
-		$fileData = file($trace[$arraySlot]['file']);	//get file contents as an array.
-		
-		$prevLine = $fileData[(int)$trace[$arraySlot]['line'] - 1];	//get the line that needs to be replaced i.e. the string that contains the plain-text sensitive data.
-		$functionName = str_replace(__NAMESPACE__ . "\\", '', __FUNCTION__);	//calculate the function name of this function (without any namespace).
-		$pos = strpos($prevLine, $functionName);	//find the position of this function-name in the original string.
-		$endPos = strpos($prevLine, ")", $pos);		//search where this function ends, but start the search from the start of the function.
-		
-		$newLine = substr($prevLine, 0, $pos) . $functionName . "('{$encryptedString}')";	//generate the new line i.e. with encrypted String.	
-		
-		$fileData[(int)$trace[$arraySlot]['line'] - 1] = $newLine . substr( $prevLine, $endPos+1);	//replace the old line with the new line.
-		$fileData = implode("", $fileData);	//get the data from the array.
-		
+		$origString = $trace[$arraySlot]['args'][0]; //store the original value.
+
+		$encryptedString = mcrypt_encrypt(Encryption::getCipher(), Encryption::getKey(), serialize($origString), Encryption::getMode(), Encryption::getIV()); //encrypt the value.
+		$encryptedString = base64_encode($encryptedString); //base 64 encode it.
+		$encryptedString = ":" . $encryptedString; //append ":" at the beginning of the encrypted string.
+
+		$fileData = file($trace[$arraySlot]['file']); //get file contents as an array.
+
+		$prevLine = $fileData[(int)$trace[$arraySlot]['line'] - 1]; //get the line that needs to be replaced i.e. the string that contains the plain-text sensitive data.
+		$functionName = str_replace(__NAMESPACE__ . "\\", '', __FUNCTION__); //calculate the function name of this function (without any namespace).
+		$pos = strpos($prevLine, $functionName); //find the position of this function-name in the original string.
+		$endPos = strpos($prevLine, ")", $pos); //search where this function ends, but start the search from the start of the function.
+
+		$newLine = substr($prevLine, 0, $pos) . $functionName . "('{$encryptedString}')"; //generate the new line i.e. with encrypted String.
+
+		$fileData[(int)$trace[$arraySlot]['line'] - 1] = $newLine . substr($prevLine, $endPos + 1); //replace the old line with the new line.
+		$fileData = implode("", $fileData); //get the data from the array.
+
 		//check if file is writable or not.
-		if ( !is_writable($trace[$arraySlot]['file']) )
+		if (!is_writable($trace[$arraySlot]['file'])) {
 			throw new FileNotWritable("ERROR: This file is not Writable!!");
-		
+		}
+
 		//write this new data to file.
 		$fp = fopen($trace[$arraySlot]['file'], 'w');
 		fwrite($fp, $fileData);
 		fclose($fp);
-		
+
 		//return the un-encrypted string for use.
 		return $origString;
 	}
 }
-
-?>

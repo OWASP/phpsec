@@ -244,6 +244,9 @@ class BasicPasswordManagement
 	 */
 	public static function containDoubledWords($string)
 	{
+		// Alternative approach that will find also words with variations at the start or end
+		return (preg_match('/(.{3,})\\1/', $string) == 1);
+		/*
 		//divide the string into two halves.
 		$firstHalf = substr($string, 0, (strlen($string) / 2));
 		$secondHalf = substr($string, (strlen($string) / 2), strlen($string));
@@ -253,6 +256,7 @@ class BasicPasswordManagement
 			return TRUE;
 		else
 			return FALSE;
+		*/
 	}
 	
 	
