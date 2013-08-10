@@ -2,7 +2,7 @@
 
 namespace phpsec;
 
-require_once (__DIR__ . "/../../core/functions.php");
+require_once __DIR__."/../dbmanager.php";
 
 /**
  * DatabaseConfig class
@@ -52,53 +52,49 @@ abstract class DatabaseModel
 
 	public function SQL ($query)
 	{
-		if ($this->dbh === NULL)
-		{
-                        echof("You need to initialize database object properly first.");
-			return false;
+		if ($this->dbh === NULL) {
+			throw new DatabaseNotSet("You need to initialize database object properly first.");
 		}
+
 		$args = func_get_args ();
 		array_shift ($args);
 		$statement = $this->prepare ($query);
+
 		if (!empty ($args[0])) {
-			if (is_array ($args[0]))
+			if (is_array ($args[0])) {
 				$statement->execute ($args[0]);
-			else if (count ($args) >= 1)
-			{
+			} elseif (count ($args) >= 1) {
 				call_user_func_array (array ($statement, "bindAll"), $args);
 				$statement->execute ();
 			}
-		}
-		else
+		} else {
 			$statement->execute ();
+		}
+
 		$type = substr (trim (strtoupper ($query)), 0, 3);
-		if ($type == "INS")
-		{
-			$res = $this->LastInsertId ();
-			if ($res == 0)
-				return $statement->rowCount ();
+		if ($type == "INS") {
+			$res = $this->LastInsertId();
+			if ($res == 0) {
+				return $statement->rowCount();
+			}
 			return $res;
-		}
-		elseif ($type == "DEL" or $type == "UPD")
-		{
-			return $statement->rowCount ();
-		}
-		elseif ($type == "SEL")
-		{
+		} elseif ($type == "DEL" or $type == "UPD") {
+			return $statement->rowCount();
+		} elseif ($type == "SEL") {
 			return $statement->fetchAll();
 		}
-		else
-			return null;
+
+		return null;
 	}
 
-	public function query ($query)
+	public function query($query)
 	{
-		return $this->dbh->query ($query);
+		return $this->dbh->query($query);
 	}
 
-	public function exec ($query)
+	public function exec($query)
 	{
-		return $this->dbh->exec ($query);
+		return $this->dbh->exec($query);
 	}
 }
 
