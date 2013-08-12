@@ -40,3 +40,5 @@ else 								//php-cgi
 	$URL=\phpsec\HttpRequest::URL(false);
 	\phpsec\HttpRequest::SetBaseURL(substr($URL,0,strlen($URL)-strlen($InternalRequest)));
 }
+
+require_once __DIR__."/../config/routes.php";

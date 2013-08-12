@@ -25,7 +25,8 @@ class Autoloader
 			"Session"						=>	"session/session",
 	);
 	static $FrameworkArray=array(
-			
+			"Controller"					=>	"base/control",
+			"DefaultController"				=>	"base/control",
 			
 	);
 	static function autoload($ClassnameWithNamespace)
