@@ -2,9 +2,9 @@
 namespace phpsec;
 
 return array(
-    "DBNAME"    => "OWASP",
-    "DBUSER"    => "root",
-    "DBPASS"    => "testing",
+	"DBNAME" => "OWASP",
+	"DBUSER" => "travis",
+	"DBPASS" => "",
 );
 
 ?>
