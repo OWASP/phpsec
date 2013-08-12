@@ -51,12 +51,16 @@ class FrontController
 		return $classes;
 		//is_subclass_of(class, parent_class,/* allow first param to be string */true) 
 	}
+	/**
+	 * Starts handling the application
+	 * Uses HttpRequest::InternalPath as input
+	 */
 	public function Start()
 	{
 		$Request=HttpRequest::InternalPath();
 		if (substr($Request,0,strlen(self::$StaticPrefix)+1)==self::$StaticPrefix."/") //static requset
 		{
-			echo "static request {$Request}";
+			return $this->StaticContent(substr($Request,strlen(self::$StaticPrefix)+1));
 		}
 		else
 		{
@@ -65,6 +69,11 @@ class FrontController
 		}
 	} 
 	
+	protected function StaticContent($Request)
+	{
+		if (!realpath(__DIR__."/../static/{$Request}")) return false;
+		
+	}
 	
 	/**
 	 * Finds the appropriate route among routes array,
@@ -147,7 +156,16 @@ class FrontController
 		}
 		return $controllerObject->Start();
 	}	
+	
+	
+	function NotFound()
+	{
+		$file=__DIR__."/../view/404.php";
+		if (realpath($file))
+			require $file;
+	}
 }
 $FrontController=new FrontController();
-$FrontController->Start();
+if (!$FrontController->Start())
+	$FrontController->NotFound();
 

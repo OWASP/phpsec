@@ -23,7 +23,7 @@ class Scanner
 	 * Array to hold all the words that are considered unsafe.
 	 * @var Array
 	 */
-	public static $blacklist = array("T_ECHO", "T_PRINT");
+	public static $blacklist = array("T_ECHO"=>"echo", "T_PRINT"=>"print","printf","vprintf");
 	
 	
 	
@@ -65,8 +65,9 @@ class Scanner
 		$i = 0;
 		foreach ($fileList as $file)	//add errors found to the results.
 		{
-			$occurences[$i][0] = Scanner::scanFile($file);
-			$occurences[$i][1] = realpath($file);
+			if (pathinfo($file, PATHINFO_EXTENSION)!="php") continue;
+			$occurences[$i]['file'] = realpath($file);
+			$occurences[$i]['result'] = Scanner::scanFile($file);
 			
 			$i++;
 		}
@@ -103,15 +104,20 @@ class Scanner
 				continue;
 			
 			$token[0] = token_name($token[0]);
-			
-			if (  in_array( $token[0], Scanner::$blacklist))
+			foreach (self::$blacklist as $k=>$v)
 			{
-				$line = array_pop($token);
-				$occurences[$count]["CONTENT"] = preg_replace('/(\t|\n)+/', "", $filecontents[$line-1]);
-				$occurences[$count]["LINE"] = $line;
-				$occurences[$count]["ERROR"] = $token[0];
-				
-				$count++;
+				if (!is_string($k))
+					$k="T_STRING";
+				if ($token[0]==$k && $token[1]==$v)
+				{
+					var_dump($token);
+					$line = $token[2];
+					$occurences[$count]["CONTENT"] = preg_replace('/(\t|\n)+/', "", $filecontents[$line-1]);
+					$occurences[$count]["LINE"] = $line;
+					$occurences[$count]["ERROR"] = $token[0];
+					
+					$count++;
+				}
 			}
 		}
 		

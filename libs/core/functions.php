@@ -5,14 +5,14 @@ class echofException extends \Exception {}
  * Returns XSS-safe equivalent of string
  * @param mixed $data
  */
-function echo_ret($data)
+function xss_safe($data)
 {
 	if (func_num_args()>1)
 	{
 		$args=func_get_args();
 		$out=array();
 		foreach ($args as $arg)
-			$out[]=echo_ret ($arg);
+			$out[]=xss_safe ($arg);
 		return implode("",$out);
 	}
 	if (defined("ENT_HTML401"))
@@ -33,7 +33,7 @@ function echo_ret($data)
  */
 function exho($data)
 {
-	echo echo_ret($data);
+	echo xss_safe($data);
 }
 /**
  * XSS-safe replacement for echo, with formatting and ability to dump elements and attributes
@@ -50,10 +50,39 @@ function echof($string)
 	foreach ($args as $arg)
 	{
 		$formatPosition=strpos($out,"?");
-		$out=substr($out,0,$formatPosition).echo_ret($arg).substr($out,$formatPosition+1);
+		$out=substr($out,0,$formatPosition).xss_safe($arg).substr($out,$formatPosition+1);
 	}
 	echo($out);
 }
+/**
+ * Safe printf. Escapes all arguments
+ * The format string should not contain any concatenations or variables, just plain text
+ * @param string $formatString
+ */
+function printf($formatString)
+{
+	$args=func_get_args();
+	$flag=0;
+	foreach ($args as &$arg)
+	{
+		if (!$flag++) continue; //skip first arg, format str
+		$arg=xss_safe($arg);
+	}
+	call_user_func_array("\\printf", $args);
+}
+/**
+ * Safe vprintf. Escapes all arguments
+ * The format string should not contain any concatenations or variables, just plain text
+ * @param string $formatString
+ * @param array args
+ */
+function vprintf($formatString,$args)
+{
+	foreach ($args as &$arg)
+		$arg=xss_safe($arg);
+	call_user_func_array("\\vprintf", array($formatString,$args));
+}
+
 /**
  * This one replaces NewLines with <br/>
  * @see echo
@@ -61,7 +90,15 @@ function echof($string)
  */
 function echo_br($data)
 {
-	echo nl2br(echo_ret($data));	
+	echo nl2br(xss_safe($data));	
 }
-
+/**
+ * exho alias
+ * @see exho
+ * @param string $data
+ */
+function echos($data)
+{
+	exho($data);
+}
 /** @decontaminated_end **/

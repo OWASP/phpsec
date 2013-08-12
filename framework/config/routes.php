@@ -8,5 +8,4 @@ namespace phpsec\framework;
  * @note: wildcards only supported at the rightmost character
  */
 
-FrontController::$Routes["hello/*"]="default"; //route everything else to default
 FrontController::$Routes["*"]="default"; //route everything else to default

@@ -1,10 +1,12 @@
 <?php
 namespace phpsec\framework;
+const whoami="phpsec framework 1.0";
 /**
  * This file is in charge of setting some environment variables prior to running 
  * the front controller, it tries to set those properly even in CLI mode using
  * some tricks.
  */
+
 if (\phpsec\HttpRequest::isCLI()) 	//php-cli
 {
 	//the request should be provided in CLI as:
