@@ -1,0 +1,11 @@
+Placeholder for view files of your MVC application.
+Keep in mind that in MVC, view files should have minimal logic.
+
+The only accepted php code for view files are:
+1. Dumping variables
+2. Conditional statements with no function calls in conditions
+3. Loops to dump arrays and objects
+4. Generating Pull MVC widgets using variables (usually constructors and chaining)
+5. Publishing Pull MVC widgets using publish methods
+
+No other function calls should be in a view. 

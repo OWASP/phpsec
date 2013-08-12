@@ -4,7 +4,7 @@ namespace phpsec;
 
 class HttpRequestException extends \Exception {}
 class HttpRequestInsecureParameterException extends HttpRequestException {}
-
+class BaseURLNotSetException extends HttpRequestException {}
 
 require_once (__DIR__ . '/tainted.php');
 
@@ -41,6 +41,8 @@ abstract class HttpRequestArray implements \ArrayAccess
 
 	public function offsetGet($offset)
 	{
+		//TODO: some of the values will be messed up after using ___r method to retrive internal URL.
+		//override them if BaseURL is set (use framework for testing)
 		if (isset($this->data[$offset]))
 		{
 			if (substr($offset,0,4) === 'HTTP')
@@ -77,10 +79,29 @@ class HttpRequest extends HttpRequestArray
 	const METHOD_OTHER  = 'OTHER';
 
 	/**
+	 * The application can set this to point to the base URL of the application 
+	 * (e.g example.com/app/resides/here/) so that some functions work.
+	 * @note don't forget the trailing slash
+	 * @var string
+	 */
+	protected static $BaseURL=null;
+	protected static $BasePath=null;
+
+	/**
+	 * Applications should use this to set base url of the website,
+	 * so that Internal* functions work properly.
+	 */
+	public static function SetBaseURL($BaseURL)
+	{
+		self::$BaseURL=$BaseURL;
+		self::$BasePath=substr($BaseURL,strpos($BaseURL,"/",strpos($BaseURL,"://")+4)+1);
+	}
+	
+	/**
 	 * Checks if script is being called from command line
 	 * @return boolean
 	 */
-	protected static function isCLI()
+	public static function isCLI()
 	{
 		if (php_sapi_name() === self::PROTOCOL_CLI || !isset($_SERVER['REMOTE_ADDR']))
 			return true;
@@ -106,7 +127,7 @@ class HttpRequest extends HttpRequestArray
 	static function URL($QueryString=true)
 	{
 		if (self::isCLI())
-			return NULL;
+			return null;
 		if ($QueryString && self::QueryString() )
 			return (self::Protocol()."://".self::ServerName().self::PortReadable().self::Path()."?".self::QueryString());
 		else
@@ -220,7 +241,19 @@ class HttpRequest extends HttpRequestArray
 			return NULL;
 		return isset ($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
 	}
-
+	
+	/**
+	 * Returns the internal request URI, i.e the portion that is
+	 * after the application base URL
+	 * @return string
+	 */
+	static function InternalRequestURI()
+	{
+		if (self::$BaseURL===null)
+			throw new BaseURLNotSetException("You should set the base URL to use internal* functions.");
+		return substr(self::RequestURI(),strlen(self::$BaseURL));
+	}
+	
 	/**
 	 * Query String, the last part in url after ?
 	 *
@@ -274,7 +307,7 @@ class HttpRequest extends HttpRequestArray
 
 	/**
 	 * Request Path, e.g http://somesite.com/this/is/the/request/path/index.php
-	 *
+	 * will return this/is/the/request/path/index.php
 	 * @return string Path
 	 */
 	static function Path()
@@ -288,25 +321,45 @@ class HttpRequest extends HttpRequestArray
 			$Path = $RequestURI;
 		return $Path;
 	}
-
+	
+	/**
+	 * Returns the internal path, i.e the portion that is
+	 * after the application base URL
+	 * @return string
+	 */
+	static function InternalPath()
+	{
+		if (self::isCLI()) //CLI-based internal path
+			if ($temp=strpos(self::$BasePath,"?"))
+				return substr(self::$BasePath,0,$temp);
+			else
+				return self::$BasePath;
+		if (self::$BaseURL===null)
+			throw new BaseURLNotSetException("You should set the base URL to use internal* functions.");
+		return substr(self::Path(),strlen(self::$BasePath)+1);
+		
+	}
+	
 	/**
 	 * Root of website without trailing slash
-	 *
+	 * @see InternalPath
 	 * @return string Root
 	 */
 	static function Root()
 	{
 		if (self::IsCLI())
 			return NULL;
-		$root = self::Protocol()."://".self::Host().self::PortReadable().self::Path();
+		$root = self::Protocol()."://".self::Host().self::PortReadable().self::InternalPath();
 		return $root;
 	}
 
 	/**
 	 * Returns the IP address of the server under which the current script is executing.
+	 * @return string
 	 */
 	static function ServerIP()
 	{
+		#TODO: this is still insecure, find a way to list IP addresses on the system, and match against these, or use online services
 		if (self::isCLI())
 			return '127.0.0.1';
 		return isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : NULL;

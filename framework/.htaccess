@@ -1,0 +1,5 @@
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteCond %{QUERY_STRING} (.*)
+RewriteRule (.*) _core/front.php?___r=$1&%1
+</IfModule>
