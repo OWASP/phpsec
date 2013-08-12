@@ -14,7 +14,7 @@ class LoggerDbTest extends \PHPUnit_Framework_TestCase
 
 	/**
 	 * Varible to keep the object of class \phpsec\Logger.
-	 * @var Object \phpsec\Logger
+	 * @var \phpsec\Logger
 	 */
 	private $myLogger = NULL;
 
@@ -38,9 +38,6 @@ class LoggerDbTest extends \PHPUnit_Framework_TestCase
 
 		$result = SQL("SELECT * FROM LOGS"); //get how many records are there in the log DB.
 
-		if (count($result) > 0)
-			$this->assertTrue(TRUE); //More than 1 record present indicates that logs were inserted.
-		else
-			$this->assertTrue(FALSE);
+		$this->assertCount(2, $result); // Should have two log entries.
 	}
 }
