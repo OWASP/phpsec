@@ -98,10 +98,14 @@ class Scanner
 		$occurences = array(array());
 		$count = 0;
 		
+                $currentTokenNo = 0;    //keeps track of the current token number that is being examined.
 		foreach ($allTokens as $token)
 		{
 			if (!is_array( $token))
-				continue;
+			{
+                                $currentTokenNo++;
+                                continue;
+                        }
 			
 			$token[0] = token_name($token[0]);
 			foreach (self::$blacklist as $k=>$v)
@@ -112,13 +116,26 @@ class Scanner
 				{
 					var_dump($token);
 					$line = $token[2];
-					$occurences[$count]["CONTENT"] = preg_replace('/(\t|\n)+/', "", $filecontents[$line-1]);
+                                        
+                                        $localTokenNo = $currentTokenNo;    //keep a local copy of the current token number.
+                                        while($allTokens[$localTokenNo++] != ";") {}    //search for the token ";" from the current token number.
+                                        $statementTillLine = $allTokens[$localTokenNo][2];  //get the line number where the statement ends.
+                                        
+                                        $content = "";
+                                        for($i = $line-1; $i < $statementTillLine; $i++)    //get contents of all the lines which are related to the statement.
+                                        {
+                                                $content .= preg_replace('/(\t|\n)+/', "", $filecontents[$i]);
+                                        }
+                                        
+					$occurences[$count]["CONTENT"] = $content;
 					$occurences[$count]["LINE"] = $line;
 					$occurences[$count]["ERROR"] = $token[0];
 					
 					$count++;
 				}
 			}
+                        
+                        $currentTokenNo++;
 		}
 		
 		return $occurences;
@@ -133,10 +150,14 @@ class Scanner
 	 */
 	public static function getErrorMessage($error)
 	{
-		if ( ($error == "T_ECHO") || ($error == "T_PRINT") )
+		if ( ($error == "T_ECHO") || ($error == "T_PRINT") || ($error == "T_STRING") )
 		{
 			return "Keyword [{$error}] found in this statement. Using this statement can cause injection attacks!";
 		}
+                else
+                {
+                        return $error;
+                }
 	}
 	
 	
@@ -152,12 +173,12 @@ class Scanner
 		
 		foreach ($errors as $listoferrors)
 		{
-			foreach ($listoferrors[0] as $individualErrors)
+			foreach ($listoferrors['result'] as $individualErrors)
 			{
 				if (count($individualErrors) == 0)
 					continue;
 				
-				$file = $listoferrors[1];
+				$file = $listoferrors['file'];
 				$line = $individualErrors["LINE"];
 				$content = $individualErrors["CONTENT"];
 				$errorType = $individualErrors["ERROR"];
@@ -183,12 +204,12 @@ class Scanner
 		
 		foreach ($errors as $listoferrors)
 		{
-			foreach ($listoferrors[0] as $individualErrors)
+			foreach ($listoferrors['result'] as $individualErrors)
 			{
 				if (count($individualErrors) == 0)
 					continue;
 				
-				$file = $listoferrors[1];
+				$file = $listoferrors['file'];
 				$line = $individualErrors["LINE"];
 				$content = $individualErrors["CONTENT"];
 				$errorType = $individualErrors["ERROR"];
