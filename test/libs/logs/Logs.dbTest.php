@@ -33,11 +33,12 @@ class LoggerDbTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testCreation()
 	{
-		$this->myLogger->log("This is the first message", "WARNING", "LOW"); //store this log.
+		$result1 = SQL("SELECT COUNT(`ID`) FROM `LOGS`");
+            
+                $this->myLogger->log("This is the first message", "WARNING", "LOW"); //store this log.
 		$this->myLogger->log("This is the second message"); //store this log.
-
-		$result = SQL("SELECT * FROM LOGS"); //get how many records are there in the log DB.
-
-		$this->assertCount(2, $result); // Should have two log entries.
+                
+                $result2 = SQL("SELECT COUNT(`ID`) FROM `LOGS`"); //get how many records are there in the log DB.
+		$this->assertTrue( ($result2[0]["COUNT(`ID`)"] - $result1[0]["COUNT(`ID`)"]) == 2 ); // Should have two log entries.
 	}
 }
