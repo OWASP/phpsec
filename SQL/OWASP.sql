@@ -17,16 +17,16 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8 */;
 
 --
--- Database: `owasp`
+-- Database: `OWASP`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `logs`
+-- Table structure for table `LOGS`
 --
 
-CREATE TABLE IF NOT EXISTS `logs` (
+CREATE TABLE IF NOT EXISTS `LOGS` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `MESSAGE` text,
   `FILENAME` text,
@@ -40,10 +40,10 @@ CREATE TABLE IF NOT EXISTS `logs` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `password`
+-- Table structure for table `PASSWORD`
 --
 
-CREATE TABLE IF NOT EXISTS `password` (
+CREATE TABLE IF NOT EXISTS `PASSWORD` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `TEMP_PASS` varchar(128) NOT NULL,
   `USE_FLAG` tinyint(1) NOT NULL,
@@ -58,10 +58,10 @@ CREATE TABLE IF NOT EXISTS `password` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `session`
+-- Table structure for table `SESSION`
 --
 
-CREATE TABLE IF NOT EXISTS `session` (
+CREATE TABLE IF NOT EXISTS `SESSION` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `SESSION_ID` varchar(32) NOT NULL,
   `DATE_CREATED` int(10) NOT NULL,
@@ -74,10 +74,10 @@ CREATE TABLE IF NOT EXISTS `session` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `session_data`
+-- Table structure for table `SESSION_DATA`
 --
 
-CREATE TABLE IF NOT EXISTS `session_data` (
+CREATE TABLE IF NOT EXISTS `SESSION_DATA` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `SESSION_ID` varchar(32) NOT NULL,
   `KEY` varchar(32) NOT NULL,
@@ -88,10 +88,10 @@ CREATE TABLE IF NOT EXISTS `session_data` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user`
+-- Table structure for table `USER`
 --
 
-CREATE TABLE IF NOT EXISTS `user` (
+CREATE TABLE IF NOT EXISTS `USER` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `USERID` varchar(32) NOT NULL,
   `ACCOUNT_CREATED` int(10) NOT NULL,
