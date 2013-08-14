@@ -1,13 +1,13 @@
 -- phpMyAdmin SQL Dump
--- version 3.4.10.1deb1
+-- version 4.0.5
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jul 26, 2013 at 06:03 AM
--- Server version: 5.5.22
--- PHP Version: 5.3.10-1ubuntu3
+-- Generation Time: Aug 14, 2013 at 06:45 AM
+-- Server version: 5.1.71-community
+-- PHP Version: 5.3.27
 
-SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
 
@@ -17,31 +17,33 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8 */;
 
 --
--- Database: `OWASP`
+-- Database: `owasp`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `LOGS`
+-- Table structure for table `logs`
 --
 
-CREATE TABLE IF NOT EXISTS `LOGS` (
+CREATE TABLE IF NOT EXISTS `logs` (
+  `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `MESSAGE` text,
   `FILENAME` text,
   `TYPE` text,
   `PRIORITY` text,
   `DATETIME` text,
-  `LINE` int(10) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `LINE` int(10) DEFAULT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=25 ;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `PASSWORD`
+-- Table structure for table `password`
 --
 
-CREATE TABLE IF NOT EXISTS `PASSWORD` (
+CREATE TABLE IF NOT EXISTS `password` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `TEMP_PASS` varchar(128) NOT NULL,
   `USE_FLAG` tinyint(1) NOT NULL,
@@ -51,15 +53,15 @@ CREATE TABLE IF NOT EXISTS `PASSWORD` (
   `USERID` varchar(32) NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `USERID` (`USERID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=65 ;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `SESSION`
+-- Table structure for table `session`
 --
 
-CREATE TABLE IF NOT EXISTS `SESSION` (
+CREATE TABLE IF NOT EXISTS `session` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `SESSION_ID` varchar(32) NOT NULL,
   `DATE_CREATED` int(10) NOT NULL,
@@ -67,29 +69,29 @@ CREATE TABLE IF NOT EXISTS `SESSION` (
   `USERID` varchar(32) NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `SESSION_ID` (`SESSION_ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=447 ;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `SESSION_DATA`
+-- Table structure for table `session_data`
 --
 
-CREATE TABLE IF NOT EXISTS `SESSION_DATA` (
+CREATE TABLE IF NOT EXISTS `session_data` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `SESSION_ID` varchar(32) NOT NULL,
   `KEY` varchar(32) NOT NULL,
   `VALUE` varchar(64) DEFAULT NULL,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=35 ;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `USER`
+-- Table structure for table `user`
 --
 
-CREATE TABLE IF NOT EXISTS `USER` (
+CREATE TABLE IF NOT EXISTS `user` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `USERID` varchar(32) NOT NULL,
   `ACCOUNT_CREATED` int(10) NOT NULL,
@@ -101,7 +103,7 @@ CREATE TABLE IF NOT EXISTS `USER` (
   `STATIC_SALT` varchar(128) NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `USERID` (`USERID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=187 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
