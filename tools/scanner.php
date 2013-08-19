@@ -28,6 +28,14 @@ class Scanner
 	
 	
 	/**
+	 * Array to hold the type/nature of the error.
+	 * @var Array
+	 */
+	public static $warningType = array("w"=>"WARNING", "e"=>"ERROR");
+	
+	
+	
+	/**
 	 * Function to start a scan in a directory.
 	 * @return Array
 	 * @throws DirectoryNotFoundException
@@ -114,11 +122,22 @@ class Scanner
 					$k="T_STRING";
 				if ($token[0]==$k && $token[1]==$v)
 				{
-					var_dump($token);
+					//var_dump($token);
 					$line = $token[2];
                                         
+					$inlineVariable = FALSE;
+					$separatorFound = FALSE;
                                         $localTokenNo = $currentTokenNo;    //keep a local copy of the current token number.
-                                        while($allTokens[$localTokenNo++] != ";") {}    //search for the token ";" from the current token number.
+                                        while($allTokens[$localTokenNo++] != ";")    //search for the token ";" from the current token number.
+					{
+						if($allTokens[$localTokenNo] == ",")
+							$separatorFound = TRUE;
+						
+						if(is_array($allTokens[$localTokenNo]) && (token_name($allTokens[$localTokenNo][0]) == "T_VARIABLE") && ($separatorFound == FALSE))
+						{
+							$inlineVariable = TRUE;
+						}	
+					}
                                         $statementTillLine = $allTokens[$localTokenNo][2];  //get the line number where the statement ends.
                                         
                                         $content = "";
@@ -126,10 +145,14 @@ class Scanner
                                         {
                                                 $content .= preg_replace('/(\t|\n)+/', "", $filecontents[$i]);
                                         }
-                                        
+					
 					$occurences[$count]["CONTENT"] = $content;
 					$occurences[$count]["LINE"] = $line;
 					$occurences[$count]["ERROR"] = $token[0];
+					if($inlineVariable)
+						$occurences[$count]["TYPE"] = Scanner::$warningType["e"];
+					else
+						$occurences[$count]["TYPE"] = Scanner::$warningType["w"];
 					
 					$count++;
 				}
@@ -182,11 +205,13 @@ class Scanner
 				$line = $individualErrors["LINE"];
 				$content = $individualErrors["CONTENT"];
 				$errorType = $individualErrors["ERROR"];
+				$errorNature = $individualErrors["TYPE"];
 
 				echof("FILE:\t?\n", $file);
 				echof("LINE:\t?\n", $line);
 				echof("ERROR:\t?\n", Scanner::getErrorMessage($errorType));
-				echof("CONTENT:\t?\n\n", $content);
+				echof("CONTENT:\t?\n", $content);
+				echof("TYPE:\t?\n\n", $errorNature);
 			}
 		}
 	}
@@ -214,8 +239,9 @@ class Scanner
 				$content = $individualErrors["CONTENT"];
 				$errorType = $individualErrors["ERROR"];
 				$errorMessage = Scanner::getErrorMessage($errorType);
+				$errorNature = $individualErrors["TYPE"];
 				
-				echof("?:?:?:\t?\n?\n\n", $file, $line, $errorType, $content, $errorMessage);
+				echof("?:?:?:?:\t?\n?\n\n", $errorNature, $file, $line, $errorType, $content, $errorMessage);
 			}
 		}
 	}
