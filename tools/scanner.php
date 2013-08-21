@@ -126,17 +126,22 @@ class Scanner
 					$line = $token[2];
                                         
 					$inlineVariable = FALSE;
-					$separatorFound = FALSE;
-                                        $localTokenNo = $currentTokenNo;    //keep a local copy of the current token number.
+					$localTokenNo = $currentTokenNo;    //keep a local copy of the current token number.
                                         while($allTokens[$localTokenNo++] != ";")    //search for the token ";" from the current token number.
 					{
-						if($allTokens[$localTokenNo] == ",")
-							$separatorFound = TRUE;
-						
-						if(is_array($allTokens[$localTokenNo]) && (token_name($allTokens[$localTokenNo][0]) == "T_VARIABLE") && ($separatorFound == FALSE))
+						if (is_array($allTokens[$localTokenNo]) && ($allTokens[$localTokenNo][0] == T_ENCAPSED_AND_WHITESPACE))
 						{
 							$inlineVariable = TRUE;
-						}	
+						}
+						elseif($allTokens[$localTokenNo] == ".")
+						{
+							$tempToken = $localTokenNo+1;
+							while(isset($allTokens[$tempToken][0]) && ($allTokens[$tempToken][0] == T_WHITESPACE)) {$tempToken++;}
+							if(isset($allTokens[$tempToken][0]) && ($allTokens[$tempToken][0] == T_VARIABLE))
+							{
+								$inlineVariable = TRUE;
+							}
+						}
 					}
                                         $statementTillLine = $allTokens[$localTokenNo][2];  //get the line number where the statement ends.
                                         

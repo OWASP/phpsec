@@ -14,7 +14,7 @@ class DefaultController extends phpsec\framework\DefaultController
 		$x="<p>yo</p>";
 		echo "this should be just warning"; //safe stuff
 		echo "this one {$x} is error";
-		print "this is ".$x." unsafe too.";
+		print "this is ". $x." unsafe too.";
 		printf("warning here");
 		vprintf("warn %s",array($x));
 		vprintf("not ok ".$x." %s",array($x));
