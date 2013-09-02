@@ -35,17 +35,24 @@ class AdvancedPasswordManagement
 	
 	
 	/**
-	 * It denotes the # of maximum attempts for login using the password. If this limit exceeds and this happens within a very short amount of time, then it is considered as a brute force attack.
+	 * It denotes the # of maximum attempts for login using the password. If this limit exceeds and this happens within a very short amount of time (which is defined by $bruteForceLockAttemptTotalTime), then it is considered as a brute force attack.
 	 * @var int
 	 */
 	public static $bruteForceLockAttempts = 5;	//This tells how many attemps must be considered before brute-force lock.
 	
+
+	/**
+	 * It denotes the amount of time in seconds for which time for total number of attempts must not exceed this value. If this happens , then it is considered as a brute force attack.
+	 * @var int
+	 */
+	public static $bruteForceLockAttemptTotalTime =5; //This tells that if 5 login attempts are made within this time then it will be a brute force.
 	
+
 	/**
 	 * It denotes the amount of time in seconds between which no two wrong passwords must be entered. If this happens, then it is considered that a bot is trying to hack the account using brute-force means.
 	 * @var int
 	 */
-	public static $bruteForceLockTimePeriod = 5;	//5 SEC  - This defines the time-period after which next login attempt must be carried out. E.g if the time is 5 sec, then time-period between two login attempts must minimum be 5 sec, otherwise it will be considered brute-force attack.
+	public static $bruteForceLockTimePeriod = 1;	//1 SEC  - This defines the time-period after which next login attempt must be carried out. E.g if the time is 5 sec, then time-period between two login attempts must minimum be 1 sec. Assuming that user will take atleast 1 sec time to type between two passwords.
 	
 	
 	
@@ -99,7 +106,7 @@ class AdvancedPasswordManagement
 
 		if (count($result) < 1)
 		{
-			SQL("INSERT INTO PASSWORD (`TEMP_PASS`, `USE_FLAG`, `TEMP_TIME`, `TOTAL_LOGIN_ATTEMPTS`, `LAST_LOGIN_ATTEMPT`, `USERID`) VALUES (?, ?, ?, ?, ?, ?)", array(  randstr(10), 1, 0, 1, time(), $user));
+			SQL("INSERT INTO PASSWORD (`TEMP_PASS`, `USE_FLAG`, `TEMP_TIME`, `TOTAL_LOGIN_ATTEMPTS`, `LAST_LOGIN_ATTEMPT`, `FIRST_LOGIN_ATTEMPT`, `USERID`) VALUES (?, ?, ?, ?, ?, ?,?)", array(randstr(10), 1, 0, 1, time(), $currentTime, $user));
 
 			return FALSE;
 		}
@@ -107,22 +114,19 @@ class AdvancedPasswordManagement
 		{
 			if ( ($currentTime - $result[0]['LAST_LOGIN_ATTEMPT']) <= AdvancedPasswordManagement::$bruteForceLockTimePeriod )
 			{
-				if ($result[0]['TOTAL_LOGIN_ATTEMPTS'] >= AdvancedPasswordManagement::$bruteForceLockAttempts)
-				{
-					SQL("UPDATE PASSWORD SET `TOTAL_LOGIN_ATTEMPTS` = `TOTAL_LOGIN_ATTEMPTS` + 1, `LAST_LOGIN_ATTEMPT` = ? WHERE USERID = ?", array($currentTime, $user));
-
-					return TRUE;
-				}
-				else
-				{
-					SQL("UPDATE PASSWORD SET `TOTAL_LOGIN_ATTEMPTS` = `TOTAL_LOGIN_ATTEMPTS` + 1, `LAST_LOGIN_ATTEMPT` = ? WHERE USERID = ?", array($currentTime, $user));
-
-					return FALSE;
-				}
+				SQL("UPDATE PASSWORD SET `TOTAL_LOGIN_ATTEMPTS` = `TOTAL_LOGIN_ATTEMPTS` + 1, `LAST_LOGIN_ATTEMPT` = ? WHERE USERID = ?", array($currentTime, $user));
+				
+				return TRUE;
+			}
+			else if ($result[0]['TOTAL_LOGIN_ATTEMPTS'] >= AdvancedPasswordManagement::$bruteForceLockAttempts && ($currentTime - $result[0]['FIRST_LOGIN_ATTEMPT']) <= AdvancedPasswordManagement::$bruteForceLockAttemptTotalTime)
+			{
+				SQL("UPDATE PASSWORD SET `TOTAL_LOGIN_ATTEMPTS` = `TOTAL_LOGIN_ATTEMPTS` + 1, `LAST_LOGIN_ATTEMPT` = ? WHERE USERID = ?", array($currentTime, $user));
+				
+				return TRUE;
 			}
 			else
 			{
-				SQL("UPDATE PASSWORD SET `TOTAL_LOGIN_ATTEMPTS` = ?, `LAST_LOGIN_ATTEMPT` = ? WHERE USERID = ?", array(1, $currentTime, $user));
+				SQL("UPDATE PASSWORD SET `TOTAL_LOGIN_ATTEMPTS` = ?, `LAST_LOGIN_ATTEMPT` = ?, `FIRST_LOGIN_ATTEMPT` =? WHERE USERID = ?", array(1, $currentTime, $currentTime, $user));
 
 				return FALSE;
 			}
