@@ -45,7 +45,7 @@ class AdvancedPasswordManagement
 	 * It denotes the amount of time in seconds for which time for total number of attempts must not exceed this value. If this happens , then it is considered as a brute force attack.
 	 * @var int
 	 */
-	public static $bruteForceLockAttemptTotalTime =5; //This tells that if 5 login attempts are made within this time then it will be a brute force.
+	public static $bruteForceLockAttemptTotalTime =25; //This tells that if 5 login attempts are made within this time then it will be a brute force.
 	
 
 	/**
