@@ -118,6 +118,12 @@ class AdvancedPasswordManagement
 				
 				return TRUE;
 			}
+			else if($result[0]['TOTAL_LOGIN_ATTEMPTS'] < AdvancedPasswordManagement::$bruteForceLockAttempts)
+			{
+				SQL("UPDATE PASSWORD SET `TOTAL_LOGIN_ATTEMPTS` = ?, `LAST_LOGIN_ATTEMPT` = ? WHERE USERID = ?", array(1, $currentTime, $user));
+
+				return FALSE;
+			}
 			else if ($result[0]['TOTAL_LOGIN_ATTEMPTS'] >= AdvancedPasswordManagement::$bruteForceLockAttempts && ($currentTime - $result[0]['FIRST_LOGIN_ATTEMPT']) <= AdvancedPasswordManagement::$bruteForceLockAttemptTotalTime)
 			{
 				SQL("UPDATE PASSWORD SET `TOTAL_LOGIN_ATTEMPTS` = `TOTAL_LOGIN_ATTEMPTS` + 1, `LAST_LOGIN_ATTEMPT` = ? WHERE USERID = ?", array($currentTime, $user));
