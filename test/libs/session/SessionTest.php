@@ -1,6 +1,8 @@
 <?php
 namespace phpsec;
 
+ob_start();
+
 
 /**
  * Required Files.
@@ -36,13 +38,17 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		time("RESET");
 
 		//Create users.
-		$this->user[0] = User::newUserObject("1234", "resting");
-		$this->user[1] = User::newUserObject("5678", "owasp");
+		$this->user[0] = User::newUserObject(randstr(4), "resting");
+		$this->user[1] = User::newUserObject(randstr(4), "owasp");
 
 		//create new sessions associated with each user.
-		$this->session[0] = new Session($this->user[0]->getUserID()); //session for user 0.
-		$this->session[1] = new Session($this->user[0]->getUserID()); //session for user 0.
-		$this->session[2] = new Session($this->user[1]->getUserID()); //session for user 1.
+		$this->session[0] = new Session(); //session for user 0.
+		$this->session[1] = new Session(); //session for user 0.
+		$this->session[2] = new Session(); //session for user 1.
+		
+		$this->session[0]->newSession($this->user[0]->getUserID());
+		$this->session[1]->newSession($this->user[0]->getUserID());
+		$this->session[2]->newSession($this->user[1]->getUserID());
 	}
 
 
@@ -60,11 +66,8 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 			$this->session[2]->destroySession();
 
 		//delete all the created users.
-		$this->user[0]->deleteUser();
-		$this->user[1]->deleteUser();
-
-		//delete the connection to the DB.
-		$this->conn = null;
+//		$this->user[0]->deleteUser();
+//		$this->user[1]->deleteUser();
 	}
 
 	/**
@@ -146,6 +149,27 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertTrue((count($arrayReturned1) != 0) && (count($arrayReturned2) == 0) && (count($arrayReturned3) == 0));
 	}
+	
+	
+	/**
+	 * Function to check if previous sessionIDs can be revived if their expiry time has not passed.
+	 */
+	public function testExistingSession()
+	{
+		$_COOKIE['sessionid'] = $this->session[0]->getSessionID();	//imitate the cookie variable because phpunit cant set cookies in browser.
+		
+		$myNewSession = new Session();
+		$sessionID1 = $myNewSession->existingSession($this->session[0]->getSessionID());
+		$experiment1 = ($sessionID1 == $this->session[0]->getSessionID());	//Since session not expired, the old and the new session, both must be same.
+		
+		time("SET", 1380502880);
+		$sessionID2 = $myNewSession->existingSession($this->session[0]->getSessionID());
+		$experiment2 = ($sessionID2 != $this->session[0]->getSessionID());	//Since session expired, a new session will be created. Thus, old and new session will be different.
+		
+		$myNewSession->destroySession();
+		
+		$this->assertTrue($experiment1 && $experiment2);
+	}
 
 
 	/**
@@ -225,13 +249,10 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	{
 		$this->session[0]->destroyAllSessions();
 
-		$result = SQL("SELECT TOTAL_SESSIONS FROM USER WHERE USERID = ?", array("{$this->session[0]->getUserID()}"));
-		$totalSessions = $result[0]['TOTAL_SESSIONS'];
+		$allSessions = $this->session[0]->getAllSessions();
 
-		$this->assertTrue($totalSessions == 0); //The total sessions must be 0 for this user after this operation.
+		$this->assertTrue(count($allSessions) == 0); //The total sessions must be 0 for this user after this operation.
 	}
-
-
 }
 
 ?>

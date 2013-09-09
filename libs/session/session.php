@@ -25,6 +25,9 @@ class SessionNotFoundException extends SessionException
 class NoUserFoundException extends SessionException
 {
 } //User not found to be associated with a session.
+class NullUserException extends SessionException
+{
+} //Null User passed.
 
 class Session
 {
@@ -56,23 +59,24 @@ class Session
 	 */
 	public static $expireMaxTime = 604800; //1 week.
 
-
+	
+	
 	/**
-	 * Constructor to initialize a new session for some user.
-	 * @param DatabaseObject $dbConn
-	 * @param String $user
-	 * @throws DBHandlerForSessionNotSetException
+	 * Function to check if sessionID is set for this user or not.
+	 * @throws SessionNotFoundException
 	 */
-	public function __construct($user, $sessionName = "")
+	private function checkIfSessionIDisSet()
 	{
-		$this->userID = $user;
-		$this->newSession($sessionName); //get a new session ID for the current user.
+		if ( ($this->session == "") || ($this->session == null) )
+		{
+			throw new SessionNotFoundException("ERROR: No session is set for this user.");
+		}
 	}
-
-
+	
+	
 	/**
 	 * To return the current session ID.
-	 * @return String
+	 * @return string || null
 	 */
 	public function getSessionID()
 	{
@@ -82,7 +86,7 @@ class Session
 
 	/**
 	 * To return the current User ID.
-	 * @return String
+	 * @return string || null
 	 */
 	public function getUserID()
 	{
@@ -91,43 +95,69 @@ class Session
 
 
 	/**
-	 * To create a new Session ID for the current session.
-	 * @return boolean
-	 * @throws NoUserFoundException
+	 * To create a new Session ID for the current user.
+	 * @return string	The new session ID of the current user.
 	 */
-	protected function newSession($sessionName = "")
+	public function newSession($userID)
 	{
-		if ($this->userID == null)
-			throw new NoUserFoundException("ERROR: No User was found. Session needs a user to be present.");
-
-		if ($sessionName == "")
-			$this->session = randstr(32); //generate a new random string for the session ID of length 32.
-		else
-			$this->session = $sessionName;
-
+		if ( ($userID == null) || ($userID == "") )
+			throw new NullUserException("ERROR: UserID cannot be null.");
+		
+		$this->userID = $userID;
+		$this->session = randstr(32); //generate a new random string for the session ID of length 32.
+		
 		$time = time(); //get the current time.
 
 		SQL("INSERT INTO SESSION (`SESSION_ID`, `DATE_CREATED`, `LAST_ACTIVITY`, `USERID`) VALUES (?, ?, ?, ?)", array("{$this->session}", $time, $time, "{$this->userID}"));
 
-		$this->updateTotalNoOfSessions(); //update the total number of sessions, since we just created one.
-
-		return TRUE;
+		$this->updateUserCookies();
+		
+		return $this->session;
 	}
-
-
+	
+	
 	/**
-	 * To update the total count of sessions for the current user.
-	 * @return boolean
+	 * Function to get the session object from an old sessionID that we receive from the user's cookie.
+	 * @return string	Returns the current SessionID
+	 * @throws SessionNotFoundException
 	 */
-	protected function updateTotalNoOfSessions()
+	public function existingSession()
 	{
-		$result = $this->getAllSessions(); //get all the session IDs for the current user.
-
-		$totalCount = count($result); //count the number of session IDs returned. Total number is the count of total number of sessions.
-
-		SQL("UPDATE USER SET `TOTAL_SESSIONS` = ? WHERE USERID = ?", array($totalCount, $this->userID));
-
-		return TRUE;
+		if (!isset($_COOKIE['sessionid']))
+			throw new SessionNotFoundException("ERROR: No such sessionID exists!");
+			
+		$sessionID = $_COOKIE['sessionid'];
+		
+		$result = SQL("SELECT `SESSION_ID`, `USERID` FROM SESSION WHERE `SESSION_ID` = ?", array($sessionID));
+		if (count($result) != 1)
+		{
+			$this->updateUserCookies(TRUE);
+			throw new SessionNotFoundException("ERROR: No such sessionID exists!");
+		}
+		$this->session = $result[0]['SESSION_ID'];
+		$this->userID = $result[0]['USERID'];
+		
+		if ($this->inactivityTimeout() || $this->expireTimeout())
+		{
+			$this->refreshSession();
+		}
+		
+		$this->updateUserCookies();
+		
+		return $this->session;
+	}
+	
+	
+	public function updateUserCookies($deleteCookie = FALSE)
+	{
+		if ($deleteCookie === FALSE)
+		{
+			\setcookie("sessionid", $this->session, time() + Session::$expireMaxTime, null, null, FALSE, TRUE);
+		}
+		else
+		{
+			\setcookie("sessionid", NULL, time() - Session::$expireMaxTime, null, null, FALSE, TRUE);
+		}
 	}
 
 
@@ -137,23 +167,26 @@ class Session
 	 */
 	public function getAllSessions()
 	{
+		if ( ($this->userID == null) || ($this->userID == "") )
+		{
+			throw new NoUserFoundException("ERROR: No user is set! A user is required to work with sessions.");
+		}
+		
 		$result = SQL("SELECT SESSION_ID FROM SESSION WHERE USERID = ?", array($this->userID));
-
 		return $result;
 	}
 
 
 	/**
 	 * To set the data in the current session.
-	 * @param String $key
-	 * @param String $value
+	 * @param string $key
+	 * @param string $value
 	 * @return boolean
 	 * @throws SessionNotFoundException
 	 */
 	public function setData($key, $value)
 	{
-		if ($this->session == null)
-			throw new SessionNotFoundException("WARNING: No session is set for this user.");
+		$this->checkIfSessionIDisSet();
 
 		//check before setting data, if the session has expired.
 		if ($this->inactivityTimeout() || $this->expireTimeout()) {
@@ -161,9 +194,11 @@ class Session
 		}
 
 		//check if the key given by the user has already been set. If yes, then the value needs to be replaced and new record for key=>value is NOT needed.
-		if (count($prevSession = $this->getData($key)) > 0) {
+		if (count($prevSession = $this->getData($key)) > 0)
+		{
 			SQL("UPDATE SESSION_DATA SET `VALUE` = ? WHERE `KEY` = ? AND SESSION_ID = ?", array($value, $key, "{$this->session}"));
-		} else //If the key is not found, then a new record of key=>value pair needs to be created.
+		} 
+		else //If the key is not found, then a new record of key=>value pair needs to be created.
 		{
 			SQL("INSERT INTO SESSION_DATA (`SESSION_ID`, `KEY`, `VALUE`) VALUES (?, ?, ?)", array("{$this->session}", $key, $value));
 		}
@@ -180,8 +215,7 @@ class Session
 	 */
 	public function getData($key)
 	{
-		if ($this->session == null)
-			throw new SessionNotFoundException("WARNING: No session is set for this user.");
+		$this->checkIfSessionIDisSet();
 
 		//check before retrieving data, if the session has expired.
 		if ($this->inactivityTimeout() || $this->expireTimeout()) {
@@ -200,7 +234,7 @@ class Session
 	 */
 	public function inactivityTimeout()
 	{
-		if ($this->session == null)
+		if ( ($this->session == null) || ($this->session == "") )
 			return TRUE;
 
 		$currentActivityTime = time(); //get current time.
@@ -226,7 +260,7 @@ class Session
 	 */
 	public function expireTimeout()
 	{
-		if ($this->session == null)
+		if ( ($this->session == null) || ($this->session == "") )
 			return TRUE;
 
 		$currentActivityTime = time(); //get current time.
@@ -248,28 +282,31 @@ class Session
 
 	/**
 	 * To refresh the session ID of the current session. This will update the last time that the user was active and the session creation date to the current time. The essence is to make the session ID look like it was just created now.
-	 * @return boolean
+	 * @return string	Returns the new/current sessionID
 	 */
 	public function refreshSession()
 	{
 		//If session is not set, then just create a new session.
-		if ($this->session == null) {
-			$this->newSession();
-			return TRUE;
-		} else //If session is already set.
+		if ( ($this->session == null) || ($this->session == "") )
+		{
+			$this->newSession($this->userID);
+			return $this->session;
+		}
+		else //If session is already set.
 		{
 			//check for session expiry.
 			if ($this->inactivityTimeout() || $this->expireTimeout()) {
-				$this->newSession();
-				return TRUE;
+				$this->newSession($this->userID);
+				return $this->session;
 			}
 
 			$currentTime = time();
 
 			//exchange the old session's creation date and the last activity time with the current time.
 			SQL("UPDATE SESSION SET `DATE_CREATED` = ? , `LAST_ACTIVITY` = ? WHERE SESSION_ID = ?", array($currentTime, $currentTime, "{$this->session}"));
-
-			return TRUE;
+			$this->updateUserCookies();
+			
+			return $this->session;
 		}
 	}
 
@@ -281,8 +318,7 @@ class Session
 	 */
 	public function destroySession()
 	{
-		if ($this->session == null)
-			throw new SessionNotFoundException("WARNING: No session is set for this user.");
+		$this->checkIfSessionIDisSet();
 
 		//delete all data associated with this session ID.
 		SQL("DELETE FROM SESSION_DATA WHERE `SESSION_ID` = ?", array("{$this->session}"));
@@ -291,8 +327,8 @@ class Session
 		SQL("DELETE FROM SESSION WHERE `SESSION_ID` = ?", array("{$this->session}"));
 
 		$this->session = null;
-		$this->updateTotalNoOfSessions(); //update the total sessions because we just deleted one.
-
+		$this->updateUserCookies(TRUE);
+		
 		return TRUE;
 	}
 
@@ -315,26 +351,25 @@ class Session
 		}
 
 		$this->session = null;
-		$this->updateTotalNoOfSessions();
-
+		$this->updateUserCookies(TRUE);
+		
 		return TRUE;
 	}
 
 
 	/**
 	 * To promote/demote a session. This essentially destroys the current session ID and issues a new session ID.
-	 * @return boolean
+	 * @return string	Returns the new sessionID
 	 * @throws SessionNotFoundException
 	 */
 	public function rollSession()
 	{
-		if ($this->session == null)
-			throw new SessionNotFoundException("WARNING: No session is set for this user.");
+		$this->checkIfSessionIDisSet();
 
 		//check for session expiry.
 		if ($this->inactivityTimeout() || $this->expireTimeout()) {
-			$this->newSession();
-			return TRUE;
+			$this->newSession($this->userID);
+			return $this->session;
 		}
 
 		//get all the data that is stored by this session.
@@ -344,14 +379,14 @@ class Session
 		$this->destroySession();
 
 		//create a new session.
-		$this->newSession();
+		$this->newSession($this->userID);
 
 		//copy all the previous data to this new session.
 		foreach ($result as $arg) {
 			$this->setData($arg['KEY'], $arg['VALUE']);
 		}
 
-		return TRUE;
+		return $this->session;
 	}
 }
 
