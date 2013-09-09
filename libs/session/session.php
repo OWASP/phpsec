@@ -388,6 +388,20 @@ class Session
 
 		return $this->session;
 	}
+	
+	
+	/**
+	 * Function to return the total number of devices the user is logged in from.
+	 * @return int
+	 */
+	public function devicesLoggedIn()
+	{
+		//Select all session IDs from Session table for this user.
+		$result = SQL("SELECT `SESSION_ID` FROM SESSION WHERE USERID = ?", array($this->userID));
+		
+		//Count all these sessions, that is the total number of device logged-in because for each device there is only one session and each session belongs to only one device.
+		return count($result);
+	}
 }
 
 ?>

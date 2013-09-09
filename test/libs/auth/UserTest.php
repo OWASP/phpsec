@@ -126,5 +126,20 @@ class UserTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertTrue($this->obj->isPasswordExpired());
 	}
+	
+	
+	/**
+	 * Function to test forceLogIn function.
+	 */
+	public function testForceLogIn()
+	{
+		$obj1 = User::forceLogin("rash"); //try to force-login this user.
+
+		$test = $this->obj->getUserID() == $obj1->getUserID(); //check if both of these objects are same.
+
+		$obj1->deleteUser(); //delete the newly created users.
+
+		$this->assertTrue($test);
+	}
 
 }

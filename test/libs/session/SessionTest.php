@@ -38,8 +38,8 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		time("RESET");
 
 		//Create users.
-		$this->user[0] = User::newUserObject(randstr(4), "resting");
-		$this->user[1] = User::newUserObject(randstr(4), "owasp");
+		$this->user[0] = User::newUserObject("abcd", "resting");
+		$this->user[1] = User::newUserObject("efgh", "owasp");
 
 		//create new sessions associated with each user.
 		$this->session[0] = new Session(); //session for user 0.
@@ -252,6 +252,14 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		$allSessions = $this->session[0]->getAllSessions();
 
 		$this->assertTrue(count($allSessions) == 0); //The total sessions must be 0 for this user after this operation.
+	}
+	
+	
+	
+	public function testDevicesLoggedIn()
+	{
+		$count = $this->session[0]->devicesLoggedIn();
+		$this->assertTrue($count == 2);
 	}
 }
 

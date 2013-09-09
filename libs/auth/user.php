@@ -690,7 +690,7 @@ class User extends BasicPasswordManagement
 						return TRUE;
 				}
 			}
-
+			\setcookie("AUTHID", "");
 			return FALSE;
 		}
 		else

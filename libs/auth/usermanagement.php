@@ -17,7 +17,7 @@ class UserManagement
 	
 	/**
 	 * To check if a userID exists in the system or not.
-	 * @param String $userID
+	 * @param string $userID
 	 * @return boolean
 	 */
 	public static function userExists($userID)
@@ -31,9 +31,9 @@ class UserManagement
 	
 	/**
 	 * To create a new user.
-	 * @param String $userID
-	 * @param String $password
-	 * @param String $staticSalt
+	 * @param string $userID
+	 * @param string $password
+	 * @param string $staticSalt
 	 * @return \phpsec\User | boolean
 	 */
 	public static function createUser($userID, $password, $staticSalt = "")
@@ -48,7 +48,7 @@ class UserManagement
 	
 	/**
 	 * To delete a user.
-	 * @param String $userID
+	 * @param string $userID
 	 * @return boolean
 	 */
 	public static function deleteUser($userID)
@@ -74,46 +74,9 @@ class UserManagement
 	
 	
 	/**
-	 * Function to return the total number of devices the user is logged in from.
-	 * @param String $userID
-	 * @return int
-	 */
-	public static function devicesLoggedIn($userID)
-	{
-		//Select all session IDs from Session table for this user.
-		$result = SQL("SELECT `SESSION_ID` FROM SESSION WHERE USERID = ?", array($userID));
-		$count = 0;
-		
-		//Filter all "DEV" sessions. Count of all those sessions is the total number of device logged-in.
-		foreach ($result as $session)
-		{
-			if (\substr($session['SESSION_ID'], 0, 3) == "DEV")
-				$count = $count + 1;
-		}
-
-		return $count;
-	}
-	
-	
-	
-	/**
-	 * Function to check if a user is logged-in to the system. True will be returned if the user is logged-in from any device.
-	 * @param String $userID
-	 * @return boolean
-	 */
-	public static function isLoggedIn($userID)
-	{
-		$count = UserManagement::devicesLoggedIn($userID);
-		
-		return ($count > 0);
-	}
-	
-	
-	
-	/**
 	 * Function for user to log-in.
-	 * @param String $userID
-	 * @param String $password
+	 * @param string $userID
+	 * @param string $password
 	 * @return \phpsec\User
 	 */
 	public static function logIn($userID, $password)
@@ -125,7 +88,7 @@ class UserManagement
 	
 	/**
 	 * Function for user to log-in forcefully i.e without providing user-credentials.
-	 * @param String $userID
+	 * @param string $userID
 	 * @return \phpsec\User
 	 */
 	public static function forceLogIn($userID)
@@ -139,46 +102,43 @@ class UserManagement
 	 * Function for user to Log-out.
 	 * @param \phpsec\User $userObj
 	 * @return boolean
-	 * @throws SessionNotFoundException
 	 */
 	public static function logOut($userObj)
 	{
-		//check if session is supported.
-		if ( (isset($userObj->session[0])) && ($userObj->session[0] !== FALSE) )
+		if ($userObj->checkRememberMe() === TRUE)
 		{
-			//The session array inside user class stores sessions related to users log-in information. Deleting those sessions would result in log-out.
-			foreach ($userObj->session as $session)
-			{
-				$session->destroySession();
-			}
-			
-			return TRUE;
+			\setcookie("AUTHID", "");
 		}
-		else
-			throw new SessionNotFoundException("ERROR: Session is not Found. Session Library is needed to use this function.");
+		
+		if (  file_exists(__DIR__ . "/../session/session.php") )
+		{
+			require_once (__DIR__ . "/../session/session.php");
+			$tempSession = new Session();
+			$tempSession->existingSession();
+			$tempSession->destroySession();
+		}
 	}
 	
 	
 	
 	/**
 	 * Function for user to log-out from all the devices at once.
-	 * @param String $userID
+	 * @param string $userID
 	 * @return boolean
-	 * @throws SessionNotFoundException
 	 */
 	public static function logOutFromAllDevices($userID)
 	{
 		$userObj = UserManagement::forceLogIn($userID);		//get user object for this userID.
 		
-		//check if session is supported.
-		if ( (isset($userObj->session[0])) && ($userObj->session[0] !== FALSE) )
+		SQL("DELETE FROM `AUTH_TOKEN` WHERE USERID = ?", array($userObj->getUserID()));
+		
+		if (  file_exists(__DIR__ . "/../session/session.php") )
 		{
-			$userObj->session[0]->destroyAllSessions();	//destroy all session and session data related to this user. This would result in  logOut from all devices.
-			
-			return TRUE;
+			require_once (__DIR__ . "/../session/session.php");
+			$tempSession = new Session();
+			$tempSession->existingSession();
+			$tempSession->destroyAllSessions();
 		}
-		else
-			throw new SessionNotFoundException("ERROR: Session is not Found. Session Library is needed to use this function.");
 	}
 }
 

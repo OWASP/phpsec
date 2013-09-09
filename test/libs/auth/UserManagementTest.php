@@ -1,6 +1,8 @@
 <?php
 namespace phpsec;
 
+ob_start();
+
 
 /**
  * Required Files.
@@ -69,25 +71,25 @@ class UserManagementTest extends \PHPUnit_Framework_TestCase
 	/**
 	 * Function to check deviceLoggedIn, logOutFromAllDevices function.
 	 */
-	public function testIsLoggedIn()
+	public function testLogIn()
 	{
 		$obj1 = UserManagement::createUser("owasp1", "owasp"); //create a new user.
 		$obj2 = UserManagement::logIn("owasp1", "owasp"); //log in the same user from different device.
-		$obj3 = UserManagement::logIn("owasp1", "owasp"); //log in the same user from different device.
-		$obj4 = UserManagement::createUser("owasp2", "owasp"); //create a new user.
-
-		$firstTest = UserManagement::devicesLoggedIn("owasp1"); //check how many deviced are logged-in in name of this user.
-
-		UserManagement::logOutFromAllDevices("owasp1"); //log-out from all devices under this user's name.
-
-		$secondTest = UserManagement::devicesLoggedIn("owasp1"); //check how many deviced are logged-in in name of this user.
-
-		$thirdTest = UserManagement::devicesLoggedIn("owasp2"); //check how many deviced are logged-in in name of this user.
-
+		$firstTest = ($obj2->getUserID() != NULL);
+		
+		try
+		{
+			$obj3 = UserManagement::logIn("owasp1", "wrongPassword"); //try to log in to the same user using wrong password.
+			$secondTest = FALSE;	//exception will be thrown, hence this part will not execute.
+		}
+		catch (WrongPasswordException $e)
+		{
+			$secondTest = TRUE;
+		}
+		
 		UserManagement::deleteUser("owasp1"); //delete the newly created users.
-		UserManagement::deleteUser("owasp2"); //delete the newly created users.
-
-		$this->assertTrue(($firstTest == 3) && ($secondTest == 0) && ($thirdTest == 1));
+		
+		$this->assertTrue($firstTest && $secondTest);
 	}
 
 
@@ -99,16 +101,46 @@ class UserManagementTest extends \PHPUnit_Framework_TestCase
 		$obj1 = UserManagement::createUser("owasp1", "owasp"); //create a new user.
 		$obj2 = UserManagement::logIn("owasp1", "owasp"); //log in the same user from different device.
 		$obj3 = UserManagement::logIn("owasp1", "owasp"); //log in the same user from different device.
+		
+		//set session variables to imitate real cookies.
+		$randomValue = randstr(32);
+		SQL("INSERT INTO `SESSION` (`SESSION_ID`, `DATE_CREATED`, `LAST_ACTIVITY`, `USERID`) VALUES (?, ?, ?, ?)", array($randomValue, time(), time(), $obj3->getUserID()));
+		$_COOKIE['sessionid'] = $randomValue;
+		
+		UserManagement::logOut($obj3); //log-out the user from 1 device.
 
-		$firstTest = UserManagement::devicesLoggedIn("owasp1"); //check how many deviced are logged-in in name of this user.
-
-		UserManagement::logOut($obj1); //log-out the user from 1 device.
-		UserManagement::logOut($obj2); //log-out the user from 1 device.
-
-		$secondTest = UserManagement::devicesLoggedIn("owasp1"); //check how many deviced are logged-in in name of this user.
+		$firstTest = ($obj2->getUserID() != NULL);
+		
+		$result = SQL("SELECT * FROM SESSION");
+		$secondTest = (count($result) == 0);
 
 		UserManagement::deleteUser("owasp1"); //delete the newly created users.
 
-		$this->assertTrue(($firstTest == 3) && ($secondTest == 1));
+		$this->assertTrue($firstTest && $secondTest);
+	}
+	
+	
+	
+	public function testLogOutFromAllDevices()
+	{
+		$obj1 = UserManagement::createUser("owasp1", "owasp"); //create a new user.
+		$obj2 = UserManagement::logIn("owasp1", "owasp"); //log in the same user from different device.
+		$obj3 = UserManagement::logIn("owasp1", "owasp"); //log in the same user from different device.
+		
+		//set session variables to imitate real cookies.
+		$randomValue = randstr(32);
+		SQL("INSERT INTO `SESSION` (`SESSION_ID`, `DATE_CREATED`, `LAST_ACTIVITY`, `USERID`) VALUES (?, ?, ?, ?)", array($randomValue, time(), time(), $obj3->getUserID()));
+		SQL("INSERT INTO `SESSION` (`SESSION_ID`, `DATE_CREATED`, `LAST_ACTIVITY`, `USERID`) VALUES (?, ?, ?, ?)", array(randstr(32), time(), time(), $obj3->getUserID()));
+		SQL("INSERT INTO `SESSION` (`SESSION_ID`, `DATE_CREATED`, `LAST_ACTIVITY`, `USERID`) VALUES (?, ?, ?, ?)", array(randstr(32), time(), time(), $obj3->getUserID()));
+		$_COOKIE['sessionid'] = $randomValue;
+		
+		UserManagement::logOutFromAllDevices($obj1->getUserID());
+		
+		$result = SQL("SELECT * FROM SESSION");
+		$Test = (count($result) == 0);
+
+		UserManagement::deleteUser("owasp1"); //delete the newly created users.
+
+		$this->assertTrue($Test);
 	}
 }
