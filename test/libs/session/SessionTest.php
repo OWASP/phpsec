@@ -66,8 +66,8 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 			$this->session[2]->destroySession();
 
 		//delete all the created users.
-//		$this->user[0]->deleteUser();
-//		$this->user[1]->deleteUser();
+		$this->user[0]->deleteUser();
+		$this->user[1]->deleteUser();
 	}
 
 	/**

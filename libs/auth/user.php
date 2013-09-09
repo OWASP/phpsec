@@ -439,32 +439,10 @@ class User extends BasicPasswordManagement
 	
 	
 	/**
-	 * An array to hold the sessions generated within this file.
-	 * @var Array phpsec\Session
+	 * To denote the maximum time after which the user must again enter their passwords.
+	 * @var int
 	 */
-	public $session = array();
-	
-	
-	
-	/**
-	 * Constructor for the User class. The role of this constructor is to check if session Library is present or not. If present, a new "DEV" session is added in the Session Table.
-	 */
-	private function __construct($userID)
-	{
-		//Create a session for the user. A min of 1 session present will denote that the user is logged in to the system from atleast one device.
-		if ( \file_exists(__DIR__ . "/../session/session.php") )
-		{
-			require_once (__DIR__ . "/../session/session.php");
-			/**
-			 * Sessions Starting with keyword "DEV" are sessionIDs used to show that a used is logged in from some DEVICE. These are special sessions. These must not be used to store data.
-			 */
-			$this->session[0] = new Session($userID, "DEV" . randstr(29));
-		}
-		else
-		{
-			$this->session[0] = FALSE;	//denotes that the session library is not present.
-		}
-	}
+	public static $rememberMeExpiryTime = 2592000;	//approx 1 month.
 	
 	
 	
@@ -475,7 +453,6 @@ class User extends BasicPasswordManagement
 	 * @param String $pass
 	 * @param String $staticSalt
 	 * @return \phpsec\User
-	 * @throws DBHandlerForUserNotSetException
 	 * @throws UserExistsException
 	 */
 	public static function newUserObject($id, $pass, $staticSalt = "")
@@ -510,7 +487,6 @@ class User extends BasicPasswordManagement
 	 * @param String $id
 	 * @param String $pass
 	 * @return \phpsec\User
-	 * @throws DBHandlerForUserNotSetException
 	 * @throws UserNotExistsException
 	 * @throws WrongPasswordException
 	 */
@@ -550,7 +526,7 @@ class User extends BasicPasswordManagement
 	 */
 	public static function forceLogin($id)
 	{
-		$obj = new User($id);
+		$obj = new User();
 		
 		$result = SQL("SELECT `HASH`, `ALGO`, `DYNAMIC_SALT`, `STATIC_SALT` FROM USER WHERE `USERID` = ?", array($id));
 
@@ -633,10 +609,6 @@ class User extends BasicPasswordManagement
 	 */
 	public function deleteUser()
 	{
-		//Delete user Data from Session Table.
-		if ($this->session[0] !== FALSE)
-			$this->session[0]->destroyAllSessions();
-		
 		//Delete user Data from from Password Table.
 		SQL("DELETE FROM PASSWORD WHERE USERID = ?", array($this->userID));
 		
@@ -666,69 +638,63 @@ class User extends BasicPasswordManagement
 	
 	
 	/**
-	 * Function to implement "Remember Me" functionality.
+	 * Function to enable "Remember Me" functionality.
 	 * @param boolean $secure	//If set, the cookies will only set for HTTPS connections.
 	 * @param boolean $httpOnly	//If set, the cookies will only be accessible via HTTP Methods and not via Javascript and other means.
 	 * @return boolean
 	 */
-	public function rememberMe($secure = TRUE, $httpOnly = TRUE)
+	public function enableRememberMe($secure = TRUE, $httpOnly = TRUE)
 	{
-		//If the session library is present, then only we can use this functionality.
-		if ($this->session[0] !== FALSE)
+		$authID = randstr(32);
+			
+		SQL("INSERT INTO `AUTH_TOKENS` (`AUTH_ID`, `USERID`, `DATE_CREATED`) VALUES (?, ?, ?)", array($authID, $this->userID, time()));
+
+		//store the newly created session into the user cookie.
+		if ($secure && $httpOnly)
+			\setcookie("AUTHID", $authID, time() + User::$rememberMeExpiryTime, null, null, TRUE, TRUE);
+		elseif (!$secure && !$httpOnly)
+			\setcookie("AUTHID", $authID, time() + User::$rememberMeExpiryTime, null, null, FALSE, FALSE);
+		elseif ($secure && !$httpOnly)
+			\setcookie("AUTHID", $authID, time() + User::$rememberMeExpiryTime, null, null, TRUE, FALSE);
+		elseif (!$secure && $httpOnly)
+			\setcookie("AUTHID", $authID, time() + User::$rememberMeExpiryTime, null, null, FALSE, TRUE);
+		
+		return TRUE;
+	}
+	
+	
+	
+	public function checkRememberMe()
+	{
+		if (isset($_COOKIE['AUTHID']))
 		{
-			//If the cookie is not found, this implies that the cookie is not set. Hence set this cookie.
-			if ( !isset($_COOKIE['AUTHID']) )
+			//get all the sessions associated with this user.
+			$result = SQL("SELECT `AUTH_ID`, `DATE_CREATED` FROM `AUTH_TOKENS` WHERE `USERID` = ?", array($this->userID));
+
+			//If any of the session IDs matches the user sent cookie, then we know that the user is validated.
+			foreach ($result as $auth)
 			{
-				/**
-				 * Sessions Starting with keyword "REM" are sessionIDs used for "Remember Me" functionality. These must not be used to store data.
-				 */
-				$this->session[1] = new Session($this->userID, "REM" . randstr(29));		//create a new session.
-
-				//store the newly created session into the user cookie.
-				if ($secure && $httpOnly)
-					\setcookie("AUTHID", $this->session[1]->getSessionID(), time() + 29999999, null, null, TRUE, TRUE);	//keep cookie for unlimited time because it doesn't matter. The time that cookie will be present in client's system will be determined from the $automaticLoginTimePeriod variable. Once this time has passed, the cookie will be cancelled from the server end.
-				elseif (!$secure && !$httpOnly)
-					\setcookie("AUTHID", $this->session[1]->getSessionID(), time() + 299999999, null, null, FALSE, FALSE);
-				elseif ($secure && !$httpOnly)
-					\setcookie("AUTHID", $this->session[1]->getSessionID(), time() + 299999999, null, null, TRUE, FALSE);
-				elseif (!$secure && $httpOnly)
-					\setcookie("AUTHID", $this->session[1]->getSessionID(), time() + 299999999, null, null, FALSE, TRUE);
-
-				return TRUE;
-			}
-			else	//If the cookie is already set, then validate it.
-			{
-				//get all the sessions associated with this user.
-				$result = SQL("SELECT `SESSION_ID`, `DATE_CREATED` FROM `SESSION` WHERE `USERID` = ?", array($this->userID));
-
-				//If any of the session IDs matches the user sent cookie, then we know that the user is validated.
-				foreach ($result as $auth)
+				if ($auth['AUTH_ID'] == $_COOKIE['AUTHID'])
 				{
-					if ($auth['SESSION_ID'] == $_COOKIE['AUTHID'])
+					$currentTime = time();
+
+					//If cookie time has expired, then delete the cookie from the DB and the user's browser.
+					if ( ($currentTime - $auth['DATE_CREATED']) >= User::$rememberMeExpiryTime)
 					{
-						$currentTime = time();
+						SQL("DELETE FROM `AUTH_TOKENS` WHERE USERID = ? AND `AUTH_ID` = ?", array($this->userID, $_COOKIE['AUTHID']));
+						\setcookie("AUTHID", "");
 
-						//If cookie time has expired, the delete the cookie from the DB and the user's browser.
-						if ( ($currentTime - $auth['DATE_CREATED']) >= Session::$expireMaxTime)
-						{
-							SQL("DELETE FROM `SESSION` WHERE USERID = ? AND `SESSION_ID` = ?", array($this->userID, $_COOKIE['AUTHID']));
-
-							setcookie("AUTHID", "");
-
-							return FALSE;
-						}
-						else
-							return TRUE;
+						return FALSE;
 					}
+					else
+						return TRUE;
 				}
-
-				return FALSE;
 			}
+
+			return FALSE;
 		}
-		else	//If the session library is not present, then we cannot use this function.
-		{
-			throw new SessionNotFoundException("ERROR: Session is not Found. Session Library is needed to use this function.");
-		}
+		else
+			return FALSE;
 	}
 }
 

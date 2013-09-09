@@ -82,12 +82,13 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		$newPassword = "resting";
 		$oldPassword = "testing";
 
-		//try to reset password by providing wrong password.
+		//verify the password with the new password. Note that the new password is still not set.
 		$this->assertFalse($this->obj->verifyPassword($newPassword));
-
+		
+		//set the new password.
 		$this->obj->resetPassword($oldPassword, $newPassword);
 
-		//try to reset password by providing correct password.
+		//verify the password with the new password since now the new password is set.
 		$this->assertTrue($this->obj->verifyPassword($newPassword));
 	}
 
