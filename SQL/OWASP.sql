@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Sep 09, 2013 at 06:39 AM
+-- Generation Time: Sep 09, 2013 at 06:49 AM
 -- Server version: 5.5.22
 -- PHP Version: 5.3.10-1ubuntu3
 
@@ -40,20 +40,15 @@ CREATE TABLE IF NOT EXISTS `AUTH_TOKENS` (
 --
 
 CREATE TABLE IF NOT EXISTS `LOGS` (
+  `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `MESSAGE` text,
   `FILENAME` text,
   `TYPE` text,
   `PRIORITY` text,
   `DATETIME` text,
-  `LINE` int(10) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
---
--- Dumping data for table `LOGS`
---
-
-INSERT INTO `LOGS` (`MESSAGE`, `FILENAME`, `TYPE`, `PRIORITY`, `DATETIME`, `LINE`) VALUES
-('q', 'q', 'q', 'q', 'q', 0);
+  `LINE` int(10) DEFAULT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
