@@ -32,7 +32,7 @@ class BasicPasswordManagement
 	public static function getStaticSalt()
 	{
 		$configArray = require_once (__DIR__ . "/../config.php");
-		BasicPasswordManagement::$staticSalt = $configArray['STATIC_SALTW'];
+		BasicPasswordManagement::$staticSalt = $configArray['STATIC_SALT'];
 		
 		return BasicPasswordManagement::$staticSalt;
 	}
