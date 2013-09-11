@@ -629,11 +629,11 @@ class User extends BasicPasswordManagement
 	 * @param boolean $httpOnly	//If set, the cookies will only be accessible via HTTP Methods and not via Javascript and other means.
 	 * @return boolean
 	 */
-	public function enableRememberMe($secure = TRUE, $httpOnly = TRUE)
+	public static function enableRememberMe($userID, $secure = TRUE, $httpOnly = TRUE)
 	{
 		$authID = randstr(32);
 			
-		SQL("INSERT INTO `AUTH_TOKENS` (`AUTH_ID`, `USERID`, `DATE_CREATED`) VALUES (?, ?, ?)", array($authID, $this->userID, time()));
+		SQL("INSERT INTO `AUTH_TOKENS` (`AUTH_ID`, `USERID`, `DATE_CREATED`) VALUES (?, ?, ?)", array($authID, $userID, time()));
 
 		//store the newly created session into the user cookie.
 		if ($secure && $httpOnly)
@@ -650,32 +650,29 @@ class User extends BasicPasswordManagement
 	
 	
 	
-	public function checkRememberMe()
+	public static function checkRememberMe()
 	{
 		if (isset($_COOKIE['AUTHID']))
 		{
 			//get all the sessions associated with this user.
-			$result = SQL("SELECT `AUTH_ID`, `DATE_CREATED` FROM `AUTH_TOKENS` WHERE `USERID` = ?", array($this->userID));
-
-			//If any of the session IDs matches the user sent cookie, then we know that the user is validated.
-			foreach ($result as $auth)
+			$result = SQL("SELECT * FROM `AUTH_TOKENS` WHERE `AUTHID` = ?", array($_COOKIE['AUTHID']));
+			
+			if (count($result) == 1)
 			{
-				if ($auth['AUTH_ID'] == $_COOKIE['AUTHID'])
+				$currentTime = time();
+
+				//If cookie time has expired, then delete the cookie from the DB and the user's browser.
+				if ( ($currentTime - $result['DATE_CREATED']) >= User::$rememberMeExpiryTime)
 				{
-					$currentTime = time();
+					SQL("DELETE FROM `AUTH_TOKENS` WHERE `AUTH_ID` = ?", array($_COOKIE['AUTHID']));
+					\setcookie("AUTHID", "");
 
-					//If cookie time has expired, then delete the cookie from the DB and the user's browser.
-					if ( ($currentTime - $auth['DATE_CREATED']) >= User::$rememberMeExpiryTime)
-					{
-						SQL("DELETE FROM `AUTH_TOKENS` WHERE USERID = ? AND `AUTH_ID` = ?", array($this->userID, $_COOKIE['AUTHID']));
-						\setcookie("AUTHID", "");
-
-						return FALSE;
-					}
-					else
-						return TRUE;
+					return FALSE;
 				}
+				else
+					return TRUE;
 			}
+			
 			\setcookie("AUTHID", "");
 			return FALSE;
 		}
