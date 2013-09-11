@@ -15,7 +15,7 @@ class BasicPasswordManagement
 	 * To store the static salt for password salting.
 	 * @var String
 	 */
-	protected static $staticSalt = "7d2cdb76dcc3c97fc55bff3dafb35724031f3e4c47512d4903b6d1fb914774405e74539ea70a49fbc4b52ededb1f5dfb7eebef3bcc89e9578e449ed93cfb2103";
+	private static $staticSalt;
 	
 	
 	/**
@@ -31,6 +31,9 @@ class BasicPasswordManagement
 	 */
 	public static function getStaticSalt()
 	{
+		$configArray = require_once (__DIR__ . "/../config.php");
+		BasicPasswordManagement::$staticSalt = $configArray['STATIC_SALTW'];
+		
 		return BasicPasswordManagement::$staticSalt;
 	}
 	
@@ -52,7 +55,7 @@ class BasicPasswordManagement
 		if ($algo == "")
 			$algo = "sha512";
 		
-		return hash($algo, strtolower($dynamicSalt . $pass . BasicPasswordManagement::$staticSalt));
+		return hash($algo, strtolower($dynamicSalt . $pass . BasicPasswordManagement::getStaticSalt()));
 	}
 	
 	
@@ -451,27 +454,22 @@ class User extends BasicPasswordManagement
 	 * @param DatabaseObject $dbConn
 	 * @param String $id
 	 * @param String $pass
-	 * @param String $staticSalt
 	 * @return \phpsec\User
 	 * @throws UserExistsException
 	 */
-	public static function newUserObject($id, $pass, $staticSalt = "")
+	public static function newUserObject($id, $pass)
 	{
 		$obj = new User($id);
 		
 		$obj->userID = $id;
 			
-		//If static salt is provided, then use the new static salt, not the default one set.
-		if ($staticSalt != "")
-			BasicPasswordManagement::$staticSalt = $staticSalt;
-
 		$time = time();
 
 		//calculate the hash of the password.
 		$obj->dynamicSalt = hash("sha512", randstr(64));
 		$obj->hashedPassword = BasicPasswordManagement::hashPassword($pass, $obj->dynamicSalt, BasicPasswordManagement::$hashAlgo);
 
-		$count = SQL("INSERT INTO USER (`USERID`, `ACCOUNT_CREATED`, `HASH`, `DATE_CREATED`, `TOTAL_SESSIONS`, `ALGO`, `DYNAMIC_SALT`, `STATIC_SALT`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", array("{$obj->userID}", $time, $obj->hashedPassword, $time, 0, BasicPasswordManagement::$hashAlgo, $obj->dynamicSalt, BasicPasswordManagement::$staticSalt));
+		$count = SQL("INSERT INTO USER (`USERID`, `ACCOUNT_CREATED`, `HASH`, `DATE_CREATED`, `TOTAL_SESSIONS`, `ALGO`, `DYNAMIC_SALT`) VALUES (?, ?, ?, ?, ?, ?, ?)", array("{$obj->userID}", $time, $obj->hashedPassword, $time, 0, BasicPasswordManagement::$hashAlgo, $obj->dynamicSalt));
 
 		//If the user is already present in the database, then a duplicate won't be created and no rows will be affected. Hence 0 will be returned.
 		if ($count == 0)
@@ -494,14 +492,11 @@ class User extends BasicPasswordManagement
 	{
 		$obj = new User($id);
 		
-		$result = SQL("SELECT `HASH`, `ALGO`, `DYNAMIC_SALT`, `STATIC_SALT` FROM USER WHERE `USERID` = ?", array($id));
+		$result = SQL("SELECT `HASH`, `ALGO`, `DYNAMIC_SALT` FROM USER WHERE `USERID` = ?", array($id));
 
 		//If no record is returned for this user, then this user does not exist in the system.
 		if (count($result) < 1)
 			throw new UserNotExistsException("ERROR: User Not found.");
-
-		//extract static salt used while password generation
-		BasicPasswordManagement::$staticSalt = $result[0]['STATIC_SALT'];
 
 		//validate the given password with that stored in the DB.
 		if (!BasicPasswordManagement::validatePassword( $pass, $result[0]['HASH'], $result[0]['DYNAMIC_SALT'], $result[0]['ALGO']))
@@ -528,7 +523,7 @@ class User extends BasicPasswordManagement
 	{
 		$obj = new User();
 		
-		$result = SQL("SELECT `HASH`, `ALGO`, `DYNAMIC_SALT`, `STATIC_SALT` FROM USER WHERE `USERID` = ?", array($id));
+		$result = SQL("SELECT `HASH`, `ALGO`, `DYNAMIC_SALT` FROM USER WHERE `USERID` = ?", array($id));
 
 		//If no record is returned for this user, then this user does not exist in the system.
 		if (count($result) < 1)

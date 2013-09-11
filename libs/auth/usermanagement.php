@@ -33,13 +33,12 @@ class UserManagement
 	 * To create a new user.
 	 * @param string $userID
 	 * @param string $password
-	 * @param string $staticSalt
 	 * @return \phpsec\User | boolean
 	 */
-	public static function createUser($userID, $password, $staticSalt = "")
+	public static function createUser($userID, $password)
 	{
 		if (! UserManagement::userExists( $userID ))	//If the userId is available, then create a new user.
-			return User::newUserObject($userID, $password, $staticSalt);
+			return User::newUserObject($userID, $password);
 		
 		return FALSE;
 	}

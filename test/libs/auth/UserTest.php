@@ -94,27 +94,6 @@ class UserTest extends \PHPUnit_Framework_TestCase
 
 
 	/**
-	 * To check if we can set static salts.
-	 */
-	public function testSetStaticSalt()
-	{
-		//create a new user with user provided static salt. This will set the static salt to this provided salt.
-		$obj2 = User::newUserObject("rahul", "owasp pass", hash("sha512", randstr(64)));
-		//delete this object.
-		$obj2 = null;
-		//revive this user's object again.
-		$obj2 = User::existingUserObject("rahul", "owasp pass");
-
-		//try to validate password by giving correct password. Note that the static salt has already been set.
-		$this->assertTrue($obj2->verifyPassword("owasp pass"));
-		//try to validate password by giving wrong password. Note that the static salt has already been set.
-		$this->assertFalse($obj2->verifyPassword("other password"));
-
-		$obj2->deleteUser(); // this should move to teardown
-	}
-
-
-	/**
 	 * To check if password has expired or not.
 	 */
 	public function testIsPasswordExpired()
