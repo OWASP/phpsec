@@ -12,13 +12,6 @@ class BasicPasswordManagement
 {
 	
 	/**
-	 * To store the static salt for password salting.
-	 * @var String
-	 */
-	private static $staticSalt;
-	
-	
-	/**
 	 * To store the current hash algorithm in use.
 	 * @var String
 	 */
@@ -31,10 +24,8 @@ class BasicPasswordManagement
 	 */
 	public static function getStaticSalt()
 	{
-		$configArray = require_once (__DIR__ . "/../config.php");
-		BasicPasswordManagement::$staticSalt = $configArray['STATIC_SALT'];
-		
-		return BasicPasswordManagement::$staticSalt;
+		$configArray = require(__DIR__ . "/../config.php");
+		return $configArray['STATIC_SALT'];
 	}
 	
 	
