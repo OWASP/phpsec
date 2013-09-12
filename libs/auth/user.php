@@ -654,15 +654,20 @@ class User extends BasicPasswordManagement
 	public static function isLocked($user)
 	{
 		$result = SQL("SELECT LOCKED FROM USER WHERE USERID = ?", array($user));
+		if (count($result))
+		{
+			if ($result[0]['LOCKED'] == 1)
+			{
+				return TRUE;
+			}
+			else
+			{
+				return FALSE;
+			}
+		}
 		
-		if ($result[0]['LOCKED'] == 1)
-		{
-			return TRUE;
-		}
-		else
-		{
-			return FALSE;
-		}
+		return FALSE;
+		
 	}
 	
 	
