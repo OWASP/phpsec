@@ -399,6 +399,7 @@ class UserException extends \Exception {}
 class WrongPasswordException extends UserException {}			//The password provided for the existing user is not correct.
 class UserExistsException extends UserException {}			//Records were found with this userID in the database.
 class UserNotExistsException extends UserException {}			//Records were NOT found with this userID in the database.
+class UserLocked extends UserException {}				//The user account is locked.
 
 
 class User extends BasicPasswordManagement
@@ -491,8 +492,13 @@ class User extends BasicPasswordManagement
 
 		//validate the given password with that stored in the DB.
 		if (!BasicPasswordManagement::validatePassword( $pass, $result[0]['HASH'], $result[0]['DYNAMIC_SALT'], $result[0]['ALGO']))
-			throw new WrongPasswordException("ERROR: Wrong Password. User Object not returned.");
-
+			throw new WrongPasswordException("ERROR: Wrong Password.");
+		
+		if (User::isLocked($id))
+		{
+			throw new UserLocked("ERROR: The account is locked!");
+		}
+		
 		//If all goes right, then set the local variables and return the user object.
 		$obj->userID = $id;
 		$obj->dynamicSalt = $result[0]['DYNAMIC_SALT'];
@@ -624,6 +630,44 @@ class User extends BasicPasswordManagement
 	
 	
 	/**
+	 * Function to lock the user account.
+	 */
+	public function lockAccount()
+	{
+		SQL("UPDATE USER SET LOCKED = ? WHERE USERID = ?", array(1, $this->userID));
+	}
+	
+	
+	/**
+	 * Function to unlock the user account.
+	 */
+	public function unlockAccount()
+	{
+		SQL("UPDATE USER SET LOCKED = ? WHERE USERID = ?", array(0, $this->userID));
+	}
+	
+	
+	/**
+	 * Function to check if the user account is locked or not.
+	 * @return boolean
+	 */
+	public static function isLocked($user)
+	{
+		$result = SQL("SELECT LOCKED FROM USER WHERE USERID = ?", array($user));
+		
+		if ($result[0]['LOCKED'] == 1)
+		{
+			return TRUE;
+		}
+		else
+		{
+			return FALSE;
+		}
+	}
+	
+	
+	
+	/**
 	 * Function to enable "Remember Me" functionality.
 	 * @param boolean $secure	//If set, the cookies will only set for HTTPS connections.
 	 * @param boolean $httpOnly	//If set, the cookies will only be accessible via HTTP Methods and not via Javascript and other means.
@@ -650,6 +694,10 @@ class User extends BasicPasswordManagement
 	
 	
 	
+	/**
+	 * Function to check for AUTH token. If present and valid, returns TRUE, otherwise FALSE.
+	 * @return boolean
+	 */
 	public static function checkRememberMe()
 	{
 		if (isset($_COOKIE['AUTHID']))

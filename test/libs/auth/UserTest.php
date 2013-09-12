@@ -120,5 +120,30 @@ class UserTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertTrue($test);
 	}
-
+	
+	
+	
+	/**
+	 * Function to test accessibility if the account is locked/unlocked.
+	 */
+	public function testLocked()
+	{
+		$testUser = User::newUserObject("phpsec", "owasp");
+		$testUser->lockAccount();
+		
+		try
+		{
+			User::existingUserObject("phpsec", "owasp");
+		}
+		catch(\phpsec\UserLocked $e)
+		{
+			$testUser->deleteUser();
+			$firstTest = TRUE;
+			
+			$testUser->unlockAccount();
+			$secondTest = (strlen($testUser->getUserID()) > 1);
+			
+			$this->assertTrue($firstTest && $secondTest);
+		}
+	}
 }
