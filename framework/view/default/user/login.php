@@ -3,7 +3,7 @@
 ?>
 
 <div name="login-div" id="login-div">
-	<form method="POST" action="" name="login-form" id="login-form" onsubmit="return check();">
+	<form method="POST" action="#" name="login-form" id="login-form" onsubmit="return check('login-form', 'checkForBlanks');">
 		<table name="login-table" id="login-table">
 			<tr name="user-field" id="user-field">
 				<td><label>Username:</label></td>
@@ -25,27 +25,4 @@
 	</form>
 </div>
 
-<script>
-	function check()
-	{
-		checkForBlanks();
-	}
-
-	function checkForBlanks()
-	{
-		var allElements = document.forms['login-form'].getElementsByTagName("input");
-		for(i=0; i<allElements.length; i++)
-		{
-			if(allElements[i].getAttribute("type") === "text")
-			{
-				if(allElements[i].value == "")
-				{
-					alert("Empty Fields are not allowed!");
-					return false;
-				}
-			}
-		}
-
-		return true;
-	}
-</script>
+<script type="text/javascript" src="../../js/check.js"></script>

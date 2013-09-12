@@ -118,13 +118,12 @@ class Session
 	
 	/**
 	 * Function to get the session object from an old sessionID that we receive from the user's cookie.
-	 * @return string	Returns the current SessionID
-	 * @throws SessionNotFoundException
+	 * @return string || FALSE	Returns the current SessionID or FALSE
 	 */
 	public function existingSession()
 	{
 		if (!isset($_COOKIE['sessionid']))
-			throw new SessionNotFoundException("ERROR: No such sessionID exists!");
+			return FALSE;
 			
 		$sessionID = $_COOKIE['sessionid'];
 		
@@ -132,7 +131,7 @@ class Session
 		if (count($result) != 1)
 		{
 			$this->updateUserCookies(TRUE);
-			throw new SessionNotFoundException("ERROR: No such sessionID exists!");
+			return FALSE;
 		}
 		$this->session = $result[0]['SESSION_ID'];
 		$this->userID = $result[0]['USERID'];

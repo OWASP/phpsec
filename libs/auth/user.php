@@ -400,6 +400,7 @@ class WrongPasswordException extends UserException {}			//The password provided 
 class UserExistsException extends UserException {}			//Records were found with this userID in the database.
 class UserNotExistsException extends UserException {}			//Records were NOT found with this userID in the database.
 class UserLocked extends UserException {}				//The user account is locked.
+class UserAccountInactive extends UserException {}			//The user account is inactive.
 
 
 class User extends BasicPasswordManagement
@@ -473,7 +474,6 @@ class User extends BasicPasswordManagement
 	
 	/**
 	 * To get the object of an existing user.
-	 * @param DatabaseObject $dbConn
 	 * @param String $id
 	 * @param String $pass
 	 * @return \phpsec\User
@@ -497,6 +497,11 @@ class User extends BasicPasswordManagement
 		if (User::isLocked($id))
 		{
 			throw new UserLocked("ERROR: The account is locked!");
+		}
+		
+		if (User::isInactive($id))
+		{
+			throw new UserAccountInactive("ERROR: The account is inactive. Please activate your account.");
 		}
 		
 		//If all goes right, then set the local variables and return the user object.
@@ -615,16 +620,19 @@ class User extends BasicPasswordManagement
 	 * To check if the password has aged. i.e. if the time has passed after which the password must be changed.
 	 * @return boolean
 	 */
-	public function isPasswordExpired()
+	public static function isPasswordExpired($user)
 	{
-		$result = SQL("SELECT `DATE_CREATED` FROM USER WHERE `USERID` = ?", array($this->userID));
+		$result = SQL("SELECT `DATE_CREATED` FROM USER WHERE `USERID` = ?", array($user));
 			
-		$currentTime = time();
+		if (count($result) == 1)
+		{
+			$currentTime = time();
 
-		if ( ($currentTime - $result[0]['DATE_CREATED'])  > User::$passwordExpiryTime)
-			return TRUE;
-		else
-			return FALSE;
+			if ( ($currentTime - $result[0]['DATE_CREATED'])  > User::$passwordExpiryTime)
+				return TRUE;
+		}
+		
+		return FALSE;
 	}
 	
 	
@@ -649,12 +657,14 @@ class User extends BasicPasswordManagement
 	
 	/**
 	 * Function to check if the user account is locked or not.
+	 * @param string $user
 	 * @return boolean
 	 */
 	public static function isLocked($user)
 	{
 		$result = SQL("SELECT LOCKED FROM USER WHERE USERID = ?", array($user));
-		if (count($result))
+		
+		if (count($result) == 1)
 		{
 			if ($result[0]['LOCKED'] == 1)
 			{
@@ -667,7 +677,32 @@ class User extends BasicPasswordManagement
 		}
 		
 		return FALSE;
+	}
+	
+	
+	
+	/**
+	 * Function to check if the user's account is inactive or not.
+	 * @param string $user
+	 * @return boolean
+	 */
+	public static function isInactive($user)
+	{
+		$result = SQL("SELECT INACTIVE FROM USER WHERE USERID = ?", array($user));
 		
+		if (count($result) == 1)
+		{
+			if ($result[0]['INACTIVE'] == 1)
+			{
+				return TRUE;
+			}
+			else
+			{
+				return FALSE;
+			}
+		}
+		
+		return FALSE;
 	}
 	
 	
@@ -715,7 +750,7 @@ class User extends BasicPasswordManagement
 				$currentTime = time();
 
 				//If cookie time has expired, then delete the cookie from the DB and the user's browser.
-				if ( ($currentTime - $result['DATE_CREATED']) >= User::$rememberMeExpiryTime)
+				if ( ($currentTime - $result[0]['DATE_CREATED']) >= User::$rememberMeExpiryTime)
 				{
 					SQL("DELETE FROM `AUTH_TOKENS` WHERE `AUTH_ID` = ?", array($_COOKIE['AUTHID']));
 					\setcookie("AUTHID", "");
@@ -723,7 +758,7 @@ class User extends BasicPasswordManagement
 					return FALSE;
 				}
 				else
-					return TRUE;
+					return $result[0]['USERID'];
 			}
 			
 			\setcookie("AUTHID", "");

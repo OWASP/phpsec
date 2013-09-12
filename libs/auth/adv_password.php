@@ -51,13 +51,11 @@ class AdvancedPasswordManagement
 	
 	/**
 	 * Constructor for the AdvancedPasswordManagement Class.
-	 * @param DatabaseObject $dbConn
 	 * @param String $user		//The ID of the user.
 	 * @param String $pass		//The password of the user.
 	 * @param boolean $bruteLock	//If brute force detection is enabled.
 	 * @throws BruteForceAttackDetectedException
 	 * @throws \phpsec\WrongPasswordException
-	 * @throws \phpsec\UserException
 	 */
 	public function __construct($user, $pass, $bruteLock = false)
 	{
