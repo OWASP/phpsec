@@ -40,7 +40,7 @@ function checkForPasswordsMatch(formName)
 	
 	for(var i=0; i<allElements.length; i++)
 	{
-		if(allElements[i].getAttribute("type") === "password")
+		if( (allElements[i].getAttribute("type") === "password") && (allElements[i].name.substring(0, 3) !== "_x_") )
 		{
 			if (password === "")
 			{

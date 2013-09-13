@@ -12,7 +12,7 @@ class UsersLoginController extends phpsec\framework\DefaultController
 			{
 				if ( (!isset($_POST['user'])) && (!isset($_POST['pass'])) )
 				{
-					//show login error.
+					//show the login page again here so that users can enter their credentials again.
 				}
 
 				$userID = $_POST['user'];

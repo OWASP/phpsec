@@ -32,6 +32,7 @@ class UserSignupController extends phpsec\framework\DefaultController
 			else
 			{
 				$this->error = "ERROR: Empty fields are not allowed.";
+				//show the login page again here so that users can enter their credentials again.
 			}
 		}
 		catch (Exception $e)
