@@ -10,7 +10,7 @@ class UsersLoginController extends phpsec\framework\DefaultController
 		
 			if (! $userID)
 			{
-				if ( (!isset($_POST['user'])) || (!isset($_POST['pass'])) )
+				if ( (!isset($_POST['user'])) && (!isset($_POST['pass'])) )
 				{
 					//show login error.
 				}
@@ -33,6 +33,8 @@ class UsersLoginController extends phpsec\framework\DefaultController
 					}
 					
 					$this->error = $e->getMessage();
+					
+					//show the login page again here so that users can enter their credentials again.
 				}
 
 				if ( (isset($_POST['remember-me'])) && ($_POST['remember-me'] == "on") )
@@ -59,15 +61,16 @@ class UsersLoginController extends phpsec\framework\DefaultController
 				$userSessionID = $userSession->newSession($userID);
 			}
 
-			if (! phpsec\User::isPasswordExpired($userID))
+			$userObj = phpsec\UserManagement::forceLogIn($userID);
+			
+			if (! $userObj->isPasswordExpired() )
 			{
-				phpsec\UserManagement::forceLogIn($userID);
 				//what next to do after successful login ?
 			}
 			else
 			{
 				$this->error = "ERROR: Its been too long since you have changed your password. For security reasons, please change your password.";
-				//call appropriate view.
+				//call reset-password controller.
 			}
 		}
 		catch (Exception $e)

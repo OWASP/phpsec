@@ -103,7 +103,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		User::$passwordExpiryTime = 1000; //set the password expiry time to 1000.
 		time("SET", $currentTime + 5000); //set a new false time that is bound to exceed the expiry limit.
 
-		$this->assertTrue(User::isPasswordExpired("rash"));
+		$this->assertTrue($this->obj->isPasswordExpired());
 	}
 	
 	

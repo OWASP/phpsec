@@ -18,6 +18,14 @@ class BasicPasswordManagement
 	public static $hashAlgo = "sha512";
 	
 	
+	
+	/**
+	 * To store the minimum password strength that all passwords must have.
+	 * @var float
+	 */
+	public static $passwordStrength = 0.5;
+	
+	
 	/**
 	 * To return the current value of static salt in use.
 	 * @return String.
@@ -620,9 +628,9 @@ class User extends BasicPasswordManagement
 	 * To check if the password has aged. i.e. if the time has passed after which the password must be changed.
 	 * @return boolean
 	 */
-	public static function isPasswordExpired($user)
+	public function isPasswordExpired()
 	{
-		$result = SQL("SELECT `DATE_CREATED` FROM USER WHERE `USERID` = ?", array($user));
+		$result = SQL("SELECT `DATE_CREATED` FROM USER WHERE `USERID` = ?", array($this->userID));
 			
 		if (count($result) == 1)
 		{
