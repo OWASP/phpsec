@@ -30,7 +30,15 @@ class UserSignupController extends phpsec\framework\DefaultController
 					//Then call the appropriate view to reload the page so that user can enter the new password.
 				}
 
-				//call account-activation controller and create new user object.
+				//call temp-pass controller to validate the account (aka account activation) and then create new user object.
+				$tempPass = new TempPassController($_POST['user'], $_POST['email']);
+				if ($tempPass->Handle())
+				{
+					$userObj = phpsec\UserManagement::createUser($_POST['user'], $_POST['pass'], $_POST['email']);
+					$userObj->activateAccount();
+					
+					//call appropriate view after the user object has been created.
+				}
 			}
 			else
 			{

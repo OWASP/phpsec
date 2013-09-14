@@ -702,6 +702,14 @@ class User extends BasicPasswordManagement
 	
 	
 	
+	
+	public function activateAccount()
+	{
+		SQL("UPDATE USER SET INACTIVE = ? WHERE USERID = ?", array(0, $this->userID));
+	}
+	
+	
+	
 	/**
 	 * Function to check if the user's account is inactive or not.
 	 * @param string $user

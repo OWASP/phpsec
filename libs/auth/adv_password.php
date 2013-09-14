@@ -161,7 +161,7 @@ class AdvancedPasswordManagement
 			$time = time();
 
 			SQL("UPDATE PASSWORD SET `TEMP_PASS` = ?, `USE_FLAG` = ?, `TEMP_TIME` = ? WHERE USERID = ?", array($tempPass, 0, $time, $userID));
-			return TRUE;
+			return $tempPass;
 		}
 		else	//If a temp pass is provided, then check if it is not expired and it correct.
 		{
