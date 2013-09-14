@@ -133,9 +133,9 @@ class AdvancedPasswordManagement
 	 * To check if the temporary password has expired.
 	 * @return boolean
 	 */
-	public function checkIfTempPassExpired()
+	public static function checkIfTempPassExpired($userID)
 	{
-		$result = SQL("SELECT `TEMP_TIME` FROM PASSWORD WHERE `USERID` = ?", array($this->userID));
+		$result = SQL("SELECT `TEMP_TIME` FROM PASSWORD WHERE `USERID` = ?", array($userID));
 			
 		$currentTime = time();
 		
@@ -152,35 +152,36 @@ class AdvancedPasswordManagement
 	 * @param String $tempPass
 	 * @return boolean
 	 */
-	public function tempPassword($tempPass = "")
+	public static function tempPassword($userID, $tempPass = "")
 	{
 		//If a temp password has not been provided, then create a temp password.
 		if ($tempPass == "")
 		{
-			$tempPass = hash("sha512", randstr(64));
+			$tempPass = hash(BasicPasswordManagement::$hashAlgo, randstr(64));
 			$time = time();
 
-			SQL("UPDATE PASSWORD SET `TEMP_PASS` = ?, `USE_FLAG` = ?, `TEMP_TIME` = ? WHERE USERID = ?", array($tempPass, 0, $time, $this->userID));
-
+			SQL("UPDATE PASSWORD SET `TEMP_PASS` = ?, `USE_FLAG` = ?, `TEMP_TIME` = ? WHERE USERID = ?", array($tempPass, 0, $time, $userID));
 			return TRUE;
 		}
 		else	//If a temp pass is provided, then check if it is not expired and it correct.
 		{
-			$result = SQL("SELECT `TEMP_PASS`, `USE_FLAG`, `TEMP_TIME` FROM PASSWORD WHERE `USERID` = ?", array($this->userID));
+			$result = SQL("SELECT `TEMP_PASS`, `USE_FLAG`, `TEMP_TIME` FROM PASSWORD WHERE `USERID` = ?", array($userID));
 				
-			if ( ($result[0]['USE_FLAG'] == 0) && (!$this->checkIfTempPassExpired()))
+			if ( ($result[0]['USE_FLAG'] == 0) && (! $a = AdvancedPasswordManagement::checkIfTempPassExpired($userID)) )
 			{	
 				if ( $result[0]['TEMP_PASS'] != $tempPass )
+				{
 					return FALSE;
+				}
 
-				SQL("UPDATE PASSWORD SET TEMP_PASS = ?, USE_FLAG = ?, TEMP_TIME = ? WHERE USERID = ?", array(randstr(10), 1, 0, $this->userID));
+				SQL("UPDATE PASSWORD SET TEMP_PASS = ?, USE_FLAG = ?, TEMP_TIME = ? WHERE USERID = ?", array(randstr(10), 1, 0, $userID));
 
 				return TRUE;
 			}
 			else
 			{
-				SQL("UPDATE PASSWORD SET TEMP_PASS = ?, USE_FLAG = ?, TEMP_TIME = ? WHERE USERID = ?", array(randstr(10), 1, 0, $this->userID));
-
+				SQL("UPDATE PASSWORD SET TEMP_PASS = ?, USE_FLAG = ?, TEMP_TIME = ? WHERE USERID = ?", array(randstr(10), 1, 0, $userID));
+				
 				return FALSE;
 			}
 		}

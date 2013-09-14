@@ -53,11 +53,11 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 		//update the temp pass time to current time.
 		SQL("UPDATE PASSWORD SET TEMP_TIME = ? WHERE USERID = ?", array(time("SYS"), $this->userID->getUserID()));
 
-		$this->assertFalse($this->obj->checkIfTempPassExpired()); //this check will provide false, since the temp password time has not expired.
+		$this->assertFalse(  AdvancedPasswordManagement::checkIfTempPassExpired($this->userID->getUserID())); //this check will provide false, since the temp password time has not expired.
 
 		time("SET", 1390706853); //Now set the time to some distant future time.
 
-		$this->assertTrue($this->obj->checkIfTempPassExpired()); //this check will provide true, since the temp password time has expired.
+		$this->assertTrue(AdvancedPasswordManagement::checkIfTempPassExpired($this->userID->getUserID())); //this check will provide true, since the temp password time has expired.
 	}
 
 
@@ -70,21 +70,21 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 
 		AdvancedPasswordManagement::$tempPassExpiryTime = 900;
 
-		$this->obj->tempPassword(); //this will create a new temp password.
+		AdvancedPasswordManagement::tempPassword($this->userID->getUserID()); //this will create a new temp password.
 
 		$result = SQL("SELECT TEMP_PASS FROM PASSWORD WHERE USERID = ?", array($this->userID->getUserID()));
 
 		//firstTest
 		time("SET", $currentTime + 500); //set future time that has not passed.
-		$this->assertFalse($this->obj->tempPassword("qwert")); //This should return false since the password is wrong. Even though time has not expired.
+		$this->assertFalse(AdvancedPasswordManagement::tempPassword($this->userID->getUserID(), "qwert")); //This should return false since the password is wrong. Even though time has not expired.
 
 		//secondTest
 		time("SET", $currentTime + 500);
-		$this->assertTrue($this->obj->tempPassword($result[0]['TEMP_PASS'])); //This should return true since the password is correct and time has not expired.
-
+		$this->assertTrue(AdvancedPasswordManagement::tempPassword($this->userID->getUserID(), $result[0]['TEMP_PASS'])); //This should return true since the password is correct and time has not expired.
+		
 		//thirdTest
 		time("SET", $currentTime + 1000);
-		$this->assertFalse($this->obj->tempPassword($result[0]['TEMP_PASS'])); //This should return false since time has expired.
+		$this->assertFalse(AdvancedPasswordManagement::tempPassword($this->userID->getUserID(), $result[0]['TEMP_PASS'])); //This should return false since time has expired.
 	}
 
 
