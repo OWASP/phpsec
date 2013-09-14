@@ -46,10 +46,6 @@ class BasicPasswordManagement
 	 */
 	protected static function hashPassword($pass, $dynamicSalt = "", $algo = "")
 	{
-		//If dynamic salt is not present, create one.
-		if ($dynamicSalt == "")
-			$dynamicSalt = hash("sha512",  randstr( 64));
-		
 		//If algo is not defined, use sha512 by default.
 		if ($algo == "")
 			$algo = "sha512";
@@ -467,7 +463,7 @@ class User extends BasicPasswordManagement
 		$time = time();
 
 		//calculate the hash of the password.
-		$obj->dynamicSalt = hash("sha512", randstr(64));
+		$obj->dynamicSalt = hash(BasicPasswordManagement::$hashAlgo, randstr(64));
 		$obj->hashedPassword = BasicPasswordManagement::hashPassword($pass, $obj->dynamicSalt, BasicPasswordManagement::$hashAlgo);
 
 		$count = SQL("INSERT INTO USER (`USERID`, `ACCOUNT_CREATED`, `HASH`, `DATE_CREATED`, `ALGO`, `DYNAMIC_SALT`) VALUES (?, ?, ?, ?, ?, ?)", array("{$obj->userID}", $time, $obj->hashedPassword, $time, BasicPasswordManagement::$hashAlgo, $obj->dynamicSalt));
@@ -596,7 +592,7 @@ class User extends BasicPasswordManagement
 			throw new WrongPasswordException("ERROR: Wrong Password provided!!");
 		
 		//create a new dynamic salt.
-		$this->dynamicSalt = hash("sha512", randstr(64));
+		$this->dynamicSalt = hash(BasicPasswordManagement::$hashAlgo, randstr(64));
 		//create the hash of the new password.
 		$newHash = BasicPasswordManagement::hashPassword($newPassword, $this->dynamicSalt, BasicPasswordManagement::$hashAlgo);
 		
