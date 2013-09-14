@@ -7,19 +7,16 @@ class XUser extends User
 {
 	protected $firstName = NULL;
 	protected $lastName = NULL;
-	protected $primaryEmail = NULL;
 	protected $secondaryEmail = NULL;
 	protected $dob = NULL;
 	protected $securityAnswer1 = NULL;
 	protected $securityAnswer2 = NULL;
 	protected static $minAge = 378684000;	//12 years.
 	
-	public function __construct($userObj, $primaryEmail)
+	public function __construct($userObj)
 	{
 		$this->userID = $userObj->getUserID();
-		$this->primaryEmail = $primaryEmail;
-		
-		SQL("INSERT INTO XUSER (`USERID`, `P_EMAIL`) VALUES (?, ?)", array($this->userID, $this->primaryEmail));
+		SQL("INSERT INTO XUSER (`USERID`) VALUES (?)", array($this->userID));
 	}
 	
 	public function setName($firstName, $lastName)

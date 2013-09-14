@@ -38,8 +38,8 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		time("RESET");
 
 		//Create users.
-		$this->user[0] = User::newUserObject("abcd", "resting");
-		$this->user[1] = User::newUserObject("efgh", "owasp");
+		$this->user[0] = User::newUserObject("abcd", "resting", "rac130@pitt.edu");
+		$this->user[1] = User::newUserObject("efgh", "owasp", "rac130@pitt.edu");
 
 		//create new sessions associated with each user.
 		$this->session[0] = new Session(); //session for user 0.

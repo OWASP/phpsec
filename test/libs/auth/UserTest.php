@@ -25,7 +25,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	public function setUp()
 	{
 		BasicPasswordManagement::$hashAlgo = "haval256,5"; //choose a hashing algo.
-		$this->obj = User::newUserObject("rash", 'testing'); //create a new user.
+		$this->obj = User::newUserObject("rash", 'testing', "rac130@pitt.edu"); //create a new user.
 	}
 
 	/**
@@ -128,7 +128,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testLocked()
 	{
-		$testUser = User::newUserObject("phpsec", "owasp");
+		$testUser = User::newUserObject("phpsec", "owasp", "rac130@pitt.edu");
 		$testUser->lockAccount();
 		
 		try

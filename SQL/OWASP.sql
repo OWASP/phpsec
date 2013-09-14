@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Sep 13, 2013 at 11:37 PM
+-- Generation Time: Sep 14, 2013 at 12:02 AM
 -- Server version: 5.5.22
 -- PHP Version: 5.3.10-1ubuntu3
 
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS `PASSWORD` (
   `USERID` varchar(32) NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `USERID` (`USERID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=17 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=25 ;
 
 -- --------------------------------------------------------
 
@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS `SESSION` (
   `USERID` varchar(32) NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `SESSION_ID` (`SESSION_ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=9 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=13 ;
 
 -- --------------------------------------------------------
 
@@ -107,6 +107,7 @@ CREATE TABLE IF NOT EXISTS `SESSION_DATA` (
 CREATE TABLE IF NOT EXISTS `USER` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `USERID` varchar(32) NOT NULL,
+  `P_EMAIL` varchar(128) NOT NULL,
   `ACCOUNT_CREATED` int(10) NOT NULL,
   `LOCKED` tinyint(1) NOT NULL DEFAULT '0',
   `INACTIVE` tinyint(1) NOT NULL DEFAULT '0',
@@ -116,7 +117,7 @@ CREATE TABLE IF NOT EXISTS `USER` (
   `DYNAMIC_SALT` varchar(128) NOT NULL,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `USERID` (`USERID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=182 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=215 ;
 
 -- --------------------------------------------------------
 
@@ -126,7 +127,6 @@ CREATE TABLE IF NOT EXISTS `USER` (
 
 CREATE TABLE IF NOT EXISTS `XUSER` (
   `USERID` varchar(32) NOT NULL,
-  `P_EMAIL` varchar(128) NOT NULL,
   `S_EMAIL` varchar(128) DEFAULT NULL,
   `FIRST_NAME` varchar(40) DEFAULT NULL,
   `LAST_NAME` varchar(40) DEFAULT NULL,

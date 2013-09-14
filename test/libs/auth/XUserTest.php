@@ -24,8 +24,8 @@ class XUserTest extends \PHPUnit_Framework_TestCase
 	public function setUp()
 	{
 		BasicPasswordManagement::$hashAlgo = "haval256,5"; //choose a hashing algo.
-		$this->obj = User::newUserObject("rash", 'testing'); //create a new user.
-		$this->xobj = new XUser($this->obj, "rahul300chaudhary400@gmail.com");
+		$this->obj = User::newUserObject("rash", 'testing', "rac130@pitt.edu"); //create a new user.
+		$this->xobj = new XUser($this->obj);
 	}
 
 	/**

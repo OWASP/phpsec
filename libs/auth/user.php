@@ -417,6 +417,14 @@ class User extends BasicPasswordManagement
 	protected $userID = null;
 	
 	
+	
+	/**
+	 * To store the primary email of the user.
+	 * @var string
+	 */
+	protected $primaryEmail = null;
+	
+	
 	/**
 	 * To store the hash of the user password.
 	 * @var String
@@ -454,11 +462,12 @@ class User extends BasicPasswordManagement
 	 * @return \phpsec\User
 	 * @throws UserExistsException
 	 */
-	public static function newUserObject($id, $pass)
+	public static function newUserObject($id, $pass, $pemail)
 	{
 		$obj = new User($id);
 		
 		$obj->userID = $id;
+		$obj->primaryEmail = $pemail;
 			
 		$time = time();
 
@@ -466,7 +475,7 @@ class User extends BasicPasswordManagement
 		$obj->dynamicSalt = hash(BasicPasswordManagement::$hashAlgo, randstr(64));
 		$obj->hashedPassword = BasicPasswordManagement::hashPassword($pass, $obj->dynamicSalt, BasicPasswordManagement::$hashAlgo);
 
-		$count = SQL("INSERT INTO USER (`USERID`, `ACCOUNT_CREATED`, `HASH`, `DATE_CREATED`, `ALGO`, `DYNAMIC_SALT`) VALUES (?, ?, ?, ?, ?, ?)", array("{$obj->userID}", $time, $obj->hashedPassword, $time, BasicPasswordManagement::$hashAlgo, $obj->dynamicSalt));
+		$count = SQL("INSERT INTO USER (`USERID`, `P_EMAIL`, `ACCOUNT_CREATED`, `HASH`, `DATE_CREATED`, `ALGO`, `DYNAMIC_SALT`) VALUES (?, ?, ?, ?, ?, ?, ?)", array($obj->userID, $obj->primaryEmail, $time, $obj->hashedPassword, $time, BasicPasswordManagement::$hashAlgo, $obj->dynamicSalt));
 
 		//If the user is already present in the database, then a duplicate won't be created and no rows will be affected. Hence 0 will be returned.
 		if ($count == 0)
@@ -488,7 +497,7 @@ class User extends BasicPasswordManagement
 	{
 		$obj = new User($id);
 		
-		$result = SQL("SELECT `HASH`, `ALGO`, `DYNAMIC_SALT` FROM USER WHERE `USERID` = ?", array($id));
+		$result = SQL("SELECT `P_EMAIL`, `HASH`, `ALGO`, `DYNAMIC_SALT` FROM USER WHERE `USERID` = ?", array($id));
 
 		//If no record is returned for this user, then this user does not exist in the system.
 		if (count($result) < 1)
@@ -510,6 +519,7 @@ class User extends BasicPasswordManagement
 		
 		//If all goes right, then set the local variables and return the user object.
 		$obj->userID = $id;
+		$obj->primaryEmail = $result[0]['P_EMAIL'];
 		$obj->dynamicSalt = $result[0]['DYNAMIC_SALT'];
 		$obj->hashedPassword = $result[0]['HASH'];
 		BasicPasswordManagement::$hashAlgo = $result[0]['ALGO'];
@@ -529,13 +539,14 @@ class User extends BasicPasswordManagement
 	{
 		$obj = new User();
 		
-		$result = SQL("SELECT `HASH`, `ALGO`, `DYNAMIC_SALT` FROM USER WHERE `USERID` = ?", array($id));
+		$result = SQL("SELECT `P_EMAIL`, `HASH`, `ALGO`, `DYNAMIC_SALT` FROM USER WHERE `USERID` = ?", array($id));
 
 		//If no record is returned for this user, then this user does not exist in the system.
 		if (count($result) < 1)
 			throw new UserNotExistsException("ERROR: User Not found.");
 		
 		$obj->userID = $id;
+		$obj->primaryEmail = $result[0]['P_EMAIL'];
 		$obj->dynamicSalt = $result[0]['DYNAMIC_SALT'];
 		$obj->hashedPassword = $result[0]['HASH'];
 		BasicPasswordManagement::$hashAlgo = $result[0]['ALGO'];
@@ -564,6 +575,12 @@ class User extends BasicPasswordManagement
 	public function getUserID()
 	{
 		return $this->userID;
+	}
+	
+	
+	public function getPrimaryEmail()
+	{
+		return $this->primaryEmail;
 	}
 	
 	

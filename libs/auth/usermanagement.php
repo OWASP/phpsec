@@ -35,10 +35,10 @@ class UserManagement
 	 * @param string $password
 	 * @return \phpsec\User | boolean
 	 */
-	public static function createUser($userID, $password)
+	public static function createUser($userID, $password, $email)
 	{
 		if (! UserManagement::userExists( $userID ))	//If the userId is available, then create a new user.
-			return User::newUserObject($userID, $password);
+			return User::newUserObject($userID, $password, $email);
 		
 		return FALSE;
 	}
