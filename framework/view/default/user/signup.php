@@ -9,6 +9,10 @@
 				<td><label>Desired Username:</label></td>
 				<td><input type="text" name="user" id="user" maxlength="32"></td>
 			</tr>
+			<tr name="email-field" id="email-field">
+				<td><label>E-Mail:</label></td>
+				<td><input type="text" name="email" id="email" maxlength="128"></td>
+			</tr>
 			<tr name="pass-field" id="pass-field">
 				<td><label>Desired Password:</label></td>
 				<td><input type="password" name="pass" id="pass" maxlength="32"></td>

@@ -6,7 +6,7 @@ class UserSignupController extends phpsec\framework\DefaultController
 	{
 		try
 		{
-			if ( (isset($_POST['user'])) && (isset($_POST['pass'])) && (isset($_POST['repass'])) )
+			if ( (isset($_POST['user'])) && ((isset($_POST['email']))) && (isset($_POST['pass'])) && (isset($_POST['repass'])) )
 			{
 				if ( phpsec\UserManagement::userExists($_POST['user']) )
 				{
@@ -14,6 +14,9 @@ class UserSignupController extends phpsec\framework\DefaultController
 					//Keep a config file that will tell if username suggestion must be enabled or not and then if enabled, suggest a new username.
 					//Then call the appropriate view to reload the page so that user can enter the new username.
 				}
+				
+				if (!preg_match('/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/',$_POST['email']))
+					$this->error = "Invalid email address.";
 
 				if ( ($_POST['pass']) !== ($_POST['repass']) )
 				{
