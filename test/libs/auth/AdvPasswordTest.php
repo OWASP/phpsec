@@ -83,22 +83,54 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 		$this->assertTrue(AdvancedPasswordManagement::tempPassword($this->userID->getUserID(), $result[0]['TEMP_PASS'])); //This should return true since the password is correct and time has not expired.
 		
 		//thirdTest
-		time("SET", $currentTime + 1000);
-		$this->assertFalse(AdvancedPasswordManagement::tempPassword($this->userID->getUserID(), $result[0]['TEMP_PASS'])); //This should return false since time has expired.
+		time("SET", $currentTime + 500);
+		$this->assertFalse(AdvancedPasswordManagement::tempPassword($this->userID->getUserID(), $result[0]['TEMP_PASS'])); //This should return false since the above temp_pass has already been used once, so its expired.
+		
+		
+		$temp_pass = AdvancedPasswordManagement::tempPassword($this->userID->getUserID()); //this will create a new temp password.
+		
+		//fourthTest
+		time("SET", time() + 1000);
+		$this->assertFalse(AdvancedPasswordManagement::tempPassword($this->userID->getUserID(), $temp_pass)); //This should return false since the time has expired.
 	}
 
 
 	/**
-	 * Function to test if brute force is detected.
-	 *
-	 * @expectedException \phpsec\BruteForceAttackDetectedException
+	 * Function to test if brute force is detected when passwords are provided continously.
 	 */
-	public function testBruteForce()
+	public function testBruteForceForFastPasswordGuessing()
 	{
-		//repeatedly provide wrong password.
-		for ($i = 0; $i < 7; $i++) {
-			$this->obj = new AdvancedPasswordManagement($this->userID->getUserID(), "resting", true); //wrong password provided.
+		try
+		{
+			//repeatedly provide wrong password.
+			for ($i = 0; $i < 7; $i++) {
+				$this->obj = new AdvancedPasswordManagement($this->userID->getUserID(), "resting", true); //wrong password provided.
+			}
+		}
+		catch (  BruteForceAttackDetectedException $e)
+		{
+			$this->assertTrue(TRUE);
 		}
 	}
-
+	
+	
+	
+	/**
+	 * Function to test if brute force is detected when passwords are provided after sleeping for some second.
+	 */
+	public function testBruteForceForSlowPasswordGuessing()
+	{
+		try
+		{
+			//repeatedly provide wrong password.
+			for ($i = 0; $i < 7; $i++) {
+				sleep(2);
+				$this->obj = new AdvancedPasswordManagement($this->userID->getUserID(), "resting", true); //wrong password provided.
+			}
+		}
+		catch (  BruteForceAttackDetectedException $e)
+		{
+			$this->assertTrue(TRUE);
+		}
+	}
 }
