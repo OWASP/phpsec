@@ -1,11 +1,20 @@
 <?php
-
 namespace phpsec;
 
-require_once __DIR__ . "/../../../libs/core/random.php";
+
+
+/**
+ * Required Files
+ */
 require_once __DIR__ . "/../../../libs/auth/user.php";
 
-class BasicPasswordManagementTest extends \PHPUnit_Framework_TestCase {
+
+
+class BasicPasswordManagementTest extends \PHPUnit_Framework_TestCase
+{
+	
+	
+	
 	/**
 	 * To check if we can retrieve the static salt.
 	 */
@@ -15,73 +24,85 @@ class BasicPasswordManagementTest extends \PHPUnit_Framework_TestCase {
 	}
 
 
+
 	/**
-	 * To check if we can get the entropy. This string will produce an entropy greater than 1.
+	 * To check if we can get the entropy. This string will produce an entropy greater than 2.
 	 */
 	public function testEntropy()
 	{
-		$this->assertTrue(BasicPasswordManagement::Entropy("OWASP PHP") > 1);
+		$this->assertTrue(BasicPasswordManagement::Entropy("OWASP PHP") > 2);
+		$this->assertTrue(BasicPasswordManagement::Entropy("") == 0);
+		$this->assertTrue(BasicPasswordManagement::Entropy("a") == 0);
+		$this->assertTrue(BasicPasswordManagement::Entropy("abcd") == 2);
+		$this->assertTrue(BasicPasswordManagement::Entropy("aabbccdd") == 2);
 	}
 
 
+	
 	/**
-	 * To check if a string as ordered characters. (3 cases are checked).
+	 * To check if a string as ordered characters.
 	 */
 	public function testHasOrderedCharacters()
 	{
 		$this->assertTrue(BasicPasswordManagement::hasOrderedCharacters("abcd", 3));
-		$this->assertTrue(BasicPasswordManagement::hasOrderedCharacters("dcba", 3));
-
+		$this->assertTrue(BasicPasswordManagement::hasOrderedCharacters("edcba", 4));
 		$this->assertFalse(BasicPasswordManagement::hasOrderedCharacters("abed", 3));
 	}
 
 
+	
 	/**
-	 * To check if a string as keyboard ordered characters. (3 cases are checked).
+	 * To check if a string as keyboard ordered characters.
 	 */
 	public function testHasKeyboardOrderedCharacters()
 	{
 		$this->assertTrue(BasicPasswordManagement::hasKeyboardOrderedCharacters("qwert", 3));
-		$this->assertTrue(BasicPasswordManagement::hasKeyboardOrderedCharacters("trewq", 3));
-
+		$this->assertTrue(BasicPasswordManagement::hasKeyboardOrderedCharacters("ytrewq", 5));
 		$this->assertFalse(BasicPasswordManagement::hasKeyboardOrderedCharacters("trwwQz", 3));
 	}
 
 
+	
 	/**
-	 * To check if the string is a phone number (3 cases are checked)
+	 * To check if the string is a phone number.
 	 */
 	public function testIsPhoneNumber()
 	{
 		$this->assertTrue(BasicPasswordManagement::isPhoneNumber("4125199634"));
 		$this->assertTrue(BasicPasswordManagement::isPhoneNumber("+14125199634"));
-
 		$this->assertFalse(BasicPasswordManagement::isPhoneNumber("412-519-9634"));
 	}
 
 
+	
 	/**
-	 * To check if the string contains a phone-pattern (3 cases are checked)
+	 * To check if the string contains a phone-pattern.
 	 */
 	public function testContainsPhoneNumber()
 	{
 		$this->assertTrue(BasicPasswordManagement::containsPhoneNumber("rash4125199634"));
 		$this->assertTrue(BasicPasswordManagement::containsPhoneNumber("+14125199634rahul"));
-
 		$this->assertFalse(BasicPasswordManagement::containsPhoneNumber("412-519-9634"));
 	}
 
 
+	/**
+	 * Function to provide different date-types.
+	 * @return array	Array that holds different date formats
+	 */
 	public function provideValidDateStrings()
 	{
 		return array(
-			"european english" => array("23-May 2012"),
-			"american" => array("may/21-1990"),
-			"iso caseinsensitive" => array("2021 FeB.13"),
+			"european english" =>		array("23-May 2012"),
+			"american" =>			array("may/21-1990"),
+			"iso caseinsensitive" =>	array("2021 FeB.13"),
 		);
 	}
 
+	
+	
 	/**
+	 * Function to check for CORRECT date patterns.
 	 * @dataProvider provideValidDateStrings
 	 */
 	public function testIsDateShouldReturnTrue($date)
@@ -89,13 +110,20 @@ class BasicPasswordManagementTest extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue(BasicPasswordManagement::isDate($date));
 	}
 
+	
+	
+	/**
+	 * Function to check for INCORRECT date patterns.
+	 */
 	public function testIsDateShouldReturnFalse()
 	{
 		$this->assertFalse(BasicPasswordManagement::isDate("rash21-May-rash"));
 	}
 
+	
+	
 	/**
-	 * To check if the string contains a date. (4 cases are checked)
+	 * To check if the string contains a date.
 	 */
 	public function testContainsDate()
 	{
@@ -106,18 +134,22 @@ class BasicPasswordManagementTest extends \PHPUnit_Framework_TestCase {
 	}
 
 
+	
 	/**
-	 * To check if the string contains double words. (2 cases are checked)
+	 * To check if the string contains double words.
 	 */
 	public function testContainsDoubledWords()
 	{
 		$this->assertTrue(BasicPasswordManagement::containDoubledWords("dogdog"));
 		$this->assertTrue(BasicPasswordManagement::containDoubledWords("dogdogs"));
+		$this->assertTrue(BasicPasswordManagement::containDoubledWords("coconutcoconut"));
+		$this->assertFalse(BasicPasswordManagement::containDoubledWords("fishcat"));
 	}
 
+	
 
 	/**
-	 * To check if a string contains another string. (2 cases are checked)
+	 * To check if a string contains another string.
 	 */
 	public function testContainsString()
 	{
@@ -126,8 +158,9 @@ class BasicPasswordManagementTest extends \PHPUnit_Framework_TestCase {
 	}
 
 
+	
 	/**
-	 * To check if we can get the strength of a string. (3 cases are checked)
+	 * To check if we can get the strength of a string.
 	 */
 	public function testStrength()
 	{
@@ -137,8 +170,9 @@ class BasicPasswordManagementTest extends \PHPUnit_Framework_TestCase {
 	}
 
 
+	
 	/**
-	 * To check if we can generate a random string of given strength. (3 cases are checked)
+	 * To check if we can generate a random string of given strength.
 	 */
 	public function testGenerate()
 	{

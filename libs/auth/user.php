@@ -11,24 +11,27 @@ require_once (__DIR__ . '/../core/time.php');
 class BasicPasswordManagement
 {
 	
+	
+	
 	/**
-	 * To store the current hash algorithm in use.
-	 * @var String
+	 * Current hash algorithm in use.
+	 * @var string
 	 */
 	public static $hashAlgo = "sha512";
 	
 	
 	
 	/**
-	 * To store the minimum password strength that all passwords must have.
+	 * Minimum password strength that all passwords must have.
 	 * @var float
 	 */
 	public static $passwordStrength = 0.5;
 	
 	
+	
 	/**
-	 * To return the current value of static salt in use.
-	 * @return String.
+	 * Current static salt in use.
+	 * @return string	The value of static salt
 	 */
 	public static function getStaticSalt()
 	{
@@ -37,46 +40,43 @@ class BasicPasswordManagement
 	}
 	
 	
+	
 	/**
 	 * To create hash of a string using dynamic and static salt.
-	 * @param String $pass
-	 * @param String $dynamicSalt
-	 * @param String $algo
-	 * @return String
+	 * @param string $pass			password in plain-text
+	 * @param string $dynamicSalt		dynamic salt
+	 * @return string			final hash
 	 */
-	protected static function hashPassword($pass, $dynamicSalt = "", $algo = "")
+	protected static function hashPassword($pass, $dynamicSalt = "")
 	{
-		//If algo is not defined, use sha512 by default.
-		if ($algo == "")
-			$algo = "sha512";
-		
-		return hash($algo, strtolower($dynamicSalt . $pass . BasicPasswordManagement::getStaticSalt()));
+		return hash(BasicPasswordManagement::$hashAlgo, strtolower($dynamicSalt . $pass . BasicPasswordManagement::getStaticSalt()));
 	}
 	
 	
+	
 	/**
-	 * To check if hash from the new password is equal to the old password's hash.
-	 * @param String $newPassword
-	 * @param String $oldHash
-	 * @param String $oldSalt
-	 * @param String $oldAlgo
-	 * @return boolean
+	 * To calculate hash of given password and then to check its equality against the old password's hash.
+	 * @param string $newPassword		The given password in plain-text
+	 * @param string $oldHash		The old hash
+	 * @param string $oldSalt		The old dynamic salt used to create the old hash
+	 * @return boolean			True if new hash and old hash match. False otherwise
 	 */
-	protected static function validatePassword($newPassword, $oldHash, $oldSalt, $oldAlgo)
+	protected static function validatePassword($newPassword, $oldHash, $oldSalt)
 	{
-		$newHash = BasicPasswordManagement::hashPassword($newPassword, $oldSalt, $oldAlgo);
+		$newHash = BasicPasswordManagement::hashPassword($newPassword, $oldSalt);
 		
-		if ($newHash == $oldHash)
+		if ($newHash === $oldHash)
 			return TRUE;
 		else
 			return FALSE;
 	}
 	
 	
+	
 	/**
 	 * To calculate entropy of a string.
-	 * @param String $string
-	 * @return float
+	 * @param string $string	The string whose entropy is to be calculated
+	 * @return float		The entropy of the string
 	 */
 	public static function Entropy($string)
 	{
@@ -94,11 +94,12 @@ class BasicPasswordManagement
 	}
 	
 	
+	
 	/**
-	 * To check if the string has ordered characters i.e. strings such as "abcd".
-	 * @param String $string
-	 * @param int $length
-	 * @return boolean
+	 * To check if the string has ordered characters i.e. characters in strings are consecutive - such as "abcd". Also checks for reverse patterns such as "dcba".
+	 * @param string $string	String in which we have to check for presence of ordered characters
+	 * @param int $length		Minimum length of pattern to be qualified as ordered. e.g. String "abc" is not ordered if the length is 4 because it takes a minimum of 4 characters in consecutive orders to mark the string as ordered. Thus, the string "abcd" is an ordered character of length 4. Similarly "xyz" is ordered character of length 3 and "uvwxyz" is ordered character of length 6
+	 * @return boolean		Returns true if ordered characters are found. False otherwise
 	 */
 	public static function hasOrderedCharacters($string, $length)
 	{
@@ -113,15 +114,16 @@ class BasicPasswordManagement
 			return chr((ord($m[0]) + $j--) % 256) . chr((ord($m[0]) + $i++) % 256);
 		}, str_split($string, 1)));
 		
-		return preg_match('#(.)(.\1){' . ($length - 1) . '}#', $str)==true;
+		return \preg_match('#(.)(.\1){' . ($length - 1) . '}#', $str) == true;
 	}
 	
 	
+	
 	/**
-	 * To check if the string has keyboard ordered characters i.e. strings such as "qwert".
-	 * @param String $string
-	 * @param int $length
-	 * @return boolean
+	 * To check if the string has keyboard ordered characters i.e. strings such as "qwert". Also checks for reverse patterns such as "rewq".
+	 * @param string $string	String in which we have to check for presence of ordered characters
+	 * @param int $length		Minimum length of pattern to be qualified as ordered. e.g. String "qwe" is not ordered if the length is 4 because it takes a minimum of 4 characters in consecutive orders to mark the string as ordered. Thus, the string "qwer" is an ordered character of length 4. Similarly "asd" is ordered character of length 3 and "zxcvbn" is ordered character of length 6
+	 * @return boolean		Returns true if ordered characters are found. False otherwise
 	 */
 	public static function hasKeyboardOrderedCharacters($string, $length)
 	{
@@ -137,48 +139,51 @@ class BasicPasswordManagement
 			return ((strpos($keyboardSet,$m[0]) + $j--) ) . ((strpos($keyboardSet,$m[0]) + $i++) );
 		}, str_split($string, 1)));
 		
-		return preg_match('#(..)(..\1){' . ($length - 1) . '}#', $str)==true;
+		return \preg_match('#(..)(..\1){' . ($length - 1) . '}#', $str) == true;
 	}
 	
 	
+	
 	/**
-	 * To check if the string is of a phone-number pattern.
-	 * @param String $string
-	 * @return boolean
+	 * To check if the string is a phone-number.
+	 * @param string $string	The string to be checked
+	 * @return boolean		Returns true if the string is a phone number. False otherwise
 	 */
-	public static function isPhoneNumber($string)	//there are many cases that phone numbers can be arranged. Hence not all possible combinations were taken into account.
+	public static function isPhoneNumber($string)	//there are many cases for a legitimate phone number such as various area codes, strings in phone numbers, dashes in between numbers, etc. Hence not all possible combinations were taken into account.
 	{
 		//If the string contains only numbers and the length of the string is between 6 and 13, it is possibly a phone number.
-		preg_match_all ("/^(\+)?\d{6,13}$/i", $string, $matches);
+		preg_match_all ("/^(\+)?\d{6,13}$/i", $string, $matches);	//checks for a '+' sign infront of string which may be present. Then checks for digits.
 		
-		if (count($matches[0])>=1)
+		if (count($matches[0]) >= 1)
 			return TRUE;
 		else
 			return FALSE;
 	}
 	
 	
+	
 	/**
-	 * To check if the string contains a phone-number pattern.
-	 * @param String $string
-	 * @return boolean
+	 * To check if the string contains a phone-number.
+	 * @param string $string	The string to be checked
+	 * @return boolean		Returns true if the string contains a phone number. False otherwise
 	 */
-	public static function containsPhoneNumber($string)	//there are many cases that phone numbers can be arranged. Hence not all possible combinations were taken into account.
+	public static function containsPhoneNumber($string)	//there are many cases for a legitimate phone number such as various area codes, strings in phone numbers, dashes in between numbers, etc. Hence not all possible combinations were taken into account.
 	{
 		//If the string contains continous numbers of length beteen 6 and 13, then it is possible that the string contains a phone-number pattern. e.g. owasp+91917817
-		preg_match_all ("/(\+)?\d{6,13}/i", $string, $matches);
+		preg_match_all ("/(\+)?\d{6,13}/i", $string, $matches);		//checks for a '+' sign infront of string which may be present. Then checks for digits.
 		
-		if (count($matches[0])>=1)
+		if (count($matches[0]) >= 1)
 			return TRUE;
 		else
 			return FALSE;
 	}
 	
 	
+	
 	/**
-	 * To check if the string is of a date-like pattern.
-	 * @param String $string
-	 * @return boolean
+	 * To check if the string is a date.
+	 * @param string $string	The string to be checked
+	 * @return boolean		Returns true if the string is a date. False otherwise
 	 */
 	public static function isDate($string)
 	{
@@ -205,10 +210,11 @@ class BasicPasswordManagement
 	}
 	
 	
+	
 	/**
 	 * To check if the string contains a date-like pattern.
-	 * @param String $string
-	 * @return boolean
+	 * @param String $string	The string to be checked
+	 * @return boolean		Returns true if the string contains a date. False otherwise
 	 */
 	public static function containsDate($string)
 	{
@@ -235,36 +241,26 @@ class BasicPasswordManagement
 	}
 	
 	
+	
 	/**
 	 * To check if the string contains double words such as crabcrab, stopstop, treetree, passpass, etc.
-	 * @param String $string
-	 * @return boolean
+	 * @param string $string	The string to be checked
+	 * @return boolean		Returns true if the string contains double words. False otherwise
 	 */
 	public static function containDoubledWords($string)
 	{
-		// Alternative approach that will find also words with variations at the start or end
 		return (preg_match('/(.{3,})\\1/', $string) == 1);
-		/*
-		//divide the string into two halves.
-		$firstHalf = substr($string, 0, (strlen($string) / 2));
-		$secondHalf = substr($string, (strlen($string) / 2), strlen($string));
-		
-		//check for the equality of the two words.
-		if ($firstHalf == $secondHalf)
-			return TRUE;
-		else
-			return FALSE;
-		*/
 	}
 	
 	
+	
 	/**
-	 * To check if the given string($hay) contains another string ($needle) in it.
-	 * @param String $hay
-	 * @param String $needle
-	 * @return boolean
+	 * To check if the given string(Hay) contains another string (Needle) in it.
+	 * @param string $hay		The bigger string that contains another string
+	 * @param string $needle	The pattern to search for
+	 * @return boolean		Returns true if the smaller string is found inside the bigger string. False otherwise
 	 */
-	public static function containsString($hay, $needle)	//used for checking for usernames, firstname, lastname etc.
+	public static function containsString($hay, $needle)	//used for checking if the password contains usernames, firstname, lastname etc. Usually a password must not contain anything related to the user.
 	{
 		preg_match_all("/(" . $needle . ")/i", $hay, $matches);
 		
@@ -275,117 +271,132 @@ class BasicPasswordManagement
 	}
 	
 	
+	
 	/**
-	 * To calculate the strength of a given string. The value lies between 0 and 1 where 1 being the strongest.
-	 * @param String $RawPassword
-	 * @return float
+	 * To calculate the strength of a given string. The value lies between 0 and 1; 1 being the strongest.
+	 * @param string $RawPassword	The string whose strength is to be calculated
+	 * @return float		Strength of the string
 	 */
 	public static function strength($RawPassword)
 	{
-		$score=0;
+		$score = 0;
 
 		//initial score is the entropy of the password
-		$entropy=self::Entropy($RawPassword);
-		$score+=$entropy/4; //maximum entropy is 8
+		$entropy = self::Entropy($RawPassword);
+		$score += $entropy/4;	//maximum entropy is 8
 
-		//check for sequence of letters
-		$ordered=self::hasOrderedCharacters($RawPassword, strlen($RawPassword)/2);
-		$fullyOrdered=self::hasOrderedCharacters($RawPassword, strlen($RawPassword));
-		$hasKeyboardOrder=self::hasKeyboardOrderedCharacters($RawPassword,strlen($RawPassword)/2);
-		$keyboardOrdered=self::hasKeyboardOrderedCharacters($RawPassword,strlen($RawPassword));
+		//check for common patters
+		$ordered =		self::hasOrderedCharacters($RawPassword, strlen($RawPassword)/2);
+		$fullyOrdered =		self::hasOrderedCharacters($RawPassword, strlen($RawPassword));
+		$hasKeyboardOrder =	self::hasKeyboardOrderedCharacters($RawPassword,strlen($RawPassword)/2);
+		$keyboardOrdered =	self::hasKeyboardOrderedCharacters($RawPassword,strlen($RawPassword));
 
-
+		//If the whole password is ordered
 		if ($fullyOrdered)
 			$score*=.1;
+		
+		//If half the password is ordered
 		elseif ($ordered)
 			$score*=.5;
-
+		
+		//If the whole password is keyboard ordered
 		if ($keyboardOrdered)
 			$score*=.15;
+		
+		//If half the password is keyboard ordered
 		elseif ($hasKeyboardOrder)
 			$score*=.5;
 
-		//check for date patterns
+		//If the whole password is a date
 		if (self::isDate( $RawPassword))
 			$score*=.2;
+		
+		//If the password contains a date
 		elseif (self::containsDate( $RawPassword))
 			$score*=.5;
 
-		//check for phone numbers
+		//If the whole password is a phone number
 		if (self::isPhoneNumber( $RawPassword))
 			$score*=.5;
+		
+		//If the password contains a phone number
 		elseif (self::containsPhoneNumber( $RawPassword))
 			$score*=.9;
 		
+		//If the password contains a double word
 		if (self::containDoubledWords( $RawPassword))
 			$score*=.3;
 
 		//check for variety of character types
-		preg_match_all ("/\d/i", $RawPassword, $matches);
-		$numbers = count($matches[0])>=1;
+		preg_match_all ("/\d/i", $RawPassword, $matches);	//password contains digits
+		$numbers = count($matches[0]) >= 1;
 
-		preg_match_all ("/[a-z]/", $RawPassword, $matches);
-		$lowers = count($matches[0])>=1;
+		preg_match_all ("/[a-z]/", $RawPassword, $matches);	//password contains lowercase alphabets
+		$lowers = count($matches[0]) >= 1;
 
-		preg_match_all ("/[A-Z]/", $RawPassword, $matches);
-		$uppers = count($matches[0])>=1;
+		preg_match_all ("/[A-Z]/", $RawPassword, $matches);	//password contains uppercase alphabets
+		$uppers = count($matches[0]) >= 1;
 
-		preg_match_all ("/[^A-z0-9]/", $RawPassword, $matches);
-		$others = count($matches[0])>=1;
+		preg_match_all ("/[^A-z0-9]/", $RawPassword, $matches);	//password contains special characters
+		$others = count($matches[0]) >= 1;
+		
+		//calculate score of the password after checking type of characters present
+		$setMultiplier = ($others + $uppers + $lowers + $numbers)/4;
+		
+		//calculate score of the password after checking the type of characters present and the type of patterns present
+		$score = $score/2 + $score/2*$setMultiplier;
 
-		$setMultiplier=($others+$uppers+$lowers+$numbers)/4;
-
-		$score=$score/2 + $score/2*$setMultiplier;
-
-
-		return min(1,max(0,$score));
+		return min(1, max(0, $score));	//return the final score
 
 	}
 	
 	
+	
 	/**
 	 * To generate a random string of specified strength.
-	 * @param float $Security
-	 * @return String
+	 * @param float $Security	The desired strength of the string
+	 * @return String		string that is of desired strength
 	 */
 	public static function generate($Security=.5)
 	{
 		$MaxLen=20;
 		
-		if ($Security>.3)
-			$UseNumbers=true;	//can use digits.
+		if ($Security > .3)
+			$UseNumbers = true;	//can use digits.
 		else
-			$UseNumbers=false;
+			$UseNumbers = false;
 		
-		if ($Security>.5)
-			$UseUpper=true;		//can use upper case letters.
+		if ($Security > .5)
+			$UseUpper = true;		//can use upper case letters.
 		else
-			$UseUpper=false;
+			$UseUpper = false;
 		
-		if ($Security>.9)
-			$UseSymbols=true;	//can use symbols such as %, &, # etc.
+		if ($Security > .9)
+			$UseSymbols = true;	//can use special symbols such as %, &, # etc.
 		else
-			$UseSymbols=false;
+			$UseSymbols = false;
 		
 		
-		$Length=max($Security*$MaxLen,4);
+		$Length = max($Security*$MaxLen, 4);
 
-		$chars='abcdefghijklmnopqrstuvwxyz';
+		$chars = 'abcdefghijklmnopqrstuvwxyz';
 		
-		if ($UseUpper)
-			$chars.="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		if ($UseUpper)		//If allowed to use uppercase
+			$chars .= "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		
-		if ($UseNumbers)
-			$chars.="0123456789";
+		if ($UseNumbers)	//If allowed to use digits
+			$chars .= "0123456789";
 		
-		if ($UseSymbols)
-			$chars.="!@#$%^&*()_+-=?.,";
+		if ($UseSymbols)	//If allowed to use special characters
+			$chars .= "!@#$%^&*()_+-=?.,";
 
 		$Pass="";
+		
 		//$char contains the string that has all the letters we can use in a password.
+		
 		//The loop pics a character from $char in random and adds that character to the final $pass variable.
-		for ($i=0;$i<$Length;++$i)
-			$Pass.=$chars[rand(0, strlen($chars)-1)];
+		for ($i=0; $i<$Length; ++$i)
+			$Pass .= $chars[rand(0, strlen($chars)-1)];
 		
 		return $Pass;
 	}
