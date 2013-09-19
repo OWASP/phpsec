@@ -127,13 +127,13 @@ class Session
 			
 		$sessionID = $_COOKIE['sessionid'];
 		
-		$result = SQL("SELECT `SESSION_ID`, `USERID` FROM SESSION WHERE `SESSION_ID` = ?", array($sessionID));
+		$result = SQL("SELECT `USERID` FROM SESSION WHERE `SESSION_ID` = ?", array($sessionID));
 		if (count($result) != 1)
 		{
 			$this->updateUserCookies(TRUE);
 			return FALSE;
 		}
-		$this->session = $result[0]['SESSION_ID'];
+		$this->session = $sessionID;
 		$this->userID = $result[0]['USERID'];
 		
 		if ($this->inactivityTimeout() || $this->expireTimeout())
