@@ -1,5 +1,6 @@
 <?php
 namespace phpsec;
+ob_start();
 
 /**
  * Required Files.
@@ -145,5 +146,26 @@ class UserTest extends \PHPUnit_Framework_TestCase
 			
 			$this->assertTrue($firstTest && $secondTest);
 		}
+	}
+	
+	
+	
+	/**
+	 * Function to test the "remember-me" functionality.
+	 */
+	public function testRememberMe()
+	{
+		//enable the function. This will set the AUTH_ID token in DB.
+		User::enableRememberMe($this->obj->getUserID());
+		$result = SQL("SELECT `AUTH_ID` FROM `AUTH_TOKENS` WHERE USERID = ?", array($this->obj->getUserID()));//get the token. 
+		$_COOKIE['AUTHID'] = $result[0]['AUTH_ID'];	//set the cookie. In real world, this and the above step will be done in browser.
+		time("SET", time() + 100000000);	//set the time to some distant future.
+		$this->assertFalse(User::checkRememberMe());	//test should fail since the time has expired. Also the AUTH_ID token will be deleted from the DB.
+		
+		time("RESET");	//reset the clock.
+		User::enableRememberMe($this->obj->getUserID());	//enable the function again.
+		$result = SQL("SELECT `AUTH_ID` FROM `AUTH_TOKENS` WHERE USERID = ?", array($this->obj->getUserID()));	//get the token.
+		$_COOKIE['AUTHID'] = $result[0]['AUTH_ID'];	//set the cookie.
+		$this->assertTrue(User::checkRememberMe() === $this->obj->getUserID());	//the test should pass becaue the token is correct and within time-limit.
 	}
 }

@@ -578,9 +578,16 @@ class User extends BasicPasswordManagement
 	}
 	
 	
-	public function getPrimaryEmail()
+	public static function getPrimaryEmail($userID)
 	{
-		return $this->primaryEmail;
+		$result = SQL("SELECT `P_EMAIL` FROM USER WHERE USERID = ?", array($userID));
+		
+		if (count($result) == 1)
+		{
+			return $result[0]['P_EMAIL'];
+		}
+		
+		return FALSE;
 	}
 	
 	
@@ -772,7 +779,7 @@ class User extends BasicPasswordManagement
 		if (isset($_COOKIE['AUTHID']))
 		{
 			//get all the sessions associated with this user.
-			$result = SQL("SELECT * FROM `AUTH_TOKENS` WHERE `AUTHID` = ?", array($_COOKIE['AUTHID']));
+			$result = SQL("SELECT * FROM `AUTH_TOKENS` WHERE `AUTH_ID` = ?", array($_COOKIE['AUTHID']));
 			
 			if (count($result) == 1)
 			{
@@ -783,7 +790,6 @@ class User extends BasicPasswordManagement
 				{
 					SQL("DELETE FROM `AUTH_TOKENS` WHERE `AUTH_ID` = ?", array($_COOKIE['AUTHID']));
 					\setcookie("AUTHID", "");
-
 					return FALSE;
 				}
 				else
