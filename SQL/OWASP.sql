@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Sep 14, 2013 at 12:02 AM
+-- Generation Time: Sep 19, 2013 at 03:54 AM
 -- Server version: 5.5.22
 -- PHP Version: 5.3.10-1ubuntu3
 
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS `LOGS` (
   `DATETIME` text,
   `LINE` int(10) DEFAULT NULL,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
 
 -- --------------------------------------------------------
 
@@ -57,16 +57,15 @@ CREATE TABLE IF NOT EXISTS `LOGS` (
 --
 
 CREATE TABLE IF NOT EXISTS `PASSWORD` (
-  `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `TEMP_PASS` varchar(128) NOT NULL,
   `USE_FLAG` tinyint(1) NOT NULL,
   `TEMP_TIME` int(10) NOT NULL,
-  `TOTAL_LOGIN_ATTEMPTS` int(2) DEFAULT NULL,
-  `LAST_LOGIN_ATTEMPT` int(10) DEFAULT NULL,
+  `TOTAL_LOGIN_ATTEMPTS` int(2) NOT NULL DEFAULT '0',
+  `LAST_LOGIN_ATTEMPT` int(10) NOT NULL DEFAULT '0',
+  `FIRST_LOGIN_ATTEMPT` int(10) NOT NULL DEFAULT '0',
   `USERID` varchar(32) NOT NULL,
-  PRIMARY KEY (`ID`),
   UNIQUE KEY `USERID` (`USERID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=25 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -75,14 +74,12 @@ CREATE TABLE IF NOT EXISTS `PASSWORD` (
 --
 
 CREATE TABLE IF NOT EXISTS `SESSION` (
-  `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `SESSION_ID` varchar(32) NOT NULL,
   `DATE_CREATED` int(10) NOT NULL,
   `LAST_ACTIVITY` int(10) NOT NULL,
   `USERID` varchar(32) NOT NULL,
-  PRIMARY KEY (`ID`),
   UNIQUE KEY `SESSION_ID` (`SESSION_ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=13 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -91,12 +88,10 @@ CREATE TABLE IF NOT EXISTS `SESSION` (
 --
 
 CREATE TABLE IF NOT EXISTS `SESSION_DATA` (
-  `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `SESSION_ID` varchar(32) NOT NULL,
   `KEY` varchar(32) NOT NULL,
-  `VALUE` varchar(64) DEFAULT NULL,
-  PRIMARY KEY (`ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+  `VALUE` varchar(64) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -105,7 +100,6 @@ CREATE TABLE IF NOT EXISTS `SESSION_DATA` (
 --
 
 CREATE TABLE IF NOT EXISTS `USER` (
-  `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `USERID` varchar(32) NOT NULL,
   `P_EMAIL` varchar(128) NOT NULL,
   `ACCOUNT_CREATED` int(10) NOT NULL,
@@ -115,9 +109,8 @@ CREATE TABLE IF NOT EXISTS `USER` (
   `DATE_CREATED` int(10) NOT NULL,
   `ALGO` varchar(15) NOT NULL,
   `DYNAMIC_SALT` varchar(128) NOT NULL,
-  PRIMARY KEY (`ID`),
   UNIQUE KEY `USERID` (`USERID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=215 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
