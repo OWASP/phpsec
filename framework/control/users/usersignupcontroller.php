@@ -15,7 +15,7 @@ class UserSignupController extends phpsec\framework\DefaultController
 					//Then call the appropriate view to reload the page so that user can enter the new username.
 				}
 				
-				if (!preg_match('/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/',$_POST['email']))
+				if (!preg_match('/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,63})$/',$_POST['email']))
 					$this->error = "Invalid email address.";
 
 				if ( ($_POST['pass']) !== ($_POST['repass']) )
@@ -30,6 +30,23 @@ class UserSignupController extends phpsec\framework\DefaultController
 					//Then call the appropriate view to reload the page so that user can enter the new password.
 				}
 
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				//************************************************************************************PROBLEM HERE
 				//call temp-pass controller to validate the account (aka account activation) and then create new user object.
 				$tempPass = new TempPassController($_POST['user'], $_POST['email']);
 				if ($tempPass->Handle())
