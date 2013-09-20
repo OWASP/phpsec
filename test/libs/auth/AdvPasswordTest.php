@@ -30,7 +30,9 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 	public function setUp()
 	{
 		BasicPasswordManagement::$hashAlgo = "haval256,5"; //choose salting algo.
-		$this->userID = User::newUserObject(randstr(10), 'testing', "rac130@pitt.edu"); //create a user.
+		User::newUserObject("rash", 'testing', "rac130@pitt.edu"); //create a user.
+		User::activateAccount("rash");
+		$this->userID = User::existingUserObject("rash", "testing");
 		$this->obj = new AdvancedPasswordManagement($this->userID->getUserID(), 'testing'); //create object to AdvancedPasswordManagement class.
 	}
 

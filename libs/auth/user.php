@@ -1,11 +1,14 @@
 <?php
 namespace phpsec;
 
+
+
 /**
  * Required Files
  */
 require_once (__DIR__ . '/../core/random.php');
 require_once (__DIR__ . '/../core/time.php');
+
 
 
 class BasicPasswordManagement
@@ -45,11 +48,15 @@ class BasicPasswordManagement
 	 * To create hash of a string using dynamic and static salt.
 	 * @param string $pass			password in plain-text
 	 * @param string $dynamicSalt		dynamic salt
+	 * @param string $algo			The algorithm used to calculate hash
 	 * @return string			final hash
 	 */
-	protected static function hashPassword($pass, $dynamicSalt = "")
+	protected static function hashPassword($pass, $dynamicSalt = "", $algo = "")
 	{
-		return hash(BasicPasswordManagement::$hashAlgo, strtolower($dynamicSalt . $pass . BasicPasswordManagement::getStaticSalt()));
+		if ($algo == "")
+			$algo = BasicPasswordManagement::$hashAlgo;
+		
+		return hash($algo, strtolower($dynamicSalt . $pass . BasicPasswordManagement::getStaticSalt()));
 	}
 	
 	
@@ -59,11 +66,12 @@ class BasicPasswordManagement
 	 * @param string $newPassword		The given password in plain-text
 	 * @param string $oldHash		The old hash
 	 * @param string $oldSalt		The old dynamic salt used to create the old hash
+	 * @param string $oldAlgo		The old algo used to create the hash
 	 * @return boolean			True if new hash and old hash match. False otherwise
 	 */
-	protected static function validatePassword($newPassword, $oldHash, $oldSalt)
+	protected static function validatePassword($newPassword, $oldHash, $oldSalt, $oldAlgo)
 	{
-		$newHash = BasicPasswordManagement::hashPassword($newPassword, $oldSalt);
+		$newHash = BasicPasswordManagement::hashPassword($newPassword, $oldSalt, $oldAlgo);
 		
 		if ($newHash === $oldHash)
 			return TRUE;
@@ -403,62 +411,80 @@ class BasicPasswordManagement
 }
 
 
+
 /**
  * Parent Exception Class.
  */
 class UserException extends \Exception {}
 
+
+
 /**
  * Child Exception Classes
  */
 class WrongPasswordException extends UserException {}			//The password provided for the existing user is not correct.
-class UserExistsException extends UserException {}			//Records were found with this userID in the database.
-class UserNotExistsException extends UserException {}			//Records were NOT found with this userID in the database.
-class UserLocked extends UserException {}				//The user account is locked.
-class UserAccountInactive extends UserException {}			//The user account is inactive.
+class UserExistsException extends UserException {}			//User already exists in the database.
+class UserNotExistsException extends UserException {}			//User does not exists in the database.
+class UserLocked extends UserException {}				//User account is locked.
+class UserAccountInactive extends UserException {}			//User account is inactive.
+
 
 
 class User extends BasicPasswordManagement
 {
 	
+	
+	
 	/**
-	 * To store the ID of the user.
-	 * @var String
+	 * ID of the user.
+	 * @var string
 	 */
 	protected $userID = null;
 	
 	
 	
 	/**
-	 * To store the primary email of the user.
+	 * Primary email of the user.
 	 * @var string
 	 */
 	protected $primaryEmail = null;
 	
 	
+	
 	/**
-	 * To store the hash of the user password.
-	 * @var String
+	 * Hashing algorithm used for this user.
+	 * @var string
+	 */
+	protected $hashAlgorithm = null;
+	
+	
+	
+	/**
+	 * Hash of the user password.
+	 * @var string
 	 */
 	private $hashedPassword = "";
 	
 	
+	
 	/**
-	 * To store the dynamic salt used in creating the hash of the password.
-	 * @var String
+	 * Dynamic salt used in creating the hash of the password.
+	 * @var string
 	 */
 	private $dynamicSalt = "";
 	
 	
+	
 	/**
-	 * To denote the time after which a password must expire i.e. the password needs to be replaced.
+	 * Time after which a password must expire i.e. the password needs to be updated.
 	 * @var int
 	 */
 	public static $passwordExpiryTime = 15552000;	//approx 6 months.
 	
 	
+	
 	/**
-	 * To denote the maximum time after which the user must again enter their passwords.
+	 * Maximum time after which the user must re-login.
 	 * @var int
 	 */
 	public static $rememberMeExpiryTime = 2592000;	//approx 1 month.
@@ -467,62 +493,63 @@ class User extends BasicPasswordManagement
 	
 	/**
 	 * To create an object for a new user.
-	 * @param DatabaseObject $dbConn
-	 * @param String $id
-	 * @param String $pass
-	 * @return \phpsec\User
-	 * @throws UserExistsException
+	 * @param string $id		The desired ID of the user
+	 * @param string $pass		The desired password of the user
+	 * @param string $pemail	The desired email of the user
+	 * @throws UserExistsException	Will be thrown if the user already exists in the DB
 	 */
 	public static function newUserObject($id, $pass, $pemail)
 	{
-		$obj = new User($id);
+		$obj = new User();	//create a new user object
 		
-		$obj->userID = $id;
-		$obj->primaryEmail = $pemail;
+		$obj->userID = $id;		//set userID
+		$obj->primaryEmail = $pemail;	//set primary email
 			
 		$time = time();
 
 		//calculate the hash of the password.
-		$obj->dynamicSalt = hash(BasicPasswordManagement::$hashAlgo, randstr(64));
+		$obj->dynamicSalt = hash(BasicPasswordManagement::$hashAlgo, randstr(128));
 		$obj->hashedPassword = BasicPasswordManagement::hashPassword($pass, $obj->dynamicSalt, BasicPasswordManagement::$hashAlgo);
+		$obj->hashAlgorithm = BasicPasswordManagement::$hashAlgo;
 
 		$count = SQL("INSERT INTO USER (`USERID`, `P_EMAIL`, `ACCOUNT_CREATED`, `HASH`, `DATE_CREATED`, `ALGO`, `DYNAMIC_SALT`) VALUES (?, ?, ?, ?, ?, ?, ?)", array($obj->userID, $obj->primaryEmail, $time, $obj->hashedPassword, $time, BasicPasswordManagement::$hashAlgo, $obj->dynamicSalt));
 
 		//If the user is already present in the database, then a duplicate won't be created and no rows will be affected. Hence 0 will be returned.
 		if ($count == 0)
 			throw new UserExistsException("ERROR: This User already exists in the DB.");
-		
-		return $obj;
 	}
+	
 	
 	
 	/**
 	 * To get the object of an existing user.
-	 * @param String $id
-	 * @param String $pass
-	 * @return \phpsec\User
-	 * @throws UserNotExistsException
-	 * @throws WrongPasswordException
+	 * @param string $id		The id of the user
+	 * @param string $pass		The password of the user
+	 * @return \phpsec\User		The object of the user that enables them to use other functions
+	 * @throws UserNotExistsException	Will be thrown if no user is found with the given ID
+	 * @throws WrongPasswordException	Will be thrown if the given password does not matches the old password stored in the DB
 	 */
 	public static function existingUserObject($id, $pass)
 	{
-		$obj = new User($id);
+		$obj = new User();
 		
 		$result = SQL("SELECT `P_EMAIL`, `HASH`, `ALGO`, `DYNAMIC_SALT` FROM USER WHERE `USERID` = ?", array($id));
 
 		//If no record is returned for this user, then this user does not exist in the system.
-		if (count($result) < 1)
+		if (count($result) != 1)
 			throw new UserNotExistsException("ERROR: User Not found.");
 
 		//validate the given password with that stored in the DB.
-		if (!BasicPasswordManagement::validatePassword( $pass, $result[0]['HASH'], $result[0]['DYNAMIC_SALT'], $result[0]['ALGO']))
+		if ( ! BasicPasswordManagement::validatePassword( $pass, $result[0]['HASH'], $result[0]['DYNAMIC_SALT'], $result[0]['ALGO']))
 			throw new WrongPasswordException("ERROR: Wrong Password.");
 		
+		//check if the user account is locked
 		if (User::isLocked($id))
 		{
 			throw new UserLocked("ERROR: The account is locked!");
 		}
 		
+		//check if the user account is inactive
 		if (User::isInactive($id))
 		{
 			throw new UserAccountInactive("ERROR: The account is inactive. Please activate your account.");
@@ -533,7 +560,7 @@ class User extends BasicPasswordManagement
 		$obj->primaryEmail = $result[0]['P_EMAIL'];
 		$obj->dynamicSalt = $result[0]['DYNAMIC_SALT'];
 		$obj->hashedPassword = $result[0]['HASH'];
-		BasicPasswordManagement::$hashAlgo = $result[0]['ALGO'];
+		$obj->hashAlgorithm = $result[0]['ALGO'];
 
 		return $obj;
 	}
@@ -542,9 +569,9 @@ class User extends BasicPasswordManagement
 	
 	/**
 	 * Function to provide userObject forcefully (i.e. without password).
-	 * @param String $userID
-	 * @return \phpsec\User
-	 * @throws UserNotExistsException
+	 * @param string $userID		The id of the user
+	 * @return \phpsec\User			The object of the user that enables them to use other functions
+	 * @throws UserNotExistsException	Will be thrown if no user is found with the given ID
 	 */
 	public static function forceLogin($id)
 	{
@@ -553,15 +580,15 @@ class User extends BasicPasswordManagement
 		$result = SQL("SELECT `P_EMAIL`, `HASH`, `ALGO`, `DYNAMIC_SALT` FROM USER WHERE `USERID` = ?", array($id));
 
 		//If no record is returned for this user, then this user does not exist in the system.
-		if (count($result) < 1)
+		if (count($result) != 1)
 			throw new UserNotExistsException("ERROR: User Not found.");
 		
 		$obj->userID = $id;
 		$obj->primaryEmail = $result[0]['P_EMAIL'];
 		$obj->dynamicSalt = $result[0]['DYNAMIC_SALT'];
 		$obj->hashedPassword = $result[0]['HASH'];
-		BasicPasswordManagement::$hashAlgo = $result[0]['ALGO'];
-
+		$obj->hashAlgorithm = $result[0]['ALGO'];
+		
 		return $obj;
 	}
 	
@@ -573,15 +600,15 @@ class User extends BasicPasswordManagement
 	 */
 	public function getAccountCreationDate()
 	{
-		$result = SQL("SELECT `ACCOUNT_CREATED` FROM USER WHERE USERID = ?", array("{$this->userID}"));
-
+		$result = SQL("SELECT `ACCOUNT_CREATED` FROM USER WHERE USERID = ?", array($this->userID));
 		return $result[0]['ACCOUNT_CREATED'];
 	}
 	
 	
+	
 	/**
 	 * To get the userID of the current User.
-	 * @return String
+	 * @return string
 	 */
 	public function getUserID()
 	{
@@ -589,6 +616,12 @@ class User extends BasicPasswordManagement
 	}
 	
 	
+	
+	/**
+	 * To get the primary email of the user.
+	 * @param string $userID		The id of the user whose email is required
+	 * @return string | boolean		Returns the email of the user if the user is found. False otherwise
+	 */
 	public static function getPrimaryEmail($userID)
 	{
 		$result = SQL("SELECT `P_EMAIL` FROM USER WHERE USERID = ?", array($userID));
@@ -602,32 +635,35 @@ class User extends BasicPasswordManagement
 	}
 	
 	
+	
 	/**
 	 * To verify if a given string is the correct password that is stored in the DB for the current user.
-	 * @param String $password
-	 * @return boolean
+	 * @param string $password	The password that is to be checked against the one stored in DB
+	 * @return boolean		Returns True if the passwords match. False otherwise
 	 */
 	public function verifyPassword($password)
 	{
-		return BasicPasswordManagement::validatePassword($password, $this->hashedPassword, $this->dynamicSalt, BasicPasswordManagement::$hashAlgo);
+		return BasicPasswordManagement::validatePassword($password, $this->hashedPassword, $this->dynamicSalt, $this->hashAlgorithm);
 	}
 	
 	
+	
 	/**
-	 * Function to facilitate the password reset for the current user.
-	 * @param String $oldPassword
-	 * @param String $newPassword
-	 * @return boolean
-	 * @throws WrongPasswordException
+	 * Function to reset the password for the current user.
+	 * @param string $oldPassword		The old password of the user
+	 * @param string $newPassword		The new desired password of the user
+	 * @return boolean			Returns true if the password is reset successfully
+	 * @throws WrongPasswordException	Throws if the old password does not matches the one stored in the DB
 	 */
 	public function resetPassword($oldPassword, $newPassword)
 	{
 		//If given password ($oldPassword) is not matched with the one stored in the DB.
-		if (! BasicPasswordManagement::validatePassword( $oldPassword, $this->hashedPassword, $this->dynamicSalt, BasicPasswordManagement::$hashAlgo))
+		if (! BasicPasswordManagement::validatePassword( $oldPassword, $this->hashedPassword, $this->dynamicSalt, $this->hashAlgorithm))
 			throw new WrongPasswordException("ERROR: Wrong Password provided!!");
 		
 		//create a new dynamic salt.
-		$this->dynamicSalt = hash(BasicPasswordManagement::$hashAlgo, randstr(64));
+		$this->dynamicSalt = hash(BasicPasswordManagement::$hashAlgo, randstr(128));
+		
 		//create the hash of the new password.
 		$newHash = BasicPasswordManagement::hashPassword($newPassword, $this->dynamicSalt, BasicPasswordManagement::$hashAlgo);
 		
@@ -635,13 +671,16 @@ class User extends BasicPasswordManagement
 		SQL("UPDATE USER SET `HASH` = ?, `DATE_CREATED` = ?, `DYNAMIC_SALT` = ?, `ALGO` = ? WHERE `USERID` = ?", array($newHash, time(), $this->dynamicSalt, BasicPasswordManagement::$hashAlgo, $this->userID));
 		
 		$this->hashedPassword = $newHash;
+		$this->hashAlgorithm = BasicPasswordManagement::$hashAlgo;
 
 		return TRUE;
 	}
 	
 	
+	
 	/**
 	 * To delete the current user.
+	 * @return boolean		Returns True if the user is deleted successfully
 	 */
 	public function deleteUser()
 	{
@@ -655,23 +694,21 @@ class User extends BasicPasswordManagement
 	}
 	
 	
+	
 	/**
 	 * To check if the password has aged. i.e. if the time has passed after which the password must be changed.
-	 * @return boolean
+	 * @return boolean	Returns TRUE if the password HAS AGED. False if the password has NOT AGED
 	 */
 	public function isPasswordExpired()
 	{
 		$result = SQL("SELECT `DATE_CREATED` FROM USER WHERE `USERID` = ?", array($this->userID));
 			
-		if (count($result) == 1)
-		{
-			$currentTime = time();
+		$currentTime = time();
 
-			if ( ($currentTime - $result[0]['DATE_CREATED'])  > User::$passwordExpiryTime)
-				return TRUE;
-		}
-		
-		return FALSE;
+		if ( ($currentTime - $result[0]['DATE_CREATED'])  > User::$passwordExpiryTime)
+			return TRUE;
+		else
+			return FALSE;
 	}
 	
 	
@@ -685,6 +722,7 @@ class User extends BasicPasswordManagement
 	}
 	
 	
+	
 	/**
 	 * Function to unlock the user account.
 	 */
@@ -694,24 +732,21 @@ class User extends BasicPasswordManagement
 	}
 	
 	
+	
 	/**
 	 * Function to check if the user account is locked or not.
-	 * @param string $user
-	 * @return boolean
+	 * @param string $userID	The id of the user whose account status is being checked	
+	 * @return boolean		Returns True if the account is locked. False otherwise
 	 */
-	public static function isLocked($user)
+	public static function isLocked($userID)
 	{
-		$result = SQL("SELECT LOCKED FROM USER WHERE USERID = ?", array($user));
+		$result = SQL("SELECT LOCKED FROM USER WHERE USERID = ?", array($userID));
 		
 		if (count($result) == 1)
 		{
 			if ($result[0]['LOCKED'] == 1)
 			{
 				return TRUE;
-			}
-			else
-			{
-				return FALSE;
 			}
 		}
 		
@@ -720,32 +755,40 @@ class User extends BasicPasswordManagement
 	
 	
 	
-	
-	public function activateAccount()
+	/**
+	 * Function to activate the account
+	 */
+	public static function activateAccount($userID)
 	{
-		SQL("UPDATE USER SET INACTIVE = ? WHERE USERID = ?", array(0, $this->userID));
+		SQL("UPDATE USER SET INACTIVE = ? WHERE USERID = ?", array(0, $userID));
+	}
+	
+	
+	
+	/**
+	 * Function to deactivate the account
+	 */
+	public function deactivateAccount()
+	{
+		SQL("UPDATE USER SET INACTIVE = ? WHERE USERID = ?", array(1, $this->userID));
 	}
 	
 	
 	
 	/**
 	 * Function to check if the user's account is inactive or not.
-	 * @param string $user
-	 * @return boolean
+	 * @param string $userID		The id of the user whose account status is being checked	
+	 * @return boolean		Returns True if the account is inactive. False otherwise
 	 */
-	public static function isInactive($user)
+	public static function isInactive($userID)
 	{
-		$result = SQL("SELECT INACTIVE FROM USER WHERE USERID = ?", array($user));
+		$result = SQL("SELECT INACTIVE FROM USER WHERE USERID = ?", array($userID));
 		
 		if (count($result) == 1)
 		{
 			if ($result[0]['INACTIVE'] == 1)
 			{
 				return TRUE;
-			}
-			else
-			{
-				return FALSE;
 			}
 		}
 		
@@ -756,13 +799,13 @@ class User extends BasicPasswordManagement
 	
 	/**
 	 * Function to enable "Remember Me" functionality.
-	 * @param boolean $secure	//If set, the cookies will only set for HTTPS connections.
-	 * @param boolean $httpOnly	//If set, the cookies will only be accessible via HTTP Methods and not via Javascript and other means.
-	 * @return boolean
+	 * @param boolean $secure	//If set, the cookies will only set for HTTPS connections
+	 * @param boolean $httpOnly	//If set, the cookies will only be accessible via HTTP Methods and not via Javascript and other means
+	 * @return boolean		//Returns true if the function is enabled successfully
 	 */
 	public static function enableRememberMe($userID, $secure = TRUE, $httpOnly = TRUE)
 	{
-		$authID = randstr(32);
+		$authID = randstr(128);	//create a new authentication token
 			
 		SQL("INSERT INTO `AUTH_TOKENS` (`AUTH_ID`, `USERID`, `DATE_CREATED`) VALUES (?, ?, ?)", array($authID, $userID, time()));
 
@@ -782,16 +825,17 @@ class User extends BasicPasswordManagement
 	
 	
 	/**
-	 * Function to check for AUTH token. If present and valid, returns TRUE, otherwise FALSE.
-	 * @return boolean
+	 * Function to check for AUTH token validity.
+	 * @return boolean	Return the userID related to the token if the AUTH token is valid. False otherwise
 	 */
 	public static function checkRememberMe()
 	{
 		if (isset($_COOKIE['AUTHID']))
 		{
-			//get all the sessions associated with this user.
+			//get the given AUTH token from the DB.
 			$result = SQL("SELECT * FROM `AUTH_TOKENS` WHERE `AUTH_ID` = ?", array($_COOKIE['AUTHID']));
 			
+			//If the AUTH token is found in DB
 			if (count($result) == 1)
 			{
 				$currentTime = time();
@@ -803,14 +847,16 @@ class User extends BasicPasswordManagement
 					\setcookie("AUTHID", "");
 					return FALSE;
 				}
-				else
+				else	//The AUTH token is correct and valid. Hence, return the userID related to this AUTH token
 					return $result[0]['USERID'];
 			}
-			
-			\setcookie("AUTHID", "");
-			return FALSE;
+			else	//If this AUTH token is not found in DB, then erase the cookie from the client's machine and return FALSE
+			{
+				\setcookie("AUTHID", "");
+				return FALSE;
+			}
 		}
-		else
+		else	//If the user is unable to provide a AUTH token, then return FALSE
 			return FALSE;
 	}
 }

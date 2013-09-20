@@ -21,7 +21,9 @@ class UserManagementTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testUser_Create_Delete_Exists()
 	{
-		$userObj = UserManagement::createUser("owasp1", "owasp", "rac130@pitt.edu"); //create a user.
+		UserManagement::createUser("owasp1", "owasp", "rac130@pitt.edu"); //create a user.
+		User::activateAccount("owasp1");
+		$userObj = UserManagement::logIn("owasp1", "owasp");
 
 		$firstTest = UserManagement::userExists("owasp1"); //test user that exists.
 		$secondTest = UserManagement::userExists("owasp2"); //test user that does NOT exists.
@@ -38,8 +40,13 @@ class UserManagementTest extends \PHPUnit_Framework_TestCase
 	public function testUserCount()
 	{
 		//create two users.
-		$userObj1 = UserManagement::createUser("owasp1", "owasp", "rac130@pitt.edu");
-		$userObj2 = UserManagement::createUser("owasp2", "owasp", "rac130@pitt.edu");
+		UserManagement::createUser("owasp1", "owasp", "rac130@pitt.edu"); //create a user.
+		User::activateAccount("owasp1");
+		$userObj1 = UserManagement::logIn("owasp1", "owasp");
+		
+		UserManagement::createUser("owasp2", "owasp", "rac130@pitt.edu"); //create a user.
+		User::activateAccount("owasp2");
+		$userObj2 = UserManagement::logIn("owasp2", "owasp");
 
 		$count = UserManagement::userCount();
 
@@ -57,7 +64,10 @@ class UserManagementTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testForceLogIn()
 	{
-		$obj1 = UserManagement::createUser("owasp1", "owasp", "rac130@pitt.edu"); //create a new user.
+		UserManagement::createUser("owasp1", "owasp", "rac130@pitt.edu"); //create a user.
+		User::activateAccount("owasp1");
+		$obj1 = UserManagement::logIn("owasp1", "owasp");
+		
 		$obj2 = UserManagement::forceLogIn("owasp1"); //try to force-login this user.
 
 		$test = $obj1->getUserID() == $obj2->getUserID(); //check if both of these objects are same.
@@ -73,7 +83,10 @@ class UserManagementTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testLogIn()
 	{
-		$obj1 = UserManagement::createUser("owasp1", "owasp", "rac130@pitt.edu"); //create a new user.
+		UserManagement::createUser("owasp1", "owasp", "rac130@pitt.edu"); //create a user.
+		User::activateAccount("owasp1");
+		$obj1 = UserManagement::logIn("owasp1", "owasp");
+		
 		$obj2 = UserManagement::logIn("owasp1", "owasp"); //log in the same user from different device.
 		$firstTest = ($obj2->getUserID() != NULL);
 		
@@ -98,7 +111,10 @@ class UserManagementTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testLogOut()
 	{
-		$obj1 = UserManagement::createUser("owasp1", "owasp", "rac130@pitt.edu"); //create a new user.
+		UserManagement::createUser("owasp1", "owasp", "rac130@pitt.edu"); //create a user.
+		User::activateAccount("owasp1");
+		$obj1 = UserManagement::logIn("owasp1", "owasp");
+		
 		$obj2 = UserManagement::logIn("owasp1", "owasp"); //log in the same user from different device.
 		$obj3 = UserManagement::logIn("owasp1", "owasp"); //log in the same user from different device.
 		
@@ -123,7 +139,10 @@ class UserManagementTest extends \PHPUnit_Framework_TestCase
 	
 	public function testLogOutFromAllDevices()
 	{
-		$obj1 = UserManagement::createUser("owasp1", "owasp", "rac130@pitt.edu"); //create a new user.
+		UserManagement::createUser("owasp1", "owasp", "rac130@pitt.edu"); //create a user.
+		User::activateAccount("owasp1");
+		$obj1 = UserManagement::logIn("owasp1", "owasp");
+		
 		$obj2 = UserManagement::logIn("owasp1", "owasp"); //log in the same user from different device.
 		$obj3 = UserManagement::logIn("owasp1", "owasp"); //log in the same user from different device.
 		
