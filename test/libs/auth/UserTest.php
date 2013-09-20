@@ -219,6 +219,6 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		$_COOKIE['AUTHID'] = $result[0]['AUTH_ID'];	//set the cookie.
 		$this->assertTrue(User::checkRememberMe() === $this->obj->getUserID());	//the test should pass becaue the token is correct and within time-limit.
 		
-		SQL("DELETE FROM `AUTH_TOKENS` WHERE USERID = ?", array($this->obj->getUserID()));
+		User::deleteAuthenticationToken();
 	}
 }

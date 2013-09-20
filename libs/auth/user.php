@@ -843,8 +843,7 @@ class User extends BasicPasswordManagement
 				//If cookie time has expired, then delete the cookie from the DB and the user's browser.
 				if ( ($currentTime - $result[0]['DATE_CREATED']) >= User::$rememberMeExpiryTime)
 				{
-					SQL("DELETE FROM `AUTH_TOKENS` WHERE `AUTH_ID` = ?", array($_COOKIE['AUTHID']));
-					\setcookie("AUTHID", "");
+					User::deleteAuthenticationToken();
 					return FALSE;
 				}
 				else	//The AUTH token is correct and valid. Hence, return the userID related to this AUTH token
@@ -858,6 +857,20 @@ class User extends BasicPasswordManagement
 		}
 		else	//If the user is unable to provide a AUTH token, then return FALSE
 			return FALSE;
+	}
+	
+	
+	
+	/**
+	 * Function to delete the current user authentication token from the DB and user cookies
+	 */
+	public static function deleteAuthenticationToken()
+	{
+		if (isset($_COOKIE['AUTHID']))
+		{
+			SQL("DELETE FROM `AUTH_TOKENS` WHERE `AUTH_ID` = ?", array($_COOKIE['AUTHID']));
+			\setcookie("AUTHID", "");
+		}
 	}
 }
 
