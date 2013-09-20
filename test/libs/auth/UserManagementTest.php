@@ -1,7 +1,7 @@
 <?php
 namespace phpsec;
-
 ob_start();
+
 
 
 /**
@@ -12,18 +12,20 @@ require_once __DIR__ . "/../../../libs/auth/usermanagement.php";
 require_once __DIR__ . "/../../../libs/core/random.php";
 
 
+
 class UserManagementTest extends \PHPUnit_Framework_TestCase
 {
 
 
+	
 	/**
-	 * Function to test createUser, deleteUser and userExists functionalities.
+	 * Function to test createUser, deleteUser and userExists functions.
 	 */
 	public function testUser_Create_Delete_Exists()
 	{
-		UserManagement::createUser("owasp1", "owasp", "rac130@pitt.edu"); //create a user.
-		User::activateAccount("owasp1");
-		$userObj = UserManagement::logIn("owasp1", "owasp");
+		UserManagement::createUser("owasp1", "owasp", "rac130@pitt.edu"); //create a user
+		User::activateAccount("owasp1");		//activate the user's account
+		$userObj = UserManagement::logIn("owasp1", "owasp");	//get the user object
 
 		$firstTest = UserManagement::userExists("owasp1"); //test user that exists.
 		$secondTest = UserManagement::userExists("owasp2"); //test user that does NOT exists.
@@ -33,6 +35,7 @@ class UserManagementTest extends \PHPUnit_Framework_TestCase
 		$this->assertTrue($firstTest && !$secondTest);
 	}
 
+	
 
 	/**
 	 * Function to test the total number users present in the DB.
@@ -55,10 +58,11 @@ class UserManagementTest extends \PHPUnit_Framework_TestCase
 		UserManagement::deleteUser("owasp2");
 
 		//total number of users must be 2.
-		$this->assertTrue($count == 2);
+		$this->assertTrue($count === 2);
 	}
 
 
+	
 	/**
 	 * Function to test forceLogIn function.
 	 */
@@ -70,7 +74,7 @@ class UserManagementTest extends \PHPUnit_Framework_TestCase
 		
 		$obj2 = UserManagement::forceLogIn("owasp1"); //try to force-login this user.
 
-		$test = $obj1->getUserID() == $obj2->getUserID(); //check if both of these objects are same.
+		$test = ($obj1->getUserID() === $obj2->getUserID()); //check if both of these objects are same.
 
 		UserManagement::deleteUser("owasp1"); //delete the newly created users.
 
@@ -78,8 +82,9 @@ class UserManagementTest extends \PHPUnit_Framework_TestCase
 	}
 
 
+	
 	/**
-	 * Function to check deviceLoggedIn, logOutFromAllDevices function.
+	 * Function to check log-in function.
 	 */
 	public function testLogIn()
 	{
@@ -106,6 +111,7 @@ class UserManagementTest extends \PHPUnit_Framework_TestCase
 	}
 
 
+	
 	/**
 	 * Function to check logOut function.
 	 */
@@ -123,9 +129,9 @@ class UserManagementTest extends \PHPUnit_Framework_TestCase
 		SQL("INSERT INTO `SESSION` (`SESSION_ID`, `DATE_CREATED`, `LAST_ACTIVITY`, `USERID`) VALUES (?, ?, ?, ?)", array($randomValue, time(), time(), $obj3->getUserID()));
 		$_COOKIE['sessionid'] = $randomValue;
 		
-		UserManagement::logOut($obj3); //log-out the user from 1 device.
+		UserManagement::logOut($obj3); //log-out the user from this device. This should delete the session from the DB
 
-		$firstTest = ($obj2->getUserID() != NULL);
+		$firstTest = ($obj2->getUserID() != NULL);	//since this object is "not" logged out, this would still work
 		
 		$result = SQL("SELECT * FROM SESSION");
 		$secondTest = (count($result) == 0);
@@ -137,6 +143,9 @@ class UserManagementTest extends \PHPUnit_Framework_TestCase
 	
 	
 	
+	/**
+	 * Function to test the function logOutFromALLDevices
+	 */
 	public function testLogOutFromAllDevices()
 	{
 		UserManagement::createUser("owasp1", "owasp", "rac130@pitt.edu"); //create a user.
@@ -153,7 +162,7 @@ class UserManagementTest extends \PHPUnit_Framework_TestCase
 		SQL("INSERT INTO `SESSION` (`SESSION_ID`, `DATE_CREATED`, `LAST_ACTIVITY`, `USERID`) VALUES (?, ?, ?, ?)", array(randstr(32), time(), time(), $obj3->getUserID()));
 		$_COOKIE['sessionid'] = $randomValue;
 		
-		UserManagement::logOutFromAllDevices($obj1->getUserID());
+		UserManagement::logOutFromAllDevices($obj1->getUserID());	//This will delete all the sessions from the DB
 		
 		$result = SQL("SELECT * FROM SESSION");
 		$Test = (count($result) == 0);
