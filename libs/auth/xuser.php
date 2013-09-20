@@ -1,24 +1,85 @@
 <?php
 namespace phpsec;
 
-class IncorrectTimeFormatException extends \Exception {}
+
 
 class XUser extends User
 {
+	
+	
+	
+	/**
+	 * First name of the user
+	 * @var string
+	 */
 	protected $firstName = NULL;
+	
+	
+	
+	/**
+	 * Last name of the user
+	 * @var string
+	 */
 	protected $lastName = NULL;
+	
+	
+	
+	/**
+	 * Secondary email of the user
+	 * @var string
+	 */
 	protected $secondaryEmail = NULL;
+	
+	
+	
+	/**
+	 * Date of Birth of the user
+	 * @var int
+	 */
 	protected $dob = NULL;
-	protected $securityAnswer1 = NULL;
-	protected $securityAnswer2 = NULL;
+	
+	
+	
+	/**
+	 * Minimum age that is required for all users
+	 * @var int
+	 */
 	protected static $minAge = 378684000;	//12 years.
 	
+	
+	
+	/**
+	 * Constructor of this class.
+	 * @param \phpsec\User $userObj		The object of class \phpsec\User
+	 */
 	public function __construct($userObj)
 	{
 		$this->userID = $userObj->getUserID();
-		SQL("INSERT INTO XUSER (`USERID`) VALUES (?)", array($this->userID));
+		
+		if (! XUser::isXUserExists($this->userID))	//If user's records are not present in the DB, then insert them
+			SQL("INSERT INTO XUSER (`USERID`) VALUES (?)", array($this->userID));
 	}
 	
+	
+	
+	/**
+	 * To check if the user's record are present in the DB or not.
+	 * @param string $userID	The userID of the user
+	 * @return boolean		Returns true if the user is present. False otherwise
+	 */
+	protected static function isXUserExists($userID)
+	{
+		$result = SQL("SELECT USERID FROM XUSER WHERE USERID = ?", array($userID));
+		return (count($result) == 1);
+	}
+	
+	
+	
+	/**
+	 * To set the first name and last name of the user
+	 * @param string $firstName	The first name of the user
+	 * @param string $lastName	The last name of the user
+	 */
 	public function setName($firstName, $lastName)
 	{
 		$this->firstName = $firstName;
@@ -27,6 +88,12 @@ class XUser extends User
 		SQL("UPDATE XUSER SET `FIRST_NAME` = ?, `LAST_NAME` = ? WHERE USERID = ?", array($this->firstName, $this->lastName, $this->userID));
 	}
 	
+	
+	
+	/**
+	 * To set the secondary email of the user
+	 * @param string $secondaryEmail	The secondary email of the user
+	 */
 	public function setSecondaryEmail($secondaryEmail)
 	{
 		$this->secondaryEmail = $secondaryEmail;
@@ -34,71 +101,46 @@ class XUser extends User
 		SQL("UPDATE XUSER SET `S_EMAIL` = ? WHERE USERID = ?", array($this->secondaryEmail, $this->userID));
 	}
 	
+	
+	
+	/**
+	 * To set the DOB of the user
+	 * @param int $dob	The DOB of the user
+	 */
 	public function setDOB($dob)
 	{
 		$dob = (int)$dob;
 		
-		if ( (strlen($dob."") != 10) || ($dob > time()) )
+		if ( $dob < time() )	//The given DOB is in past because DOB's cant be in future
 		{
-			throw new IncorrectTimeFormatException("ERROR: Incorrect time format is passed. Only Unix-timestamps are accepted.");
+			$this->dob = $dob;
+			SQL("UPDATE XUSER SET `DOB` = ? WHERE USERID = ?", array($this->dob, $this->userID));
 		}
-		
-		$this->dob = $dob;
-		
-		SQL("UPDATE XUSER SET `DOB` = ? WHERE USERID = ?", array($this->dob, $this->userID));
 	}
 	
-	public function setSecurityAnswers($answer1, $answer2)
-	{
-		$dynamicSalt = randstr(64);
-		
-		$this->securityAnswer1 = BasicPasswordManagement::hashPassword($answer1, $dynamicSalt, BasicPasswordManagement::$hashAlgo);
-		$this->securityAnswer2 = BasicPasswordManagement::hashPassword($answer2, $dynamicSalt, BasicPasswordManagement::$hashAlgo);
-		
-		SQL("UPDATE XUSER SET `DYNAMIC_SALT` = ?, `SECURITY1` = ?, `SECURITY2` = ?, `ALGO` = ? WHERE USERID = ?", array($dynamicSalt, $this->securityAnswer1, $this->securityAnswer2, BasicPasswordManagement::$hashAlgo, $this->userID));
-	}
 	
-	public static function checkSecurityAnswer1($userID, $userAnswer)
-	{
-		$result = SQL("SELECT `SECURITY1`, `DYNAMIC_SALT`, `ALGO` FROM XUSER WHERE USERID = ?", array($userID));
-		
-		if (count($result) == 1)
-		{
-			return BasicPasswordManagement::validatePassword($userAnswer, $result[0]['SECURITY1'], $result[0]['DYNAMIC_SALT'], $result[0]['ALGO']);
-		}
-		
-		return FALSE;
-	}
 	
-	public static function checkSecurityAnswer2($userID, $userAnswer)
-	{
-		$result = SQL("SELECT `SECURITY2`, `DYNAMIC_SALT`, `ALGO` FROM XUSER WHERE USERID = ?", array($userID));
-		
-		if (count($result) == 1)
-		{
-			return User::validatePassword($userAnswer, $result[0]['SECURITY2'], $result[0]['DYNAMIC_SALT'], $result[0]['ALGO']);
-		}
-		
-		return FALSE;
-	}
-	
+	/**
+	 * TO check if the age of the user satisfies the age criteria
+	 * @return boolean	Returns true if the age is greater than the minimum age. False otherwise
+	 */
 	public function ageCheck()
 	{
 		$result = SQL("SELECT `DOB` FROM XUSER WHERE USERID = ?", array($this->userID));
 		
-		if (count($result) == 1)
-		{
-			if ( (time() - $result[0]['DOB']) < XUser::$minAge )
-				return FALSE;
-			
-			return TRUE;
-		}
-		
-		return FALSE;
+		if ( (time() - $result[0]['DOB']) < XUser::$minAge )
+			return FALSE;
+
+		return TRUE;
 	}
 	
+	
+	
+	/**
+	 * To delete the current user's record from the DB
+	 */
 	public function deleteXUser()
 	{
-		SQL("DELETE FROM XUSER WHERE USERID = ?", array($this->userID));
+		SQL("DELETE FROM XUSER WHERE USERID = ?", array(  $this->userID));
 	}
 }
