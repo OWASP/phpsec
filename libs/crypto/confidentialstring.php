@@ -2,56 +2,61 @@
 namespace phpsec;
 
 
+
 /**
  * Parent Exception
  */
-class FileExceptions extends \Exception
-{
-}
+class FileExceptions extends \Exception {}
+
+
 
 /**
  * Child Exceptions
  */
-class FileNotWritable extends FileExceptions
-{
-}
+class FileNotWritable extends FileExceptions {}		//The file does not have write permissions in it
+
 
 
 class Encryption
 {
 
 
+	
 	/**
 	 * Cipher to be used for encryption.
-	 * @var String
+	 * @var string		Name of the cipher
 	 */
 	private static $cipher = MCRYPT_RIJNDAEL_256;
 
 
+	
 	/**
-	 * Key to be used for enc/dec.
-	 * @var String
+	 * Key to be used for encryption/decryption.
+	 * @var string		The key for encryption/decryption
 	 */
 	private static $key = "qgyXyjD5YpF";
 
 
+	
 	/**
-	 * Mode to be used for enc/dec such as "ebc", "cbc" etc.
-	 * @var String
+	 * Mode to be used for encryption/decryption such as "ebc", "cbc" etc.
+	 * @var string		Mode for encryption/decryption
 	 */
 	private static $mode = "cbc";
 
 
+	
 	/**
 	 * IV to be used for modes other than "ebc".
-	 * @var String
+	 * @var string		The initial vector for encryption/decryption
 	 */
 	private static $iv = "12345678901234567890123456789012";
 
 
+	
 	/**
 	 * Function to get the value of cipher.
-	 * @return String
+	 * @return string	Returns the name/value of the cipher in use
 	 */
 	public static function getCipher()
 	{
@@ -59,9 +64,10 @@ class Encryption
 	}
 
 
+	
 	/**
 	 * Function to get the value of key.
-	 * @return String
+	 * @return string	Returns the key of the cipher in use
 	 */
 	public static function getKey()
 	{
@@ -69,9 +75,10 @@ class Encryption
 	}
 
 
+	
 	/**
-	 * Function to get the value of mode.
-	 * @return String
+	 * Function to get the value of encryption/decryption mode such as "ebc", "cbc" etc.
+	 * @return string	Returns of the mode used in cipher
 	 */
 	public static function getMode()
 	{
@@ -79,9 +86,10 @@ class Encryption
 	}
 
 
+	
 	/**
 	 * Function to get the value of IV.
-	 * @return String
+	 * @return string	Returns the IV used for the current cipher
 	 */
 	public static function getIV()
 	{
@@ -90,10 +98,11 @@ class Encryption
 }
 
 
+
 /**
  * Function to encrypt the sensitive data on its first run. For rest of the run, this function decrypts the encrypted data for use.
- * @return String
- * @throws FileNotWritable
+ * @return string		The string in plain-text
+ * @throws FileNotWritable	Thrown when the file is not writable
  */
 function confidentialString()
 {
@@ -122,7 +131,8 @@ function confidentialString()
 		$decryptedString = mcrypt_decrypt(Encryption::getCipher(), Encryption::getKey(), $decodedString, Encryption::getMode(), Encryption::getIV()); //decrypt the string.
 
 		return unserialize(rtrim($decryptedString, "\0")); //return the decrypted string.
-	} else //This is the first run of this function for this string. We know this because this string is not encrypted.
+	}
+	else //This is the first run of this function for this string. We know this because this string is not encrypted.
 	{
 		$origString = $trace[$arraySlot]['args'][0]; //store the original value.
 
