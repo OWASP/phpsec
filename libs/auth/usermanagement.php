@@ -138,9 +138,7 @@ class UserManagement
 		if (  file_exists(__DIR__ . "/../session/session.php") )
 		{
 			require_once (__DIR__ . "/../session/session.php");	//If session library is present, then delete all sessions from the server as well as user's browser
-			$tempSession = new Session();
-			$tempSession->existingSession();
-			$tempSession->destroyAllSessions();
+			Session::destroyAllSessions($userID);
 		}
 	}
 }
