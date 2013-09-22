@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Sep 19, 2013 at 03:54 AM
+-- Generation Time: Sep 22, 2013 at 03:47 AM
 -- Server version: 5.5.22
 -- PHP Version: 5.3.10-1ubuntu3
 
@@ -27,10 +27,10 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE IF NOT EXISTS `AUTH_TOKENS` (
-  `AUTH_ID` varchar(32) DEFAULT NULL,
+  `AUTH_ID` varchar(128) NOT NULL DEFAULT '',
   `USERID` varchar(32) NOT NULL,
   `DATE_CREATED` int(10) NOT NULL,
-  UNIQUE KEY `AUTH_ID` (`AUTH_ID`)
+  PRIMARY KEY (`AUTH_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS `PASSWORD` (
   `LAST_LOGIN_ATTEMPT` int(10) NOT NULL DEFAULT '0',
   `FIRST_LOGIN_ATTEMPT` int(10) NOT NULL DEFAULT '0',
   `USERID` varchar(32) NOT NULL,
-  UNIQUE KEY `USERID` (`USERID`)
+  PRIMARY KEY (`USERID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -74,11 +74,11 @@ CREATE TABLE IF NOT EXISTS `PASSWORD` (
 --
 
 CREATE TABLE IF NOT EXISTS `SESSION` (
-  `SESSION_ID` varchar(32) NOT NULL,
+  `SESSION_ID` varchar(128) NOT NULL,
   `DATE_CREATED` int(10) NOT NULL,
   `LAST_ACTIVITY` int(10) NOT NULL,
   `USERID` varchar(32) NOT NULL,
-  UNIQUE KEY `SESSION_ID` (`SESSION_ID`)
+  PRIMARY KEY (`SESSION_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -88,9 +88,9 @@ CREATE TABLE IF NOT EXISTS `SESSION` (
 --
 
 CREATE TABLE IF NOT EXISTS `SESSION_DATA` (
-  `SESSION_ID` varchar(32) NOT NULL,
-  `KEY` varchar(32) NOT NULL,
-  `VALUE` varchar(64) DEFAULT NULL
+  `SESSION_ID` varchar(128) NOT NULL,
+  `KEY` varchar(128) NOT NULL,
+  `VALUE` varchar(128) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -104,12 +104,12 @@ CREATE TABLE IF NOT EXISTS `USER` (
   `P_EMAIL` varchar(128) NOT NULL,
   `ACCOUNT_CREATED` int(10) NOT NULL,
   `LOCKED` tinyint(1) NOT NULL DEFAULT '0',
-  `INACTIVE` tinyint(1) NOT NULL DEFAULT '0',
+  `INACTIVE` tinyint(1) NOT NULL DEFAULT '1',
   `HASH` varchar(128) NOT NULL,
   `DATE_CREATED` int(10) NOT NULL,
   `ALGO` varchar(15) NOT NULL,
   `DYNAMIC_SALT` varchar(128) NOT NULL,
-  UNIQUE KEY `USERID` (`USERID`)
+  PRIMARY KEY (`USERID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -124,10 +124,6 @@ CREATE TABLE IF NOT EXISTS `XUSER` (
   `FIRST_NAME` varchar(40) DEFAULT NULL,
   `LAST_NAME` varchar(40) DEFAULT NULL,
   `DOB` int(10) DEFAULT NULL,
-  `SECURITY1` varchar(128) DEFAULT NULL,
-  `SECURITY2` varchar(128) DEFAULT NULL,
-  `DYNAMIC_SALT` varchar(128) DEFAULT NULL,
-  `ALGO` varchar(15) DEFAULT NULL,
   PRIMARY KEY (`USERID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
