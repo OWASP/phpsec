@@ -34,7 +34,7 @@ class Database_pdo_pgsql extends DatabaseModel
 		
 		if (count($args) > 1)		//If more than one argument are present, then create a new PDO object
 		{
-			$dbConfig = new DatabaseConfig ('pdo_pgsql',$args[0],$args[1],$args[2]);	//get a new DB connection
+			$dbConfig = new DatabaseConfig ('pdo_pgsql',$args[0],$args[1],$args[2]);	//get a new DB configuration
 			parent::__construct ($dbConfig);		//call the DatabaseModel's constructor to pass the DatabaseConfig object to initialize a new object
 			$this->dbh = new \PDO ("pgsql:dbname={$dbConfig->dbname};host={$dbConfig->host};",$dbConfig->username,$dbConfig->password);	//create a new PDO object
 		}
