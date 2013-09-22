@@ -6,7 +6,6 @@ namespace phpsec;
 /**
  * Required Files
  */
-require_once(__DIR__ . "/../core/functions.php");
 require_once(__DIR__ . '/adapter/base.php');
 
 
@@ -49,7 +48,7 @@ class DatabaseManager
 	{
 		//check if file exists for the adapter that is requested to connect to the DB. IF file does not exists, then that adapter is not supported yet
 		if (!file_exists(__DIR__ . "/adapter/{$dbConfig->adapter}.php")) {
-			throw new DatabaseUnsupportedAdapterException("{$dbConfig->adapter} is not a supported database adapter.");
+			throw new DatabaseUnsupportedAdapterException("ERROR: {$dbConfig->adapter} is not a supported database adapter.");
 		}
 
 		require_once(__DIR__ . "/adapter/{$dbConfig->adapter}.php");	//since file exists, include this adapter to make a connection to the DB
