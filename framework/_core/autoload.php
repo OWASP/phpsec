@@ -14,6 +14,8 @@ namespace phpsec\framework;
  *
  */
 require_once Autoloader::phpsecPath()."/core/loader.php";
+require_once (__DIR__ . "/../config/dbconnection.php");
+
 class Autoloader 
 {
 	static function phpsecPath()
