@@ -193,7 +193,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testInactivityTimeout()
 	{
-		time("SET", 1380502880); //set current time to a very far future.
+		time("SET", 1480502880); //set current time to a very far future.
 		$this->assertTrue($this->session[1]->inactivityTimeout()); //By that time, the session must expire.
 	}
 
@@ -204,7 +204,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testExpireTimeout()
 	{
-		time("SET", 1380502880); //set current time to a very far future.
+		time("SET", 1480502880); //set current time to a very far future.
 		$this->assertTrue($this->session[2]->expireTimeout()); //By that time, the session must expire.
 	}
 
