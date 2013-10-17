@@ -406,6 +406,25 @@ class Session
 		$this->updateUserCookies();
 		return $newSession;
 	}
+	
+	
+	
+	/**
+	 * Functoin to get the userID from a sessionID
+	 * @param string $sessionID	The session ID for which matching userID is needed
+	 * @return boolean | string	Returns the userID if match found. False otherwise
+	 */
+	public static function getUserIDFromSessionID($sessionID)
+	{
+		$result = SQL("SELECT `USERID` FROM SESSION WHERE `SESSION_ID` = ?", array($sessionID));
+		
+		if (count($result) == 1)
+		{
+			return $result[0]['USERID'];
+		}
+		else
+			return FALSE;
+	}
 }
 
 ?>
