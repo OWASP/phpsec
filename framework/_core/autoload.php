@@ -25,20 +25,16 @@ class Autoloader
 	static $PhpsecArray=array(
 			
 			"AdvancedPasswordManagement"	=>	"auth/adv_password",
-			"BasicPasswordManagement"		=>	"auth/user",
-			"UserManagement"				=>	"auth/usermanagement",
-			
-			"ErrorHandler"					=>	"core/error",
-	
-			"DatabaseManager"				=>	"db/dbmanager",
-			
-			"HttpRequest"					=>	"http/http",
-			"DownloadManager"				=>	"http/download",
-			"TaintedString"					=>	"http/tainted",
-	
-			"Logger"						=>	"logs/logger",
-			
-			"Session"						=>	"session/session",
+			"BasicPasswordManagement"	=>	"auth/user",
+			"User"				=>	"auth/user",
+			"UserManagement"		=>	"auth/usermanagement",
+			"ErrorHandler"			=>	"core/error",
+			"DatabaseManager"		=>	"db/dbmanager",
+			"HttpRequest"			=>	"http/http",
+			"DownloadManager"		=>	"http/download",
+			"TaintedString"			=>	"http/tainted",
+			"Logger"			=>	"logs/logger",
+			"Session"			=>	"session/session",
 	);
 	static $FrameworkArray=array(
 			"Controller"					=>	"base/control",
