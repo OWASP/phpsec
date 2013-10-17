@@ -716,9 +716,9 @@ class User extends BasicPasswordManagement
 	/**
 	 * Function to lock the user account.
 	 */
-	public function lockAccount()
+	public static function lockAccount($userID)
 	{
-		SQL("UPDATE USER SET LOCKED = ? WHERE USERID = ?", array(1, $this->userID));
+		SQL("UPDATE USER SET LOCKED = ? WHERE USERID = ?", array(1, $userID));
 	}
 	
 	
@@ -726,9 +726,9 @@ class User extends BasicPasswordManagement
 	/**
 	 * Function to unlock the user account.
 	 */
-	public function unlockAccount()
+	public static function unlockAccount($userID)
 	{
-		SQL("UPDATE USER SET LOCKED = ? WHERE USERID = ?", array(0, $this->userID));
+		SQL("UPDATE USER SET LOCKED = ? WHERE USERID = ?", array(0, $userID));
 	}
 	
 	

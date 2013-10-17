@@ -153,22 +153,22 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	{
 		User::newUserObject("phpsec", "owasp", "rac130@pitt.edu");	//create a new user
 		User::activateAccount("phpsec");		//activate the account
-		$testUser = User::existingUserObject("phpsec", "owasp");
-		$testUser->lockAccount();	//lock this user's account
-		$this->assertTrue($testUser->isLocked($testUser->getUserID()));	//test if isLocked() function is working properly
+		User::lockAccount("phpsec");	//lock this user's account
+		$this->assertTrue(User::isLocked("phpsec"));	//test if isLocked() function is working properly
 		
 		try
 		{
-			User::existingUserObject("phpsec", "owasp");	//try to create an object of this user
+			$testUser = User::existingUserObject("phpsec", "owasp");	//try to create an object of this user
 		}
 		catch(\phpsec\UserLocked $e)	//This exception must be thrown
 		{
-			$testUser->deleteUser();	//delete this test User
 			$firstTest = TRUE;	//set the condition to true as exception is thrown
 			
-			$testUser->unlockAccount();	//unlock the account
-			$secondTest = (strlen($testUser->getUserID()) > 1);	//now since the account is unlocked, all methods must work properly
+			User::unlockAccount("phpsec");	//unlock the account
+			$testUser = User::existingUserObject("phpsec", "owasp");	//try to create an object of this user
+			$secondTest = ($testUser->getUserID() === "phpsec");	//now since the account is unlocked, all methods must work properly
 			
+			$testUser->deleteUser();	//delete this test User
 			$this->assertTrue($firstTest && $secondTest);
 		}
 	}
