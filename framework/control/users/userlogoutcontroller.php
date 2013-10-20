@@ -2,26 +2,33 @@
 
 class UserLogoutController extends phpsec\framework\DefaultController
 {
-	protected $userObj = NULL;
-	
-	function __construct($userObject)
-	{
-		$this->userObj = $userObject;
-	}
-	
-	function Handle()
+	function Handle($Request)
 	{
 		try
 		{
-			phpsec\UserManagement::logOut($this->userObj);
-			//call appropriate view for the login page.
+			$userSession = new phpsec\Session();
+			$sessionID = $userSession->existingSession();
+			
+			if ($sessionID != FALSE)
+			{
+				$userID = \phpsec\Session::getUserIDFromSessionID($sessionID);
+				$userObj = phpsec\UserManagement::forceLogIn($userID);
+				phpsec\UserManagement::logOut($userObj);
+			}
+			else
+			{
+				phpsec\User::deleteAuthenticationToken();
+			}
+			
+			$this->info .= "You are now logged out." . "<BR>";
+			$nextURL = \phpsec\HttpRequest::Protocol() . "://" . \phpsec\HttpRequest::Host() . \phpsec\HttpRequest::PortReadable() . "/rnj/framework/home";
+			header("Location: {$nextURL}");
 		}
 		catch (Exception $e)
 		{
-			$this->error = $e->getMessage();
-			//call appropriate view.
-			
-			//You can also call here individual errors for a more precise action.
+			$this->error .= $e->getMessage() . "<BR>";
+			$lastURL = $_SERVER['HTTP_REFERER'];
+			header("Location: {$lastURL}");
 		}
 	}
 }

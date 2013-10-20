@@ -2,66 +2,66 @@
 
 class TempPassController extends phpsec\framework\DefaultController
 {
-	protected $userID = NULL;
-	protected $email = NULL;
-	
-	function __construct($userID, $email)
-	{
-		$this->userID = $userID;
-		$this->email = $email;
-	}
-	
-	function Handle()
+	function Handle($Request)
 	{
 		try
 		{
-			if ( (isset($_GET['validate'])) && ($_GET['validate'] != "") )
+			if ( (isset($_GET['user'])) && ($_GET['user'] != "") && (isset($_GET['verification'])) && (($_GET['verification'] != "")) && (($_GET['mode'] === 'temppass') || ($_GET['mode'] === 'activation')) )
 			{
-				if (phpsec\AdvancedPasswordManagement::tempPassword($this->userID, $_GET['validate']))
+				if (phpsec\AdvancedPasswordManagement::tempPassword($_GET['user'], $_GET['verification']))
 				{
-					//what to do after validation is done.
+					if ($_GET['mode'] === 'temppass')
+					{
+						$userSession = new phpsec\Session();
+						$userSessionID = $userSession->newSession($_GET['user']);
+						
+						$nextLocation = \phpsec\HttpRequest::Protocol() . "://" . \phpsec\HttpRequest::Host() . \phpsec\HttpRequest::PortReadable() . "/rnj/framework/requestnewpassword";
+						header("Location: {$nextLocation}");
+					}
+					else if ($_GET['mode'] === 'activation')
+					{
+						\phpsec\User::activateAccount($_GET['user']);
+						$this->info .= "Your account <b>" . $_GET['user'] . "</b> is now activated." . "<BR>";
+						require_once (__DIR__ . "/../../view/default/user/temppass.php");
+					}
 				}
 				else
 				{
-					$resendLink = \phpsec\HttpRequest::Root() . "/view/default/user/temppass.php";
-					$this->error = "ERROR: This validation token does not match our records. Please insert the token that you received in your mail or click this <a href='{$resendLink}'>link to re-send a new token to your mail.</a>";
-					//call the appropriate view to reload the page so that the user can enter correct token.
+					$this->error .= "ERROR: This validation token does not match our records!!!" . "<BR>";
+					return require_once (__DIR__ . "/../../view/default/user/temppass.php");
 				}
 			}
-			else
+			else if ( (isset($_GET['user'])) && ($_GET['user'] != "") && (isset($_GET['email'])) && ($_GET['email'] != "") && (($_GET['mode'] === 'temppass') || ($_GET['mode'] === 'activation')) )
 			{
-				$tempPass = phpsec\AdvancedPasswordManagement::tempPassword($this->userID);
+				$tempPass = phpsec\AdvancedPasswordManagement::tempPassword($_GET['user']);
 			
 				$message = "Please open the following link in order to complete the process:\n";
-
-
-				//I am not sure about this link...so check this link again later.
-				$message .= \phpsec\HttpRequest::Root() . "/view/default/user/temppass.php?validate=" . $tempPass . "\n\n\n";
-
-
-				$message .= "If you did nothing to get this email, just ignore it.";
+				$message .= \phpsec\HttpRequest::Protocol() . "://" . \phpsec\HttpRequest::Host() . \phpsec\HttpRequest::PortReadable() . "/rnj/framework/temppass?user=" . $_GET['user'] . "&mode=" . $_GET['mode'] ."&verification=" . $tempPass . "\n\n\n";
+				$message .= "Sometimes the email ends up in the Spam folder. So also please check your spam folder in case you didn't receive the email.\n\n";
+				$message .= "If you did nothing to get this email, just ignore it.\n";
 				$message = wordwrap($message, 70, "\r\n");
 
-				$send = mail(	$this->email,
+				$send = \mail(	$_GET['email'],
 						"Authentication Email",
 						$message,
-						"FROM: " . "admin@" . \phpsec\HttpRequest::Host() . "\r\n"
+						"FROM: " . "rahul300chaudhary400@gmail.com"
+						//"FROM: " . "admin@" . \phpsec\HttpRequest::Host() . "\r\n"
 					    );
 
 				if ( !$send )
 				{
-					throw new phpsec\MailNotSendException("ERROR: Mail was not send!");
+					$this->error .= "ERROR: Mail was not send!" . "<BR>";
 				}
-
-				//call the "temppass.php" view in order to show the page where the user can enter the validation token. Or they can click the mail.
+				
+				return require_once (__DIR__ . "/../../view/default/user/temppass.php");
 			}
+			else
+				return require_once (__DIR__ . "/../../view/default/404.php");
 		}
 		catch (Exception $e)
 		{
-			$this->error = $e->getMessage();
-			//call appropriate view.
-			
-			//You can also call here individual errors such as UserExistsException for a more precise action.
+			$this->error .= $e->getMessage() . "<BR>";
+			return require_once (__DIR__ . "/../../view/default/user/temppass.php");
 		}
 	}
 }
