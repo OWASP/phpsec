@@ -637,6 +637,25 @@ class User extends BasicPasswordManagement
 	
 	
 	/**
+	 * Function to return the userID that is associated with the provided email.
+	 * @param string $email
+	 * @return boolean	Returns the userID associated with the email. If MULTIPLE USERID or NO userID is associated, then returns FALSE
+	 */
+	public static function getUserIDFromEmail($email)
+	{
+		$result = SQL("SELECT USERID FROM USER WHERE `P_EMAIL` = ?", array($email));
+		
+		if (count($result) == 1)
+		{
+			return $result[0]['USERID'];
+		}
+		
+		return FALSE;
+	}
+	
+	
+	
+	/**
 	 * To verify if a given string is the correct password that is stored in the DB for the current user.
 	 * @param string $password	The password that is to be checked against the one stored in DB
 	 * @return boolean		Returns True if the passwords match. False otherwise
@@ -661,6 +680,31 @@ class User extends BasicPasswordManagement
 		if (! BasicPasswordManagement::validatePassword( $oldPassword, $this->hashedPassword, $this->dynamicSalt, $this->hashAlgorithm))
 			throw new WrongPasswordException("ERROR: Wrong Password provided!!");
 		
+		//create a new dynamic salt.
+		$this->dynamicSalt = hash(BasicPasswordManagement::$hashAlgo, randstr(128));
+		
+		//create the hash of the new password.
+		$newHash = BasicPasswordManagement::hashPassword($newPassword, $this->dynamicSalt, BasicPasswordManagement::$hashAlgo);
+		
+		//update the old password with the new password.
+		SQL("UPDATE USER SET `HASH` = ?, `DATE_CREATED` = ?, `DYNAMIC_SALT` = ?, `ALGO` = ? WHERE `USERID` = ?", array($newHash, time(), $this->dynamicSalt, BasicPasswordManagement::$hashAlgo, $this->userID));
+		
+		$this->hashedPassword = $newHash;
+		$this->hashAlgorithm = BasicPasswordManagement::$hashAlgo;
+
+		return TRUE;
+	}
+	
+	
+	
+	/**
+	 * Function to force to change the password, even when the user has not provided the old password for verification. Used with "forgot password controller".
+	 * If the user forgets his password, they need to be validated using their primary email. Once that is done, the user would like to keep a new password. This function will help there to keep a new password.
+	 * @param string $newPassword
+	 * @return boolean	Returns TRUE when the password has been changed successfully
+	 */
+	public function forceResetPassword($newPassword)
+	{
 		//create a new dynamic salt.
 		$this->dynamicSalt = hash(BasicPasswordManagement::$hashAlgo, randstr(128));
 		
