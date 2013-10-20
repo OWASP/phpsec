@@ -19,8 +19,7 @@ class TempPassController extends phpsec\framework\DefaultController
 			{
 				if (phpsec\AdvancedPasswordManagement::tempPassword($this->userID, $_GET['validate']))
 				{
-					//return to the calling function after validation is done.
-					return TRUE;
+					//what to do after validation is done.
 				}
 				else
 				{
