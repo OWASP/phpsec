@@ -127,7 +127,7 @@ class UserManagementTest extends \PHPUnit_Framework_TestCase
 		//set session variables to imitate real cookies.
 		$randomValue = randstr(32);
 		SQL("INSERT INTO `SESSION` (`SESSION_ID`, `DATE_CREATED`, `LAST_ACTIVITY`, `USERID`) VALUES (?, ?, ?, ?)", array($randomValue, time(), time(), $obj3->getUserID()));
-		$_COOKIE['sessionid'] = $randomValue;
+		$_COOKIE['SESSIONID'] = $randomValue;
 		
 		UserManagement::logOut($obj3); //log-out the user from this device. This should delete the session from the DB
 
