@@ -135,10 +135,10 @@ class Session
 	 */
 	public function existingSession()
 	{
-		if (!isset($_COOKIE['sessionid']))	//If user cannot provide a session ID, then no session is present for this user. Hance return false
+		if (!isset($_COOKIE['SESSIONID']))	//If user cannot provide a session ID, then no session is present for this user. Hance return false
 			return FALSE;
 			
-		$sessionID = $_COOKIE['sessionid'];	//get the session ID from the user cookie
+		$sessionID = $_COOKIE['SESSIONID'];	//get the session ID from the user cookie
 		
 		$result = SQL("SELECT `USERID` FROM SESSION WHERE `SESSION_ID` = ?", array($sessionID));	//match if the session ID received from the user is same as what was issued to them. If same, then the session ID stored in our DB must match with the one we received
 		if (count($result) != 1)	//a suitable match is not found
