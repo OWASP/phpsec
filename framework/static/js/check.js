@@ -1,3 +1,6 @@
+//Here the function just alerts for testing purposes. In reality, please change the alert with nice looking dialog boxes
+//and then redirect or reload the page to stop the page from submitting the data to the server
+
 function check()
 {
 	var formName = arguments[0];
