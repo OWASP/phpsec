@@ -349,7 +349,7 @@ class HttpRequest extends HttpRequestArray
 	{
 		if (self::IsCLI())
 			return NULL;
-		$root = self::Protocol()."://".self::Host().self::PortReadable().self::InternalPath();
+		$root = self::Protocol()."://".self::Host() . self::PortReadable(). "/" .self::InternalPath();
 		return $root;
 	}
 
