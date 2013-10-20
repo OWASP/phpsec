@@ -8,6 +8,7 @@ abstract class DefaultController extends Controller
 {
 	private $RestOfRequest=null;
 	public $error = null;
+	public $info = null;
 	public function __construct($RestOfRequest)
 	{
 		$this->RestOfRequest=$RestOfRequest;
