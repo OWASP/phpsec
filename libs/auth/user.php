@@ -427,6 +427,7 @@ class UserExistsException extends UserException {}			//User already exists in th
 class UserNotExistsException extends UserException {}			//User does not exists in the database.
 class UserLocked extends UserException {}				//User account is locked.
 class UserAccountInactive extends UserException {}			//User account is inactive.
+class UserIDInvalid extends UserException {}			// Invalid User ID ( It could be null, empty, it's length outside limit, use forbidden chars)
 
 
 
@@ -490,6 +491,19 @@ class User extends BasicPasswordManagement
 	public static $rememberMeExpiryTime = 2592000;	//approx 1 month.
 	
 	
+	/**
+	 * Minimum number of chars allowed for UserID, should not exceed the table definition
+	 * @var int
+	 */
+	public static $minUserIDNChars = 4;
+	
+	
+	
+	/**
+	 * Maximum number of chars allowed for UserID, should match table definition
+	 * @var int
+	 */
+	public static $maxUserIDNChars = 32;
 	
 	/**
 	 * To create an object for a new user.
@@ -497,10 +511,14 @@ class User extends BasicPasswordManagement
 	 * @param string $pass		The desired password of the user
 	 * @param string $pemail	The desired email of the user
 	 * @throws UserExistsException	Will be thrown if the user already exists in the DB
+	 * @throws UserIDInvalid	Will be thrown if the user ID Invalid ( It could be null, empty, it's length outside limit, use forbidden chars)
 	 */
 	public static function newUserObject($id, $pass, $pemail)
 	{
 		$obj = new User();	//create a new user object
+		
+		if (!User::isUserIDValid($id))
+		    throw new UserIDInvalid("ERROR: User ID is invalid.");
 		
 		$obj->userID = $id;		//set userID
 		$obj->primaryEmail = $pemail;	//set primary email
@@ -916,6 +934,21 @@ class User extends BasicPasswordManagement
 			\setcookie("AUTHID", "");
 		}
 	}
+	
+	
+
+	/**
+	 * Function to check if a userID is elegible for use.
+	 * Not allowed: null, empty, use char other than (A-Z 0-9),outside length limit
+	 * @return boolean	Return True of UserID is ellegible. False otherwise
+	 */
+	public static function isUserIDValid($userID)
+	{
+		if ($userID == null || strlen($userID) < User::$minUserIDNChars || strlen($userID) > User::$maxUserIDNChars)
+			return FALSE;
+	
+		return strlen(preg_replace("/[a-z0-9A-Z]/","",$userID)) == 0;
+	}	
 }
 
 ?>
