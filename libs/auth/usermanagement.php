@@ -35,6 +35,7 @@ class UserManagement
 	 * @param string $email			The primary email of the user
 	 * @return boolean			Returns if the user is created. False otherwise
 	 * @throws UserExistsException		Will be thrown if the user already exists in the DB
+	 * @throws UserIDInvalid	Will be thrown if the user ID Invalid ( It could be null, empty, it's length outside limit, use forbidden chars)
 	 */
 	public static function createUser($userID, $password, $email)
 	{

@@ -221,4 +221,39 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		
 		User::deleteAuthenticationToken();
 	}
+	
+	
+	/**
+	 * Function to test if allows to create a user with an Null ID
+	 * @expectedException phpsec\UserIDInvalid
+	 */
+	public function testUserIDNull()
+	{
+		BasicPasswordManagement::$hashAlgo = "haval256,5"; //choose a hashing algo
+		User::newUserObject(null, 'testing', "rac130@pitt.edu"); //create a new user
+	}
+	
+	/**
+	 * Function to test several userID (newUserObject will use this funcion to determine if throwns a exception
+	 */
+	public function testUserIDValidInvalid()
+	{
+		$this->assertTrue(User::isUserIDValid("abcd"));
+		$this->assertTrue(User::isUserIDValid("ABCD"));
+		$this->assertTrue(User::isUserIDValid("1234"));
+		$this->assertTrue(User::isUserIDValid("AbCd"));
+		$this->assertTrue(User::isUserIDValid("A1b2C3d4"));
+		$this->assertTrue(User::isUserIDValid("0A1b2C3d4"));
+	
+		$this->assertFalse(User::isUserIDValid(null));
+		$this->assertFalse(User::isUserIDValid(""));
+		$this->assertFalse(User::isUserIDValid(" "));
+		$this->assertFalse(User::isUserIDValid("A "));
+		$this->assertFalse(User::isUserIDValid("A BC D"));
+		$this->assertFalse(User::isUserIDValid("A#BC-D"));
+		$this->assertFalse(User::isUserIDValid("##$%"));
+		$this->assertFalse(User::isUserIDValid("0A1b2C3d4 "));
+	}
+	
+	
 }
