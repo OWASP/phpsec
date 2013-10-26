@@ -947,7 +947,7 @@ class User extends BasicPasswordManagement
 		if ($userID == null || strlen($userID) < User::$minUserIDNChars || strlen($userID) > User::$maxUserIDNChars)
 			return FALSE;
 	
-		return strlen(preg_replace("/[a-z0-9A-Z_@.-]/","",$userID)) == 0;
+		return preg_match("/^[a-z0-9A-Z_@.-]*$/", $userID) == 1;
 	}	
 }
 
