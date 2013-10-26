@@ -4,7 +4,7 @@
 function check()
 {
 	var formName = arguments[0];
-	
+
 	for(var i = 1; i < arguments.length; i++)
 	{
 		if (arguments[i] === "checkForBlanks")
@@ -32,7 +32,7 @@ function checkForBlanks(formName)
 			}
 		}
 	}
-	
+
 	return true;
 }
 
@@ -40,7 +40,7 @@ function checkForPasswordsMatch(formName)
 {
 	var allElements = document.forms[formName].getElementsByTagName("input");
 	var password = "";
-	
+
 	for(var i=0; i<allElements.length; i++)
 	{
 		if( (allElements[i].getAttribute("type") === "password") && (allElements[i].name.substring(0, 3) !== "_x_") )
@@ -59,6 +59,20 @@ function checkForPasswordsMatch(formName)
 			}
 		}
 	}
-	
+
+	return true;
+}
+
+
+function verifyEmail(elementID)
+{
+	var value = document.getElementById(elementID).value;
+
+	if (value.match(/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@([a-z0-9-])+\.([a-z0-9-]+)(\.[a-z]{2,63})?$/g) != value)
+	{
+		alert("Invalid Email!");
+		return false;
+	}
+
 	return true;
 }
