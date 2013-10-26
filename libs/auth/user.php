@@ -939,15 +939,15 @@ class User extends BasicPasswordManagement
 
 	/**
 	 * Function to check if a userID is elegible for use.
-	 * Not allowed: null, empty, use char other than (A-Z 0-9 or _ ),outside length limit
-	 * @return boolean	Return True of UserID is ellegible. False otherwise
+	 * Not allowed: null, empty, use char other than (A-Z 0-9 or _ @ . -),outside length limit
+	 * @return boolean	Return True if UserID is ellegible. False otherwise
 	 */
 	public static function isUserIDValid($userID)
 	{
 		if ($userID == null || strlen($userID) < User::$minUserIDNChars || strlen($userID) > User::$maxUserIDNChars)
 			return FALSE;
 	
-		return strlen(preg_replace("/[a-z0-9A-Z_]/","",$userID)) == 0;
+		return strlen(preg_replace("/[a-z0-9A-Z_@.-]/","",$userID)) == 0;
 	}	
 }
 
