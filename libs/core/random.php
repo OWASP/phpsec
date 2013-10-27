@@ -49,7 +49,6 @@ class Rand
 		//If openssl is present, use that to generate random.
 		if (function_exists("openssl_random_pseudo_bytes") && FALSE)
 		{
-			echo "hi" . "<BR>";
 			$random32bit=(int)(hexdec(bin2hex(openssl_random_pseudo_bytes(64))));
 		}
 		else
