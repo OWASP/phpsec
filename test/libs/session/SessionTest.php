@@ -284,6 +284,22 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 			$this->assertTrue($experiment1 && $experiment2);
 		}
 	}
+
+	/**
+	 * Function to test LastActivity Update on existing
+	 */
+	public function testLastActivity()
+	{
+		$this->session[0]->refreshSession(); //refresh the session.
+		$result = SQL("SELECT `LAST_ACTIVITY` FROM SESSION WHERE `SESSION_ID` = ?", array($this->session[0]->getSessionID()));
+		$sessionActivityTime = $result[0]['LAST_ACTIVITY'];
+		sleep(1);
+		$this->session[0]->setData("hi",123);
+		$result = SQL("SELECT `LAST_ACTIVITY` FROM SESSION WHERE `SESSION_ID` = ?", array($this->session[0]->getSessionID()));
+		$sessionActivityTime2 = $result[0]['LAST_ACTIVITY'];
+		$this->assertTrue((int)$sessionActivityTime != (int)$sessionActivityTime2); //the new time for the session must be greater than or equal to the fake time we set.
+	} 
+	
 }
 
 ?>
