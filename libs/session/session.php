@@ -77,7 +77,7 @@ class Session
 	 private function getSweeptimeDifference()
 	 {
 	 	$lastSweepTime =  ( SQL("SELECT `date` FROM session_last_sweeped LIMIT 1") );
-	 	return ( $lastSweepTime - strtotime(date("20y-m-d H:i:s")) );
+	 	return ( $lastSweepTime - time() );
 	 }
 	 
 	 /**
@@ -85,7 +85,7 @@ class Session
 	  */ 
 	 private function clearExpiredSession()
 	 {
-	 	$timeLimit = strtotime(date("20y-m-d H:i:s")) - $inactivityMaxTime;
+	 	$timeLimit = time() - $inactivityMaxTime;
 	 	SQL("DELETE FROM SESSION WHERE `LAST_ACTIVITY` < ?",array($timeLimit));
 	 	/**
 	 	 * updates the time when expired session entries were last cleened
