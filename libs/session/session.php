@@ -86,7 +86,12 @@ class Session
 	 private function clearExpiredSession()
 	 {
 	 	$timeLimit = time() - $inactivityMaxTime;
-	 	SQL("DELETE FROM SESSION WHERE `LAST_ACTIVITY` < ?",array($timeLimit));
+	 	/**
+	 	 * query to delete expired session from both SESSION and SESSION_DATA table
+	 	*/
+	 	SQL("DELETE SESSION,SESSION_DATA FROM SESSION 
+			LEFT JOIN SESSION_DATA ON SESSION_DATA.SESSION_ID = SESSION.SESSION_ID
+			WHERE SESSION.LAST_ACTIVITY < ?",array($timeLimit));
 	 	/**
 	 	 * updates the time when expired session entries were last cleened
 	 	 */ 
