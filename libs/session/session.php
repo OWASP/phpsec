@@ -157,6 +157,8 @@ class Session
 			throw new SessionExpired("ERROR: This session has expired.");
 		}
 		
+		$this->updateLastActivity();
+				
 		return $this->session;
 	}
 	
@@ -244,6 +246,8 @@ class Session
 			throw new SessionExpired("ERROR: This session has expired.");
 		}
 
+		$this->updateLastActivity();
+		
 		$result = SQL("SELECT `KEY`, `VALUE` FROM SESSION_DATA WHERE `SESSION_ID` = ? and `KEY` = ?", array($this->session, $key));
 		return $result;
 	}
@@ -425,6 +429,24 @@ class Session
 		else
 			return FALSE;
 	}
+	
+	
+	/**
+	 * Function to update SESSION_ID LastActivity
+	 * @throws SessionNotFoundException	Thrown when trying to store data when no session ID is set
+	 * @throws SessionExpired		Thrown when the session has expired
+	 */
+	public function updateLastActivity()
+	{ 
+		$this->checkIfSessionIDisSet();
+
+		//check for session expiry.
+		if ($this->inactivityTimeout() || $this->expireTimeout())
+			throw new SessionExpired("ERROR: This session has expired.");
+		
+		SQL("UPDATE `SESSION` SET `LAST_ACTIVITY` = ? WHERE `SESSION_ID` = ?",array(time(), $this->session));
+	}
+	 
 }
 
 ?>
