@@ -59,43 +59,36 @@ class Session
 	 * The timelimit between two successive expired session removal process
 	 * @var int
 	 */
-	public static $sweepMaxTime = 3600; //60 min.
+	public static $SweepRatio = 0.75; //sweep ration for probablity function
 	
 	/**
 	 * Session Aging. After this period, the session must expire no matter what.
 	 * @var int
 	 */
 	public static $expireMaxTime = 604800; //1 week.
-
-	
-	
-	/**
-	 * Function to return time difference between present time and
-	 * time when expired sessions were removed from db
-	 * return TIMESTAMP
-	 */
-	 private function getSweeptimeDifference()
-	 {
-	 	$lastSweepTime =  ( SQL("SELECT `date` FROM session_last_sweeped LIMIT 1") );
-	 	return ( $lastSweepTime - time() );
-	 }
 	 
 	 /**
 	  *  Function to sweep expired session from db
 	  */ 
-	 private function clearExpiredSession()
+	 private function clearExpiredSession( $force = false )
 	 {
+	 	if (!$force) if (rand ( 0, 1000 ) / 1000.0 > self::$SweepRatio) return;
+	 	
 	 	$timeLimit = time() - $inactivityMaxTime;
 	 	/**
 	 	 * query to delete expired session from both SESSION and SESSION_DATA table
 	 	*/
-	 	SQL("DELETE SESSION,SESSION_DATA FROM SESSION 
-			LEFT JOIN SESSION_DATA ON SESSION_DATA.SESSION_ID = SESSION.SESSION_ID
-			WHERE SESSION.LAST_ACTIVITY < ?",array($timeLimit));
-	 	/**
-	 	 * updates the time when expired session entries were last cleened
-	 	 */ 
-	 	SQL("UPDATE session_last_sweeped SET `date` = ?",array(time()));
+	 	$result = SQL("SELECT SESSION_ID FROM SESSION WHERE LAST_ACTIVITY < ?",array($timeLimit));
+	 	$length = count($result);
+	 	if($length)
+	 	{
+	 		for($i = 0; $i < $length; $i++)
+	 		{
+	 			SQL("DELETE FROM SESSION_DATA WHERE SESSION_ID = ?",array($result[$i]));
+	 			SQL("DELETE FROM SESSION WHERE SESSION_ID = ?",array($result[$i]));
+	 		}
+	 		
+	 	}
 	 }
 	 
 	/**
@@ -157,7 +150,12 @@ class Session
 		SQL("INSERT INTO SESSION (`SESSION_ID`, `DATE_CREATED`, `LAST_ACTIVITY`, `USERID`) VALUES (?, ?, ?, ?)", array($this->session, $time, $time, $this->userID));
 		
 		$this->updateUserCookies();
-		if( getSweeptimeDifference() > Session::$sweepMaxTime ) clearExpiredSession();
+		
+		/**
+		 * function call to clear expired session from db
+		 */ 
+		clearExpiredSession();
+		
 		return $this->session;
 	}
 	
