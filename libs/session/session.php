@@ -74,7 +74,7 @@ class Session
 	 {
 	 	if (!$force) if (rand ( 0, 1000 ) / 1000.0 > self::$SweepRatio) return;
 	 	
-	 	$timeLimit = time() - $inactivityMaxTime;
+	 	$timeLimit = time() - self::$inactivityMaxTime;
 	 	/**
 	 	 * query to delete expired session from both SESSION and SESSION_DATA table
 	 	*/
