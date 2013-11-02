@@ -154,7 +154,7 @@ class Session
 		/**
 		 * function call to clear expired session from db
 		 */ 
-		clearExpiredSession();
+		$this->clearExpiredSession();
 		
 		return $this->session;
 	}
