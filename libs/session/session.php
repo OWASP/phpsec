@@ -55,15 +55,42 @@ class Session
 	public static $inactivityMaxTime = 1800; //30 min.
 
 	
-
+	/**
+	 * The timelimit between two successive expired session removal process
+	 * @var int
+	 */
+	public static $SweepRatio = 0.75; //sweep ration for probablity function
+	
 	/**
 	 * Session Aging. After this period, the session must expire no matter what.
 	 * @var int
 	 */
 	public static $expireMaxTime = 604800; //1 week.
-
-	
-	
+	 
+	 /**
+	  *  Function to sweep expired session from db
+	  */ 
+	 private function clearExpiredSession( $force = false )
+	 {
+	 	if (!$force) if (rand ( 0, 1000 ) / 1000.0 > self::$SweepRatio) return;
+	 	
+	 	$timeLimit = time() - self::$inactivityMaxTime;
+	 	/**
+	 	 * query to delete expired session from both SESSION and SESSION_DATA table
+	 	*/
+	 	$result = SQL("SELECT SESSION_ID FROM SESSION WHERE LAST_ACTIVITY < ?",array($timeLimit));
+	 	$length = count($result);
+	 	if($length)
+	 	{
+	 		for($i = 0; $i < $length; $i++)
+	 		{
+	 			SQL("DELETE FROM SESSION_DATA WHERE SESSION_ID = ?",array($result[$i]));
+	 			SQL("DELETE FROM SESSION WHERE SESSION_ID = ?",array($result[$i]));
+	 		}
+	 		
+	 	}
+	 }
+	 
 	/**
 	 * Function to check if sessionID is set for this user or not.
 	 * @throws SessionNotFoundException
@@ -123,6 +150,12 @@ class Session
 		SQL("INSERT INTO SESSION (`SESSION_ID`, `DATE_CREATED`, `LAST_ACTIVITY`, `USERID`) VALUES (?, ?, ?, ?)", array($this->session, $time, $time, $this->userID));
 		
 		$this->updateUserCookies();
+		
+		/**
+		 * function call to clear expired session from db
+		 */ 
+		$this->clearExpiredSession();
+		
 		return $this->session;
 	}
 	
