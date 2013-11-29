@@ -63,30 +63,29 @@ class Session
 	public static $expireMaxTime = 604800; //1 week.
 
 	/**
- 	 * sweep ratio for probablity function in expired session removal process
+	 * sweep ratio for probablity function in expired session removal process
  	 * @var decimal
-         */
-        public static $SweepRatio = 0.75; 
+	 */
+	public static $SweepRatio = 0.75; 
         
-        /**
-         *  Function to sweep expired session from db
-         */ 
-         
-        private function clearExpiredSession( $force = false )
-        {
-        	if (!$force) if (rand ( 0, 1000 ) / 1000.0 > self::$SweepRatio) return;
+	/**
+	 *  Function to sweep expired session from db
+	 */ 
+	 
+	private function clearExpiredSession( $force = false )
+	{
+		if (!$force) if (rand ( 0, 1000 ) / 1000.0 > self::$SweepRatio) return;
       
 		$timeLimit = time() - self::$inactivityMaxTime;
-	  
-	        /**
-	   	 * query to delete expired session from both SESSION and SESSION_DATA table
+		/*
+		 * query to delete expired session from both SESSION and SESSION_DATA table
 		 */
 		$result = SQL("SELECT `SESSION_ID` FROM `SESSION` WHERE `LAST_ACTIVITY` < ?",array($timeLimit));
 		foreach($result as $id)
-	        {
-	         	SQL("DELETE FROM `SESSION_DATA` WHERE `SESSION_ID` = ?",array($id));
-	         	SQL("DELETE FROM `SESSION` WHERE `SESSION_ID` = ?",array($id));
-	        }
+		{
+			SQL("DELETE FROM `SESSION_DATA` WHERE `SESSION_ID` = ?",array($id['SESSION_ID']));
+			SQL("DELETE FROM `SESSION` WHERE `SESSION_ID` = ?",array($id['SESSION_ID']));
+		}
 	}
 	
 	/**
