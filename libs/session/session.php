@@ -64,14 +64,13 @@ class Session
 
 	/**
 	 * sweep ratio for probablity function in expired session removal process
- 	 * @var decimal
+	 * @var decimal
 	 */
 	public static $SweepRatio = 0.75; 
         
 	/**
 	 *  Function to sweep expired session from db
 	 */ 
-	 
 	private function clearExpiredSession( $force = false )
 	{
 		if (!$force) if (rand ( 0, 1000 ) / 1000.0 > self::$SweepRatio) return;
