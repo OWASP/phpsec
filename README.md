@@ -1,5 +1,7 @@
 # OWASP PHP Security Project
 
+[![Build Status](https://travis-ci.org/OWASP/phpsec.png?branch=master)](https://travis-ci.org/OWASP/phpsec)
+
 This is the code and documentation repository for the OWASP PHP Security Project. 
 
 OWASP PHP Security Project is an effort by a group of PHP developers in securing PHP web applications, using a collection of decoupled flexible secure PHP libraries, as well as a collection of PHP tools.
