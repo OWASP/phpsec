@@ -551,7 +551,7 @@ class User extends BasicPasswordManagement
 	{
 		$obj = new User();
 		
-		$result = SQL("SELECT `P_EMAIL`, `HASH`, `ALGO`, `DYNAMIC_SALT` FROM USER WHERE `USERID` = ?", array($id));
+		$result = SQL("SELECT `P_EMAIL`, `HASH`, `ALGO`, `DYNAMIC_SALT` FROM `USER` WHERE `USERID` = ?", array($id));
 
 		//If no record is returned for this user, then this user does not exist in the system.
 		if (count($result) != 1)
@@ -579,7 +579,10 @@ class User extends BasicPasswordManagement
 		$obj->dynamicSalt = $result[0]['DYNAMIC_SALT'];
 		$obj->hashedPassword = $result[0]['HASH'];
 		$obj->hashAlgorithm = $result[0]['ALGO'];
-
+		
+		//code to update last_login time upon login
+		SQL("UPDATE `USER` SET `LAST_LOGIN` = ? WHERE `USERID` = ?", array(time(),$id));
+		
 		return $obj;
 	}
 	
