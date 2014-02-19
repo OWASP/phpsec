@@ -626,6 +626,16 @@ class User extends BasicPasswordManagement
 	}
 	
 	
+	/**
+	 * To get the date when the user last logged in. The value returned is the UNIX timestamp.
+	 * @return int
+	 */
+	public function getLastLoginDate()
+	{
+		$result = SQL("SELECT `LAST_LOGIN` FROM USER WHERE USERID = ?", array($this->userID));
+		return $result[0]['LAST_LOGIN'];
+	}
+	
 	
 	/**
 	 * To get the userID of the current User.
