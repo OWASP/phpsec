@@ -42,7 +42,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function tearDown()
 	{
-		$this->obj->deleteUser();
+		if($this->obj)$this->obj->deleteUser();
 	}
 
 	
