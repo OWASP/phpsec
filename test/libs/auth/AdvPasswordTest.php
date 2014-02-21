@@ -53,7 +53,7 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function tearDown()
 	{
-		$this->user->deleteUser();
+		if($this->user)$this->user->deleteUser();
 		time("RESET");
 	}
 

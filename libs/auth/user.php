@@ -530,7 +530,7 @@ class User extends BasicPasswordManagement
 		$obj->hashedPassword = BasicPasswordManagement::hashPassword($pass, $obj->dynamicSalt, BasicPasswordManagement::$hashAlgo);
 		$obj->hashAlgorithm = BasicPasswordManagement::$hashAlgo;
 
-		$count = SQL("INSERT INTO USER (`USERID`, `P_EMAIL`, `ACCOUNT_CREATED`, `HASH`, `DATE_CREATED`, `ALGO`, `DYNAMIC_SALT`) VALUES (?, ?, ?, ?, ?, ?, ?)", array($obj->userID, $obj->primaryEmail, $time, $obj->hashedPassword, $time, BasicPasswordManagement::$hashAlgo, $obj->dynamicSalt));
+		$count = SQL("INSERT INTO USER (`USERID`, `P_EMAIL`, `ACCOUNT_CREATED`, `LAST_LOGIN`, `HASH`, `DATE_CREATED`, `ALGO`, `DYNAMIC_SALT`) VALUES (?, ?, ?, ?, ?, ?, ?)", array($obj->userID, $obj->primaryEmail, $time, $time, $obj->hashedPassword, $time, BasicPasswordManagement::$hashAlgo, $obj->dynamicSalt));
 
 		//If the user is already present in the database, then a duplicate won't be created and no rows will be affected. Hence 0 will be returned.
 		if ($count == 0)
@@ -551,7 +551,7 @@ class User extends BasicPasswordManagement
 	{
 		$obj = new User();
 		
-		$result = SQL("SELECT `P_EMAIL`, `HASH`, `ALGO`, `DYNAMIC_SALT` FROM USER WHERE `USERID` = ?", array($id));
+		$result = SQL("SELECT `P_EMAIL`, `HASH`, `ALGO`, `DYNAMIC_SALT` FROM `USER` WHERE `USERID` = ?", array($id));
 
 		//If no record is returned for this user, then this user does not exist in the system.
 		if (count($result) != 1)
@@ -579,7 +579,10 @@ class User extends BasicPasswordManagement
 		$obj->dynamicSalt = $result[0]['DYNAMIC_SALT'];
 		$obj->hashedPassword = $result[0]['HASH'];
 		$obj->hashAlgorithm = $result[0]['ALGO'];
-
+		
+		//code to update last_login time upon login
+		SQL("UPDATE `USER` SET `LAST_LOGIN` = ? WHERE `USERID` = ?", array(time(),$id));
+		
 		return $obj;
 	}
 	
@@ -622,6 +625,16 @@ class User extends BasicPasswordManagement
 		return $result[0]['ACCOUNT_CREATED'];
 	}
 	
+	
+	/**
+	 * To get the date when the user last logged in. The value returned is the UNIX timestamp.
+	 * @return int
+	 */
+	public function getLastLoginDate()
+	{
+		$result = SQL("SELECT `LAST_LOGIN` FROM USER WHERE USERID = ?", array($this->userID));
+		return $result[0]['LAST_LOGIN'];
+	}
 	
 	
 	/**
