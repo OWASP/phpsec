@@ -52,8 +52,8 @@ class XUserTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function tearDown()
 	{
-		$this->xobj->deleteXUser();
-		$this->obj->deleteUser();
+		if($this->xobj)$this->xobj->deleteXUser();
+		if($this->obj)$this->obj->deleteUser();
 	}
 
 	
