@@ -581,7 +581,7 @@ class User extends BasicPasswordManagement
 		$obj->hashAlgorithm = $result[0]['ALGO'];
 		
 		//code to update last_login time upon login
-		SQL("UPDATE `USER` SET `LAST_LOGIN` = ? WHERE `USERID` = ?", array(time(),$id));
+		//SQL("UPDATE `USER` SET `LAST_LOGIN` = ? WHERE `USERID` = ?", array(time(),$id));
 		
 		return $obj;
 	}
