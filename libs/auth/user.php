@@ -579,7 +579,10 @@ class User extends BasicPasswordManagement
 		$obj->dynamicSalt = $result[0]['DYNAMIC_SALT'];
 		$obj->hashedPassword = $result[0]['HASH'];
 		$obj->hashAlgorithm = $result[0]['ALGO'];
-
+		
+		//code to update last login time
+		SQL("UPDATE `USER` SET `LAST_LOGIN` = ? WHERE `USERID` = ?", array(time(),$id));
+		
 		return $obj;
 	}
 	
