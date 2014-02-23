@@ -530,7 +530,7 @@ class User extends BasicPasswordManagement
 		$obj->hashedPassword = BasicPasswordManagement::hashPassword($pass, $obj->dynamicSalt, BasicPasswordManagement::$hashAlgo);
 		$obj->hashAlgorithm = BasicPasswordManagement::$hashAlgo;
 
-		$count = SQL("INSERT INTO USER (`USERID`, `P_EMAIL`, `ACCOUNT_CREATED`, `HASH`, `DATE_CREATED`, `ALGO`, `DYNAMIC_SALT`) VALUES (?, ?, ?, ?, ?, ?, ?)", array($obj->userID, $obj->primaryEmail, $time, $obj->hashedPassword, $time, BasicPasswordManagement::$hashAlgo, $obj->dynamicSalt));
+		$count = SQL("INSERT INTO USER (`USERID`, `P_EMAIL`, `ACCOUNT_CREATED`, `LAST_LOGIN`, `HASH`, `DATE_CREATED`, `ALGO`, `DYNAMIC_SALT`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", array($obj->userID, $obj->primaryEmail, $time, $time, $obj->hashedPassword, $time, BasicPasswordManagement::$hashAlgo, $obj->dynamicSalt));
 
 		//If the user is already present in the database, then a duplicate won't be created and no rows will be affected. Hence 0 will be returned.
 		if ($count == 0)
