@@ -69,7 +69,7 @@ class AdvPasswordTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertFalse(  AdvancedPasswordManagement::checkIfTempPassExpired($this->user->getUserID())); //this check will provide false, since the temp password time has not expired.
 
-		time("SET", 1390706853); //Now set the time to some distant future time.
+		time("SET", time() + 1000000); //Now set the time to some distant future time.
 		$this->assertTrue(AdvancedPasswordManagement::checkIfTempPassExpired($this->user->getUserID())); //this check will provide true, since the temp password time has expired.
 	}
 
