@@ -12,9 +12,9 @@ require_once 'user.php';
 
 class UserManagement
 {
-	
-	
-	
+
+
+
 	/**
 	 * To check if given userID exists in the system or not.
 	 * @param string $userID	The user ID that needs to be checked
@@ -25,9 +25,9 @@ class UserManagement
 		$result = SQL("SELECT USERID FROM USER WHERE USERID = ?", array($userID));
 		return (count($result) == 1);
 	}
-	
-	
-	
+
+
+
 	/**
 	 * To create a new user.
 	 * @param string $userID		The desired ID of the user
@@ -44,28 +44,28 @@ class UserManagement
 			User::newUserObject($userID, $password, $email);
 			return TRUE;
 		}
-		
+
 		return FALSE;
 	}
-	
-	
-	
+
+
+
 	/**
-	 * To delete a user.	
+	 * To delete a user.
 	 * @param string $userID		The user ID that needs to be deleted
-	 * @return boolean			Returns true if the user is deleted. False 
+	 * @return boolean			Returns true if the user is deleted. False
 	 * @throws UserNotExistsException	Will be thrown if no user is found with the given ID
 	 */
 	public static function deleteUser($userID)
 	{
 		$userObj = UserManagement::forceLogIn($userID);
 		$deleted = $userObj->deleteUser();
-		
+
 		return ($deleted == TRUE);
 	}
-	
-	
-	
+
+
+
 	/**
 	 * To return the total number of users in the system.
 	 * @return int		Total users
@@ -75,9 +75,9 @@ class UserManagement
 		$result = SQL("SELECT USERID FROM USER WHERE 1", array());
 		return count($result);
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Function for user to log-in.
 	 * @param string $userID	The user ID that wants to log in
@@ -90,9 +90,9 @@ class UserManagement
 	{
 		return User::existingUserObject($userID, $password);	//If any user credential is wrong, exception will be thrown.
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Function for user to log-in forcefully i.e without providing user-credentials.
 	 * @param string $userID		The user ID that needs to log in
@@ -103,9 +103,9 @@ class UserManagement
 	{
 		return User::forceLogin($userID);
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Function for user to Log-out.
 	 * @param \phpsec\User $userObj		The user object of the user that needs to log out
@@ -116,7 +116,7 @@ class UserManagement
 		{
 			User::deleteAuthenticationToken();	//delete the authentication token from the server and the user's browser
 		}
-		
+
 		if (  file_exists(__DIR__ . "/../session/session.php") )
 		{
 			require_once (__DIR__ . "/../session/session.php");	//If session library is present, then delete session from the server as well as user's browser
@@ -125,9 +125,9 @@ class UserManagement
 			$tempSession->destroySession();
 		}
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Function for user to log-out from all the devices at once.
 	 * @param string $userID	The user ID that needs to log out from all devices
@@ -135,7 +135,7 @@ class UserManagement
 	public static function logOutFromAllDevices($userID)
 	{
 		SQL("DELETE FROM `AUTH_TOKEN` WHERE USERID = ?", array($userID));
-		
+
 		if (  file_exists(__DIR__ . "/../session/session.php") )
 		{
 			require_once (__DIR__ . "/../session/session.php");	//If session library is present, then delete all sessions from the server as well as user's browser

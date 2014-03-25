@@ -30,15 +30,15 @@ function randstr($len = 32)
 
 class Rand
 {
-	
+
 	/**
 	 * The seed from which a random number will be generated.
 	 * @var int
 	 */
 	protected static $randomSeed=null;
-	
-	
-	
+
+
+
 	/**
 	 * Provides a random 32 bit number
 	 * if openssl is available, it is cryptographically secure. Otherwise all available entropy is gathered.
@@ -56,28 +56,28 @@ class Rand
 			if (self::$randomSeed===null)
 			{
 				$entropy=1;
-				
+
 				if (function_exists("posix_getpid"))
 					$entropy*=posix_getpid();
-				
+
 				if (function_exists("memory_get_usage"))
 					$entropy*=memory_get_usage();
-				
+
 				list ($usec, $sec)=explode(" ",microtime());
 				$usec*=1000000;
 				$entropy*=$usec;
 				self::$randomSeed=$entropy;
-				
+
 				mt_srand(self::$randomSeed);
 			}
-			
+
 			$random32bit=mt_rand();
 		}
-		
+
 		return $random32bit;
 	}
-	
-	
+
+
 	/**
 	 * To generate a random number between the specified range.
 	 * @param int $min
@@ -88,19 +88,19 @@ class Rand
 	{
 		if ($max===null)
 			$max=1<<31;
-		
+
 		if ($min > $max)
 		{
 			return Rand::randRange($max, $min);
 		}
-		
+
 		if ($min >= 0)
 			return abs(Rand::random())%($max-$min)+$min;
 		else
 			return (abs(Rand::random())*-1)%($min - $max) + $max;
 	}
-	
-	
+
+
 	/**
 	 * To generate a random string of specified length.
 	 * @param int $Length

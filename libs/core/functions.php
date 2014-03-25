@@ -19,7 +19,7 @@ function xss_safe($data)
 		$t=htmlspecialchars($data,ENT_QUOTES | ENT_HTML401,"UTF-8");
 	else
 		$t=htmlspecialchars($data,ENT_QUOTES,"UTF-8");
-	
+
 	return $t;
 }
 
@@ -90,7 +90,7 @@ function vprintf($formatString,$args)
  */
 function echo_br($data)
 {
-	echo nl2br(xss_safe($data));	
+	echo nl2br(xss_safe($data));
 }
 /**
  * exho alias

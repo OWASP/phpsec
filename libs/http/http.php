@@ -79,7 +79,7 @@ class HttpRequest extends HttpRequestArray
 	const METHOD_OTHER  = 'OTHER';
 
 	/**
-	 * The application can set this to point to the base URL of the application 
+	 * The application can set this to point to the base URL of the application
 	 * (e.g example.com/app/resides/here/) so that some functions work.
 	 * @note don't forget the trailing slash
 	 * @var string
@@ -96,7 +96,7 @@ class HttpRequest extends HttpRequestArray
 		self::$BaseURL=$BaseURL;
 		self::$BasePath=substr($BaseURL,strpos($BaseURL,"/",strpos($BaseURL,"://")+4)+1);
 	}
-	
+
 	/**
 	 * Checks if script is being called from command line
 	 * @return boolean
@@ -149,7 +149,7 @@ class HttpRequest extends HttpRequestArray
 	static function ServerName()
 	{
 		return isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '';
-		
+
 	}
 
 	/**
@@ -187,7 +187,7 @@ class HttpRequest extends HttpRequestArray
 
 	/**
 	 * Changes protocol/scheme of current URL
-	 * 
+	 *
 	 * @return string URL
 	 */
 	static function ChangeProtocol()
@@ -241,7 +241,7 @@ class HttpRequest extends HttpRequestArray
 			return NULL;
 		return isset ($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
 	}
-	
+
 	/**
 	 * Returns the internal request URI, i.e the portion that is
 	 * after the application base URL
@@ -253,7 +253,7 @@ class HttpRequest extends HttpRequestArray
 			throw new BaseURLNotSetException("You should set the base URL to use internal* functions.");
 		return substr(self::RequestURI(),strlen(self::$BaseURL));
 	}
-	
+
 	/**
 	 * Query String, the last part in url after ?
 	 *
@@ -321,7 +321,7 @@ class HttpRequest extends HttpRequestArray
 			$Path = $RequestURI;
 		return $Path;
 	}
-	
+
 	/**
 	 * Returns the internal path, i.e the portion that is
 	 * after the application base URL
@@ -337,9 +337,9 @@ class HttpRequest extends HttpRequestArray
 		if (self::$BaseURL===null)
 			throw new BaseURLNotSetException("You should set the base URL to use internal* functions.");
 		return substr(self::Path(),strlen(self::$BasePath)+1);
-		
+
 	}
-	
+
 	/**
 	 * Root of website without trailing slash
 	 * @see InternalPath

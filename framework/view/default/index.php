@@ -10,7 +10,7 @@
 
 	<body>
 		<?php include (__DIR__ . "/include.php"); ?>
-		
+
 		This is the index page of the application for general or not-logged users.
 	</body>
 </html>

@@ -30,7 +30,7 @@ class ForgotPasswordController extends phpsec\framework\DefaultController
 		{
 			$this->error .= $e->getMessage() . "<BR>";
 		}
-		
+
 		return require_once (__DIR__ . "/../../view/default/user/forgotpassword.php");
 	}
 }

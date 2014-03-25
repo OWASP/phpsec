@@ -8,25 +8,25 @@ namespace phpsec;
  */
 abstract class Tainted
 {
-	
-	
-	
+
+
+
 	/**
 	 * Enables/Disables the taint checking function
-	 * @var boolean		True enables the taint checking function. False disables it 
+	 * @var boolean		True enables the taint checking function. False disables it
 	 */
 	public static $TaintChecking = true;
-	
-	
-	
+
+
+
 	/**
 	 * To indicate that the string is tainted
 	 * @var boolean		True means the string is tainted. False otherwise
 	 */
 	protected $Tainted = true;
-	
-	
-	
+
+
+
 	/**
 	 * To tell if the given Tainted Object is tainted or not
 	 * @param \phpsec\Tainted $Object	The Tainted class object
@@ -37,8 +37,8 @@ abstract class Tainted
 		return $Object->Tainted;
 	}
 
-	
-	
+
+
 	/**
 	 * To decontaminate a "Tainted" object
 	 */
@@ -47,8 +47,8 @@ abstract class Tainted
 		$this->Tainted = false;
 	}
 
-	
-	
+
+
 	/**
 	 * To taint a string i.e. to contaminate it.
 	 */
@@ -65,17 +65,17 @@ abstract class Tainted
  */
 class TaintedString extends Tainted
 {
-	
-	
-	
+
+
+
 	/**
 	 * String that is tainted
 	 * @var string
 	 */
 	private $data;
 
-	
-	
+
+
 	/**
 	 * Constructor of the class.
 	 * @param string $data		The string that is to be tainted
@@ -85,8 +85,8 @@ class TaintedString extends Tainted
 		$this->data=$data;
 	}
 
-	
-	
+
+
 	/**
 	 * Function to trigger error when trying to use a string that is tainted
 	 * @return string	The string that is tainted

@@ -10,7 +10,7 @@
 
 	<body>
 		<?php include (__DIR__ . "/../../default/include.php"); ?>
-		
+
 		<div name="login-div" id="login-div">
 			<form method="POST" action="" name="login-form" id="login-form" onsubmit="return check('login-form', 'checkForBlanks');">
 				<table name="login-table" id="login-table">
@@ -33,9 +33,9 @@
 				</table>
 			</form>
 		</div>
-		
+
 		<BR><a <?php $forgotpasswordURL = \phpsec\HttpRequest::Protocol() . "://" . \phpsec\HttpRequest::Host() . \phpsec\HttpRequest::PortReadable() . "/rnj/framework/forgotpassword"; echo "href='{$forgotpasswordURL}'"; ?> >Forgot Password</a> Click Here to recover your access to account in case you have forgot your password.
-		
+
 		<script type="text/javascript" <?php echo('src="' . "http://localhost/rnj/framework/file/js/check.js" . '"'); ?> ></script>
 	</body>
 </html>

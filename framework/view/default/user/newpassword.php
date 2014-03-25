@@ -10,7 +10,7 @@
 
 	<body>
 		<?php include (__DIR__ . "/../include.php"); ?>
-		
+
 		<div name="new-password-div" id="new-password-div">
 			<form method="POST" action="" name="new-password-form" id="new-password-form" onsubmit="return check('new-password-form', 'checkForBlanks', 'checkForPasswordsMatch');">
 				<table name="new-password-table" id="new-password-table">
