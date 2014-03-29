@@ -2,7 +2,7 @@
 namespace phpsec\framework;
 const whoami="phpsec framework 1.0";
 /**
- * This file is in charge of setting some environment variables prior to running 
+ * This file is in charge of setting some environment variables prior to running
  * the front controller, it tries to set those properly even in CLI mode using
  * some tricks.
  */
@@ -22,7 +22,7 @@ if (\phpsec\HttpRequest::isCLI()) 	//php-cli
 			$Params=explode("&",$QueryString);
 			foreach ($Params as $p)
 			{
-				if (strpos($p,"=")===false) 
+				if (strpos($p,"=")===false)
 				{
 					$_GET[urldecode($p)]="";
 					continue;
@@ -31,7 +31,7 @@ if (\phpsec\HttpRequest::isCLI()) 	//php-cli
 				$_GET[urldecode($k)]=urldecode($v);
 			}
 		}
-			
+
 	}
 }
 else 								//php-cgi

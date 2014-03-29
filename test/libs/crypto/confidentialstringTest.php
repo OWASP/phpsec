@@ -12,9 +12,9 @@ require_once __DIR__ . "/../../../libs/crypto/confidentialstring.php";
 
 class ConfidentialStringTest extends \PHPUnit_Framework_TestCase
 {
-	
-	
-	
+
+
+
 	/**
 	 * Function to test the functionality of confidentialString()
 	 */
@@ -25,8 +25,8 @@ class ConfidentialStringTest extends \PHPUnit_Framework_TestCase
 		$this->assertSame("0123456789012345678901234567890123456789", confidentialString(':70wEpmmYmIgYRRd3cPQj2CHmPIjoa8t+YdUkn02705ZmPK3o1+Yp627sKxOWTYO7yREZgUWT0zecT1oYjxA09w=='));
 	}
 
-	
-	
+
+
 	/**
 	 * Function to test if this function works properly even if zero bytes are present
 	 */

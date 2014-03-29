@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace phpsec\framework;
 /**
  * Specify routes here.

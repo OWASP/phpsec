@@ -8,7 +8,7 @@ class UsersLoginController extends phpsec\framework\DefaultController
 		{
 			$config = require_once (__DIR__ . "/../../config/config.php");
 			$userID = \phpsec\User::checkRememberMe();
-			
+
 			if (! $userID)
 			{
 				if ((isset($_POST['submit'])))
@@ -64,13 +64,13 @@ class UsersLoginController extends phpsec\framework\DefaultController
 				else
 					return require_once (__DIR__ . "/../../view/default/user/login.php");
 			}
-			
+
 			$userSession = new phpsec\Session();
-			
+
 			try
 			{
 				$sessionID = $userSession->existingSession();
-				
+
 				if ($sessionID)
 				{
 					$userSessionID = $userSession->rollSession();
@@ -86,7 +86,7 @@ class UsersLoginController extends phpsec\framework\DefaultController
 				{
 					$this->info .= "Its been too long since you have changed your password. For security reasons, please change your password." . "<BR>";
 				}
-				
+
 				$url_to_redirect = \phpsec\HttpRequest::Protocol() . "://" . \phpsec\HttpRequest::Host() . \phpsec\HttpRequest::PortReadable() . "/rnj/framework/user/index";
 				header("HTTP/1.1 302 Found");
 				header('Location: '.$url_to_redirect);
@@ -101,7 +101,7 @@ class UsersLoginController extends phpsec\framework\DefaultController
 		{
 			$this->error .= $e->getMessage() . "<BR>";
 		}
-		
+
 		return require_once (__DIR__ . "/../../view/default/user/login.php");
 	}
 }

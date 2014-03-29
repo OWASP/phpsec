@@ -1,6 +1,6 @@
 <?php
 namespace phpsec\framework;
-abstract class Controller 
+abstract class Controller
 {
 	abstract function Start();
 }

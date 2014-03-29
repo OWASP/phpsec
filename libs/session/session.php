@@ -30,15 +30,15 @@ class SessionExpired extends SessionException {}		//Session has Expired.
 class Session
 {
 
-	
-	
+
+
 	/**
 	 * The session ID.
 	 * @var string
 	 */
 	protected $session = null;
 
-	
+
 
 	/**
 	 * The user ID.
@@ -47,14 +47,14 @@ class Session
 	protected $userID = null;
 
 
-	
+
 	/**
 	 * Idle period. If the user is inactive for more than this period, the session must expire.
 	 * @var int
 	 */
 	public static $inactivityMaxTime = 1800; //30 min.
 
-	
+
 
 	/**
 	 * Session Aging. After this period, the session must expire no matter what.
@@ -66,15 +66,15 @@ class Session
 	 * sweep ratio for probablity function in expired session removal process
 	 * @var decimal
 	 */
-	public static $SweepRatio = 0.75; 
-        
+	public static $SweepRatio = 0.75;
+
 	/**
 	 *  Function to sweep expired session from db
-	 */ 
+	 */
 	private function clearExpiredSession( $force = false )
 	{
 		if (!$force) if (rand ( 0, 1000 ) / 1000.0 > self::$SweepRatio) return;
-      
+
 		$timeLimit = time() - self::$inactivityMaxTime;
 		/*
 		 * query to delete expired session from both SESSION and SESSION_DATA table
@@ -86,7 +86,7 @@ class Session
 			SQL("DELETE FROM `SESSION` WHERE `SESSION_ID` = ?",array($id['SESSION_ID']));
 		}
 	}
-	
+
 	/**
 	 * Function to check if sessionID is set for this user or not.
 	 * @throws SessionNotFoundException
@@ -98,9 +98,9 @@ class Session
 			throw new SessionNotFoundException("ERROR: No session is set for this user.");
 		}
 	}
-	
-	
-	
+
+
+
 	/**
 	 * To return the current session ID.
 	 * @return string		The session ID
@@ -112,12 +112,12 @@ class Session
 		{
 			throw new SessionExpired("ERROR: This session has expired.");
 		}
-		
+
 		return $this->session;
 	}
 
 
-	
+
 	/**
 	 * To return the current User ID.
 	 * @return string | NULL
@@ -127,7 +127,7 @@ class Session
 		return $this->userID;
 	}
 
-	
+
 
 	/**
 	 * To create a new Session ID for the given user.
@@ -138,24 +138,24 @@ class Session
 	{
 		if ( ($userID == null) || ($userID == "") )
 			throw new NullUserException("ERROR: UserID cannot be null.");
-		
+
 		$this->userID = $userID;
 		$this->session = randstr(128); //generate a new random string for the session ID of length 32.
-		
+
 		$time = time(); //get the current time.
 		SQL("INSERT INTO SESSION (`SESSION_ID`, `DATE_CREATED`, `LAST_ACTIVITY`, `USERID`) VALUES (?, ?, ?, ?)", array($this->session, $time, $time, $this->userID));
-		
+
 		$this->updateUserCookies();
-		
+
 		/**
 		 * Function to clear expired sessions
 		 */
 		$this->clearExpiredSession();
 		return $this->session;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Function to get the session object from an old sessionID that we receive from the user's cookie.
 	 * @return string | FALSE	Returns the sessionID or FALSE
@@ -165,33 +165,33 @@ class Session
 	{
 		if (!isset($_COOKIE['SESSIONID']))	//If user cannot provide a session ID, then no session is present for this user. Hance return false
 			return FALSE;
-			
+
 		$sessionID = $_COOKIE['SESSIONID'];	//get the session ID from the user cookie
-		
+
 		$result = SQL("SELECT `USERID` FROM SESSION WHERE `SESSION_ID` = ?", array($sessionID));	//match if the session ID received from the user is same as what was issued to them. If same, then the session ID stored in our DB must match with the one we received
 		if (count($result) != 1)	//a suitable match is not found
 		{
 			$this->updateUserCookies(TRUE);		//delete the cookie from user's browser
 			return FALSE;
 		}
-		
+
 		//set local variables
 		$this->session = $sessionID;
 		$this->userID = $result[0]['USERID'];
-		
+
 		//check if the session ID's have expired
 		if ($this->inactivityTimeout() || $this->expireTimeout())
 		{
 			throw new SessionExpired("ERROR: This session has expired.");
 		}
-		
+
 		$this->updateLastActivity();
-				
+
 		return $this->session;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Function to update/delete user session cookies
 	 * @param boolean $deleteCookie		True indicates this function to DELETE the cookie from the user's browser. False indicates this function to CREATE the cookie in user's browser.
@@ -208,7 +208,7 @@ class Session
 		}
 	}
 
-	
+
 
 	/**
 	 * To get all session IDs for the user. Total count of session is also the indication of how many devices the user is currently logged in from because each valid session refers to one device.
@@ -218,16 +218,16 @@ class Session
 	public static function getAllSessions($userID)
 	{
 		$result = SQL("SELECT `SESSION_ID` FROM SESSION WHERE USERID = ?", array($userID));
-		
+
 		if (count($result) != 0)
 		{
 			return $result;
 		}
-		
+
 		return FALSE;
 	}
 
-	
+
 
 	/**
 	 * To store data in current session.
@@ -249,7 +249,7 @@ class Session
 		if (count($this->getData($key)) == 1)
 		{
 			SQL("UPDATE SESSION_DATA SET `VALUE` = ? WHERE `KEY` = ? AND SESSION_ID = ?", array($value, $key, $this->session));
-		} 
+		}
 		else //If the key is not found, then a new record of key=>value pair needs to be created.
 		{
 			SQL("INSERT INTO SESSION_DATA (`SESSION_ID`, `KEY`, `VALUE`) VALUES (?, ?, ?)", array($this->session, $key, $value));
@@ -257,7 +257,7 @@ class Session
 	}
 
 
-	
+
 	/**
 	 * To retrieve data from current session
 	 * @param string $key			The name of the data from which it is referenced
@@ -275,13 +275,13 @@ class Session
 		}
 
 		$this->updateLastActivity();
-		
+
 		$result = SQL("SELECT `KEY`, `VALUE` FROM SESSION_DATA WHERE `SESSION_ID` = ? and `KEY` = ?", array($this->session, $key));
 		return $result;
 	}
 
 
-	
+
 	/**
 	 * To check if inactivity time has passed for this session.
 	 * @return boolean	Returns True if inactivity time has passed. False otherwise
@@ -292,7 +292,7 @@ class Session
 			return TRUE;
 
 		$result = SQL("SELECT `LAST_ACTIVITY` FROM SESSION WHERE `SESSION_ID` = ?", array($this->session));
-		
+
 		if (count($result) == 1)
 		{
 			$lastActivityTime = (int)$result[0]['LAST_ACTIVITY']; //get the last time when the user was active.
@@ -304,7 +304,7 @@ class Session
 				$this->destroySession();
 				return TRUE;
 			}
-			
+
 			return FALSE;
 		}
 		else
@@ -315,7 +315,7 @@ class Session
 	}
 
 
-	
+
 	/**
 	 * To check if expiry time has passed for this session.
 	 * @return boolean	Returns True if the expiry time has passed for this user. False otherwise
@@ -326,7 +326,7 @@ class Session
 			return TRUE;
 
 		$result = SQL("SELECT `DATE_CREATED` FROM SESSION WHERE `SESSION_ID` = ?", array($this->session));
-		
+
 		if (count($result) == 1)
 		{
 			$lastActivityTime = (int)$result[0]['DATE_CREATED']; //get the date when this session was created.
@@ -349,7 +349,7 @@ class Session
 	}
 
 
-	
+
 	/**
 	 * To refresh the session ID of the current session. This will update the last time that the user was active and the session creation date to the current time. The essence is to make the session ID look like it was just created now.
 	 * @return string			Returns the new/current sessionID and update the browser's cookies
@@ -371,7 +371,7 @@ class Session
 		return $this->session;
 	}
 
-	
+
 
 	/**
 	 * To destroy the current Session.
@@ -388,7 +388,7 @@ class Session
 		$this->updateUserCookies(TRUE);
 	}
 
-	
+
 
 	/**
 	 * To destroy all the sessions associated with the current User.
@@ -404,7 +404,7 @@ class Session
 		}
 	}
 
-	
+
 
 	/**
 	 * To promote/demote a session. This essentially destroys the current session ID and issues a new session ID.
@@ -434,13 +434,13 @@ class Session
 		foreach ($result as $arg) {
 			$this->setData($arg['KEY'], $arg['VALUE']);
 		}
-		
+
 		$this->updateUserCookies();
 		return $newSession;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Functoin to get the userID from a sessionID
 	 * @param string $sessionID	The session ID for which matching userID is needed
@@ -449,7 +449,7 @@ class Session
 	public static function getUserIDFromSessionID($sessionID)
 	{
 		$result = SQL("SELECT `USERID` FROM SESSION WHERE `SESSION_ID` = ?", array($sessionID));
-		
+
 		if (count($result) == 1)
 		{
 			return $result[0]['USERID'];
@@ -457,24 +457,24 @@ class Session
 		else
 			return FALSE;
 	}
-	
-	
+
+
 	/**
 	 * Function to update SESSION_ID LastActivity
 	 * @throws SessionNotFoundException	Thrown when trying to store data when no session ID is set
 	 * @throws SessionExpired		Thrown when the session has expired
 	 */
 	public function updateLastActivity()
-	{ 
+	{
 		$this->checkIfSessionIDisSet();
 
 		//check for session expiry.
 		if ($this->inactivityTimeout() || $this->expireTimeout())
 			throw new SessionExpired("ERROR: This session has expired.");
-		
+
 		SQL("UPDATE `SESSION` SET `LAST_ACTIVITY` = ? WHERE `SESSION_ID` = ?",array(time(), $this->session));
 	}
-	 
+
 }
 
 ?>

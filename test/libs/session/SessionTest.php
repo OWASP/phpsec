@@ -24,14 +24,14 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	public $session = array();
 
 
-	
+
 	/**
 	 * User Object Array.
 	 * @var Array
 	 */
 	public $user = array();
 
-	
+
 
 	/**
 	 * Function to be run before every test*() functions.
@@ -44,24 +44,24 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		User::newUserObject("abcd", "resting", "rac130@pitt.edu");
 		User::activateAccount("abcd");
 		$this->user[0] = User::existingUserObject("abcd", "resting");
-		
+
 		//Create users.
 		User::newUserObject("efgh", "resting", "rac130@pitt.edu");
 		User::activateAccount("efgh");
 		$this->user[1] = User::existingUserObject("efgh", "resting");
 
 		//create new sessions associated with each user.
-		$this->session[0] = new Session(); 
-		$this->session[1] = new Session(); 
-		$this->session[2] = new Session(); 
-		
+		$this->session[0] = new Session();
+		$this->session[1] = new Session();
+		$this->session[2] = new Session();
+
 		$this->session[0]->newSession($this->user[0]->getUserID());	//session for user 0.
 		$this->session[1]->newSession($this->user[0]->getUserID());	//session for user 0.
 		$this->session[2]->newSession($this->user[1]->getUserID());	//session for user 1.
 	}
 
 
-	
+
 	/*
 	 * This function will run after each test*() function has run. Its job is to clean up all the mess creted by other functions.
 	 */
@@ -73,13 +73,13 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 			$this->session[0]->destroySession();
 		}
 		catch (\phpsec\SessionExpired $e) {}
-		
+
 		try {
 			$this->session[1]->getSessionID();
 			$this->session[1]->destroySession();
 		}
 		catch (\phpsec\SessionExpired $e) {}
-		
+
 		try {
 			$this->session[2]->getSessionID();
 			$this->session[2]->destroySession();
@@ -90,9 +90,9 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		$this->user[0]->deleteUser();
 		$this->user[1]->deleteUser();
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Function to test if we can get all sessions
 	 */
@@ -101,8 +101,8 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		$this->assertTrue(count(Session::getAllSessions($this->session[0]->getUserID())) == 2);
 	}
 
-	
-	
+
+
 	/**
 	 * To check if storage and retrieval is having properly.
 	 */
@@ -118,7 +118,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		$this->assertTrue($value == $valueReturned); //the stored data must be equal to the retrieved data.
 	}
 
-	
+
 
 	/**
 	 * To check if multiple values can be inserted to a single key.
@@ -142,7 +142,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	
+
 	/**
 	 * To check if NULL is returned if incorrect key is passed to retrive data.
 	 */
@@ -160,7 +160,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	
+
 	/**
 	 * To check if data are only accessible with correct sessions and keys.
 	 */
@@ -185,9 +185,9 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertTrue((count($arrayReturned1) != 0) && (count($arrayReturned2) == 0) && (count($arrayReturned3) == 0));
 	}
-	
-	
-	
+
+
+
 	/**
 	 * To check if inactivityTime is working or not.
 	 */
@@ -197,7 +197,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		$this->assertTrue($this->session[1]->inactivityTimeout()); //By that time, the session must expire.
 	}
 
-	
+
 
 	/**
 	 * To check if expiryTime is working or not.
@@ -208,7 +208,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		$this->assertTrue($this->session[2]->expireTimeout()); //By that time, the session must expire.
 	}
 
-	
+
 
 	/**
 	 * Function to check if rollSession works or not.
@@ -230,7 +230,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	
+
 	/**
 	 * Function to check if refreshSession works.
 	 */
@@ -246,7 +246,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	
+
 	/**
 	 * Function to check if all sessions can be destroyed for the current user.
 	 */
@@ -259,20 +259,20 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertFalse($allSessions);
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Function to check if previous sessionIDs can be revived if their expiry time has not passed.
 	 */
 	public function testExistingSession()
 	{
 		$_COOKIE['SESSIONID'] = $this->session[0]->getSessionID();	//imitate the cookie variable because phpunit can't set cookies in browser.
-		
+
 		$myNewSession = new Session();
 		$sessionID1 = $myNewSession->existingSession();
 		$experiment1 = ($sessionID1 == $this->session[0]->getSessionID());	//Since session not expired, the old and the new session, both must be same.
-		
+
 		time("SET", 1380502880);	//set time to some distant future time so that the session will expire
 		try
 		{
@@ -298,8 +298,8 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		$result = SQL("SELECT `LAST_ACTIVITY` FROM SESSION WHERE `SESSION_ID` = ?", array($this->session[0]->getSessionID()));
 		$sessionActivityTime2 = $result[0]['LAST_ACTIVITY'];
 		$this->assertTrue((int)$sessionActivityTime != (int)$sessionActivityTime2); //the new time for the session must be greater than or equal to the fake time we set.
-	} 
-	
+	}
+
 }
 
 ?>

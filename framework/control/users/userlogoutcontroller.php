@@ -8,7 +8,7 @@ class UserLogoutController extends phpsec\framework\DefaultController
 		{
 			$userSession = new phpsec\Session();
 			$sessionID = $userSession->existingSession();
-			
+
 			if ($sessionID != FALSE)
 			{
 				$userID = \phpsec\Session::getUserIDFromSessionID($sessionID);
@@ -19,7 +19,7 @@ class UserLogoutController extends phpsec\framework\DefaultController
 			{
 				phpsec\User::deleteAuthenticationToken();
 			}
-			
+
 			$this->info .= "You are now logged out." . "<BR>";
 			$nextURL = \phpsec\HttpRequest::Protocol() . "://" . \phpsec\HttpRequest::Host() . \phpsec\HttpRequest::PortReadable() . "/rnj/framework/home";
 			header("Location: {$nextURL}");

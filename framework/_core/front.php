@@ -12,7 +12,7 @@ class FrontController
 {
 	public static $Routes;
 	public static $StaticPrefix="file";
-	
+
 	/**
 	 * Return a list of classes found in a file
 	 * @param string $file
@@ -20,13 +20,13 @@ class FrontController
 	 */
 	protected function GetClasses($file)
 	{
-		
+
 		$php_code = file_get_contents ( $file );
 		$classes = array ();
 		$namespace="";
 		$tokens = token_get_all ( $php_code );
 		$count = count ( $tokens );
-		
+
 		for($i = 0; $i < $count; $i ++)
 		{
 			if ($tokens[$i][0]===T_NAMESPACE)
@@ -49,7 +49,7 @@ class FrontController
 			}
 		}
 		return $classes;
-		//is_subclass_of(class, parent_class,/* allow first param to be string */true) 
+		//is_subclass_of(class, parent_class,/* allow first param to be string */true)
 	}
 	/**
 	 * Starts handling the application
@@ -67,8 +67,8 @@ class FrontController
 			$file=$this->MatchRoutes($Request);
 			return $this->StartController($file);
 		}
-	} 
-	
+	}
+
 	protected function StaticContent($Request)
 	{
 		if (!$path=realpath(__DIR__."/../static/{$Request}")) return false;
@@ -76,10 +76,10 @@ class FrontController
 		if (substr($path,0,strlen($root))!==$root) return false; //LFD attack
 		return \phpsec\DownloadManager::download($path,$path);
 	}
-	
+
 	/**
 	 * Finds the appropriate route among routes array,
-	 * and returns the filename 
+	 * and returns the filename
 	 * @param string $Request
 	 * @throws InvalidWildcardException
 	 * @throws InvalidRouteException
@@ -109,8 +109,8 @@ class FrontController
 			$originalFile=realpath(__DIR__."/../control/")."/{$file}.php";
 			$file=realpath($originalFile);
 			if (!$file) //file not found
-				throw new InvalidRouteException("Route '{$route}' points to a non-existing file '{$originalFile}'"); 
-			
+				throw new InvalidRouteException("Route '{$route}' points to a non-existing file '{$originalFile}'");
+
 			//everything set, return this file
 			break;
 		}
@@ -146,7 +146,7 @@ class FrontController
 		if ($index==-1) //appropriate controller not found
 			throw new InappropriateControllerException("The controller in {$file} should be a subclass of phpsec\\framework\\Controller");
 		$class=$classes[$index];
-		
+
 		if (is_a($class,__NAMESPACE__."\\DefaultController",true)) //default controller instance
 		{
 			$rc=new \ReflectionClass($class);
@@ -157,9 +157,9 @@ class FrontController
 			$controllerObject=new $class;
 		}
 		return $controllerObject->Start();
-	}	
-	
-	
+	}
+
+
 	function NotFound()
 	{
 		$file=__DIR__."/../view/404.php";
