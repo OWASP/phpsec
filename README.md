@@ -31,5 +31,5 @@ PHPSEC is suitable for three group of developers:
 * Shivam Dixit
 * Achim
 * Zaki Akhmad
-* AV Minhaz
+* A V Minhaz
 * Paulo Guerreiro
