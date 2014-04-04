@@ -15,15 +15,15 @@ require_once __DIR__ . "/../../../libs/core/time.php";
 class UserTest extends \PHPUnit_Framework_TestCase
 {
 
-	
-	
+
+
 	/**
 	 * @var User	The object of the user
 	 */
 	private $obj;
 
-	
-	
+
+
 	/**
 	 * Function to be run before every test*() functions.
 	 */
@@ -35,8 +35,8 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		$this->obj = User::existingUserObject("rash", "testing");	//get the existing user object
 	}
 
-	
-	
+
+
 	/**
 	 * This function will run after each test*() function has run. Its job is to clean up all the mess creted by other functions.
 	 */
@@ -45,8 +45,8 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		$this->obj->deleteUser();
 	}
 
-	
-	
+
+
 	/**
 	 * To check the account creation date.
 	 */
@@ -58,9 +58,9 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		//Since the account was created moments ago. The difference must not be greater than rougly 5 seconds
 		$this->assertTrue( (($currentTime - $creationTime) < 5) && (strlen((string)$creationTime) == 10) );
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Function to test if we can get the correct primary email of the user or not.
 	 */
@@ -70,7 +70,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	
+
 	/**
 	 * To check if the passwords are validated on providing passwords.
 	 */
@@ -83,7 +83,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	
+
 	/**
 	 * To check if we get object of an existing user.
 	 */
@@ -96,7 +96,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	
+
 	/**
 	 * Function to check if passwords are reset.
 	 */
@@ -107,7 +107,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 
 		//verify the password with the new password. Note that the new password is still not set.
 		$this->assertFalse($this->obj->verifyPassword($newPassword));
-		
+
 		//set the new password.
 		$this->obj->resetPassword($oldPassword, $newPassword);
 
@@ -116,7 +116,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	
+
 	/**
 	 * To check if password has expired or not.
 	 */
@@ -129,9 +129,9 @@ class UserTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertTrue($this->obj->isPasswordExpired());
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Function to test forceLogIn function.
 	 */
@@ -143,9 +143,9 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		$obj1->deleteUser(); //delete the newly created users.
 		$this->assertTrue($test);
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Function to test accessibility if the account is locked/unlocked.
 	 */
@@ -155,7 +155,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		User::activateAccount("phpsec");		//activate the account
 		User::lockAccount("phpsec");	//lock this user's account
 		$this->assertTrue(User::isLocked("phpsec"));	//test if isLocked() function is working properly
-		
+
 		try
 		{
 			$testUser = User::existingUserObject("phpsec", "owasp");	//try to create an object of this user
@@ -163,18 +163,18 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		catch(\phpsec\UserLocked $e)	//This exception must be thrown
 		{
 			$firstTest = TRUE;	//set the condition to true as exception is thrown
-			
+
 			User::unlockAccount("phpsec");	//unlock the account
 			$testUser = User::existingUserObject("phpsec", "owasp");	//try to create an object of this user
 			$secondTest = ($testUser->getUserID() === "phpsec");	//now since the account is unlocked, all methods must work properly
-			
+
 			$testUser->deleteUser();	//delete this test User
 			$this->assertTrue($firstTest && $secondTest);
 		}
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Function to test accessibility if the account is inactive/active.
 	 */
@@ -188,19 +188,19 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		catch (UserAccountInactive $e)	//exception must be thrown since the account is inactive
 		{
 			$this->assertTrue(TRUE);	//since exception is thrown, the test succeded.
-			
+
 			User::activateAccount("phpsec");		//activate the account
 			$testUser = User::existingUserObject("phpsec", "owasp");		//note that the account is now active. Hence the object will be created successfully.
 			$this->assertTrue($testUser->getUserID() == "phpsec");
-			
+
 			$this->assertTrue(! User::isInactive("phpsec"));
-			
+
 			$testUser->deleteUser();
 		}
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Function to test the "remember-me" functionality.
 	 */
@@ -208,21 +208,21 @@ class UserTest extends \PHPUnit_Framework_TestCase
 	{
 		//enable the function. This will set the AUTH_ID token in DB.
 		User::enableRememberMe($this->obj->getUserID());
-		$result = SQL("SELECT `AUTH_ID` FROM `AUTH_TOKENS` WHERE USERID = ?", array($this->obj->getUserID()));//get the token. 
+		$result = SQL("SELECT `AUTH_ID` FROM `AUTH_TOKENS` WHERE USERID = ?", array($this->obj->getUserID()));//get the token.
 		$_COOKIE['AUTHID'] = $result[0]['AUTH_ID'];	//set the cookie. In real world, this and the above step will be done in browser.
 		time("SET", time() + 100000000);	//set the time to some distant future.
 		$this->assertFalse(User::checkRememberMe());	//test should fail since the time has expired. Also the AUTH_ID token will be deleted from the DB.
-		
+
 		time("RESET");	//reset the clock.
 		User::enableRememberMe($this->obj->getUserID());	//enable the function again.
 		$result = SQL("SELECT `AUTH_ID` FROM `AUTH_TOKENS` WHERE USERID = ?", array($this->obj->getUserID()));	//get the token.
 		$_COOKIE['AUTHID'] = $result[0]['AUTH_ID'];	//set the cookie.
 		$this->assertTrue(User::checkRememberMe() === $this->obj->getUserID());	//the test should pass becaue the token is correct and within time-limit.
-		
+
 		User::deleteAuthenticationToken();
 	}
-	
-	
+
+
 	/**
 	 * Function to test if allows to create a user with an Null ID
 	 * @expectedException phpsec\UserIDInvalid
@@ -232,7 +232,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		BasicPasswordManagement::$hashAlgo = "haval256,5"; //choose a hashing algo
 		User::newUserObject(null, 'testing', "rac130@pitt.edu"); //create a new user
 	}
-	
+
 	/**
 	 * Function to test several userID (newUserObject will use this funcion to determine if throwns a exception
 	 */
@@ -244,7 +244,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		$this->assertTrue(User::isUserIDValid("AbCd"));
 		$this->assertTrue(User::isUserIDValid("A1b2C3d4"));
 		$this->assertTrue(User::isUserIDValid("0A1b2C3d4"));
-	
+
 		$this->assertFalse(User::isUserIDValid(null));
 		$this->assertFalse(User::isUserIDValid(""));
 		$this->assertFalse(User::isUserIDValid(" "));
@@ -254,6 +254,6 @@ class UserTest extends \PHPUnit_Framework_TestCase
 		$this->assertFalse(User::isUserIDValid("##$%"));
 		$this->assertFalse(User::isUserIDValid("0A1b2C3d4 "));
 	}
-	
-	
+
+
 }

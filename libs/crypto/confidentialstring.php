@@ -21,7 +21,7 @@ class Encryption
 {
 
 
-	
+
 	/**
 	 * Cipher to be used for encryption.
 	 * @var string		Name of the cipher
@@ -29,7 +29,7 @@ class Encryption
 	private static $cipher = MCRYPT_RIJNDAEL_256;
 
 
-	
+
 	/**
 	 * Key to be used for encryption/decryption.
 	 * @var string		The key for encryption/decryption
@@ -37,7 +37,7 @@ class Encryption
 	private static $key = "qgyXyjD5YpF";
 
 
-	
+
 	/**
 	 * Mode to be used for encryption/decryption such as "ebc", "cbc" etc.
 	 * @var string		Mode for encryption/decryption
@@ -45,7 +45,7 @@ class Encryption
 	private static $mode = "cbc";
 
 
-	
+
 	/**
 	 * IV to be used for modes other than "ebc".
 	 * @var string		The initial vector for encryption/decryption
@@ -53,7 +53,7 @@ class Encryption
 	private static $iv = "12345678901234567890123456789012";
 
 
-	
+
 	/**
 	 * Function to get the value of cipher.
 	 * @return string	Returns the name/value of the cipher in use
@@ -64,7 +64,7 @@ class Encryption
 	}
 
 
-	
+
 	/**
 	 * Function to get the value of key.
 	 * @return string	Returns the key of the cipher in use
@@ -75,7 +75,7 @@ class Encryption
 	}
 
 
-	
+
 	/**
 	 * Function to get the value of encryption/decryption mode such as "ebc", "cbc" etc.
 	 * @return string	Returns of the mode used in cipher
@@ -86,7 +86,7 @@ class Encryption
 	}
 
 
-	
+
 	/**
 	 * Function to get the value of IV.
 	 * @return string	Returns the IV used for the current cipher

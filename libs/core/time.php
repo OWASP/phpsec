@@ -27,22 +27,22 @@ function time($mode = "CURR", $givenTime = 0)
 
 class Time
 {
-	
+
 	/**
 	 * To keep the user specified time.
 	 * @var int
 	 */
 	private static $currentTime = 0;
-	
-	
+
+
 	/**
 	 * To keep the last time when System time was changed.
 	 * @var int
 	 */
 	private static $lastFalseTimeSet = 0;
-	
-	
-	
+
+
+
 	/**
 	 * To return the current user specified time.
 	 * @return int
@@ -52,11 +52,11 @@ class Time
                 $timeMoved = abs(\time() - Time::$lastFalseTimeSet);	//check how much the clock has moved since the last false time was set.
 		Time::$currentTime += $timeMoved;			//add that moveded time to the current user specified time.
 		Time::$lastFalseTimeSet = \time();
-		
+
 		return Time::$currentTime;
 	}
-	
-	
+
+
 	/**
 	 * Function to set the time to a specified time.
 	 * @param int $time
@@ -65,11 +65,11 @@ class Time
 	{
 		Time::$lastFalseTimeSet = \time();
 		Time::$currentTime = (int)$time;
-		
+
 		return Time::$currentTime;
 	}
-	
-	
+
+
 	/**
 	 * Function to reset the time to the current system time.
 	 */
@@ -77,11 +77,11 @@ class Time
 	{
 		Time::$currentTime = 0;
 		Time::$lastFalseTimeSet = 0;
-		
+
 		return \time();
 	}
-	
-	
+
+
 	/**
 	 * Function to decrease the clock time to the specified time.
 	 * @param int $difference
@@ -90,7 +90,7 @@ class Time
 	{
 		Time::$lastFalseTimeSet = \time();
 		Time::$currentTime = (int)\time() - (int)$difference;
-		
+
 		return Time::$currentTime;
 	}
 }

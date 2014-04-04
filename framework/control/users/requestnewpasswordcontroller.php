@@ -8,7 +8,7 @@ class RequestNewPasswordController extends phpsec\framework\DefaultController
 		{
 			$userSession = new phpsec\Session();
 			$sessionID = $userSession->existingSession();
-			
+
 			if ($sessionID != FALSE)
 			{
 				if (isset($_POST['submit']))
@@ -28,13 +28,13 @@ class RequestNewPasswordController extends phpsec\framework\DefaultController
 
 							return require_once (__DIR__ . "/../../view/default/user/newpassword.php");
 						}
-						
+
 						if ($_POST['pass'] !== $_POST['repass'])
 						{
 							$this->error .= "Your Password and Re-Type Password fields do not match. Please enter the same password twice." . "<BR>";
 							return require_once (__DIR__ . "/../../view/default/user/newpassword.php");
 						}
-						
+
 						$userID = \phpsec\Session::getUserIDFromSessionID($sessionID);
 
 						if ($userID !== FALSE)
@@ -68,7 +68,7 @@ class RequestNewPasswordController extends phpsec\framework\DefaultController
 		{
 			$this->error .= $e->getMessage() . "<BR>";
 		}
-		
+
 		return require_once (__DIR__ . "/../../view/default/user/newpassword.php");
 	}
 }

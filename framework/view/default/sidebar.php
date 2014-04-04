@@ -9,6 +9,6 @@
 		<li><a href='category.php?cid=2'>Books</a></li>
 		<li><a href='category.php?cid=3'>Clothing</a></li>
 		<li><a href='category.php?cid=4'>Electronics</a></li>
-		<li><a href='category.php?cid=5'>Sports</a></li>				
+		<li><a href='category.php?cid=5'>Sports</a></li>
 	</ul>
 </div>

@@ -14,7 +14,7 @@ class TempPassController extends phpsec\framework\DefaultController
 					{
 						$userSession = new phpsec\Session();
 						$userSessionID = $userSession->newSession($_GET['user']);
-						
+
 						$nextLocation = \phpsec\HttpRequest::Protocol() . "://" . \phpsec\HttpRequest::Host() . \phpsec\HttpRequest::PortReadable() . "/rnj/framework/requestnewpassword";
 						header("Location: {$nextLocation}");
 					}
@@ -34,7 +34,7 @@ class TempPassController extends phpsec\framework\DefaultController
 			else if ( (isset($_GET['user'])) && ($_GET['user'] != "") && (isset($_GET['email'])) && ($_GET['email'] != "") && (($_GET['mode'] === 'temppass') || ($_GET['mode'] === 'activation')) )
 			{
 				$tempPass = phpsec\AdvancedPasswordManagement::tempPassword($_GET['user']);
-			
+
 				$message = "Please open the following link in order to complete the process:\n";
 				$message .= \phpsec\HttpRequest::Protocol() . "://" . \phpsec\HttpRequest::Host() . \phpsec\HttpRequest::PortReadable() . "/rnj/framework/temppass?user=" . $_GET['user'] . "&mode=" . $_GET['mode'] ."&verification=" . $tempPass . "\n\n\n";
 				$message .= "Sometimes the email ends up in the Spam folder. So also please check your spam folder in case you didn't receive the email.\n\n";
@@ -52,7 +52,7 @@ class TempPassController extends phpsec\framework\DefaultController
 				{
 					$this->error .= "ERROR: Mail was not send!" . "<BR>";
 				}
-				
+
 				return require_once (__DIR__ . "/../../view/default/user/temppass.php");
 			}
 			else

@@ -16,9 +16,9 @@ require_once(__DIR__ . "/base.php");
  */
 class Database_pdo_sqlite extends DatabaseModel
 {
-	
-	
-	
+
+
+
 	/**
 	 * Constructor of this class. Used for creating a new DB connection and to set PDO modes.
 	 * @param \PDO			The PDO object
@@ -37,8 +37,8 @@ class Database_pdo_sqlite extends DatabaseModel
 		$this->dbh->setAttribute (\PDO::ATTR_ERRMODE, \PDO::ERRMODE_SILENT);	//set PDO attributes
 	}
 
-	
-	
+
+
 	/**
 	 * Destructor of the class. Destroys the PDO object
 	 */
@@ -50,8 +50,8 @@ class Database_pdo_sqlite extends DatabaseModel
 		}
 	}
 
-	
-	
+
+
 	/**
 	 * Function to prepare the query. It prepares an SQL statement to be executed by the PDOStatement::execute() method.
 	 * @param string $query					The string to be executed
@@ -71,11 +71,11 @@ class Database_pdo_sqlite extends DatabaseModel
  */
 class DatabaseStatement_pdo_sqlite extends DatabaseStatementModel
 {
-	
-	
-	
+
+
+
 	/**
-	 * 
+	 *
 	 * @param \phpsec\Database_pdo_sqlite	$db		The object of class \phpsec\Database_pdo_sqlite
 	 * @param string			$query		The query to be executed
 	 */

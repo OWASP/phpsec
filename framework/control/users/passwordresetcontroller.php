@@ -8,13 +8,13 @@ class PasswordResetController extends phpsec\framework\DefaultController
 		{
 			$userSession = new phpsec\Session();
 			$sessionID = $userSession->existingSession();
-			
+
 			if ($sessionID != FALSE)
 			{
 				if (isset($_POST['submit']))
 				{
 					$userID = \phpsec\Session::getUserIDFromSessionID($sessionID);
-				
+
 					if ( (isset($_POST['_x_oldpass'])) && ($_POST['_x_oldpass'] != "") && (isset($_POST['pass'])) && ($_POST['pass'] != "") && (isset($_POST['repass'])) && ($_POST['repass'] != "") )
 					{
 						$config = require_once (__DIR__ . "/../../config/config.php");
@@ -30,7 +30,7 @@ class PasswordResetController extends phpsec\framework\DefaultController
 
 							return require_once(__DIR__ . "/../../view/default/user/passwordreset.php");
 						}
-						
+
 						if ($_POST['pass'] !== $_POST['repass'])
 						{
 							$this->error .= "Your Password and Re-Type Password fields do not match. Please enter the same password twice." . "<BR>";
@@ -78,7 +78,7 @@ class PasswordResetController extends phpsec\framework\DefaultController
 		{
 			$this->error .= $e->getMessage() . "<BR>";
 		}
-		
+
 		return require_once (__DIR__ . "/../../view/default/user/passwordreset.php");
 	}
 }

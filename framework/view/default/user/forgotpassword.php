@@ -10,7 +10,7 @@
 
 	<body>
 		<?php include (__DIR__ . "/../include.php"); ?>
-		
+
 		<div name="forgot-password-div" id="forgot-password-div">
 			<form method="POST" action="" name="forgot-password-form" id="forgot-password-form" onsubmit="return check('forgot-password-form', 'checkForBlanks');">
 				<table name="forgot-password-table" id="forgot-password-table">

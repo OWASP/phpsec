@@ -28,16 +28,16 @@ class DatabaseNotSet extends DatabaseException {}
 class DatabaseManager
 {
 
-	
-	
+
+
 	/**
 	 * Object of DatabaseModel
 	 * @var \phpsec\DatabaseModel
 	 */
 	public static $db = NULL;
 
-	
-	
+
+
 	/**
 	 * Abstraction layer for accessing database using several adapters. Intended support for pdo_mysql, pdo_sqlite, pdo_pgsql for now.
 	 * @param \phpsec\DatabaseConfig $dbConfig		Object of type DatabaseConfig which contains the necessary credentials to connect to DB

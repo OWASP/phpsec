@@ -5,7 +5,7 @@ namespace phpsec;
 
 /**
  * This file contains the configuration Array to test the storage of logs in mails. This configutation Array will contain all of the details required to store the logs in the mail.
- * 
+ *
  * NOTE: THIS IS THE DEFAULT CONFIGURATION FILE.
  */
 return array(

@@ -8,22 +8,22 @@ namespace phpsec\framework;
  * third are generic models, camelCased, which are located inside model folder
  *  e.g someNiceClass would be sought in model/some/nice/class.php
  *  e.g \Some\Namespac3\SomeNiceClass would be sought in model/Some/Namespac3/some/nice/class.php
- *  
- * This also automatically loads phpsec core 
+ *
+ * This also automatically loads phpsec core
  * @author abiusx
  *
  */
 require_once Autoloader::phpsecPath()."/core/loader.php";
 require_once (__DIR__ . "/../config/dbconnection.php");
 
-class Autoloader 
+class Autoloader
 {
 	static function phpsecPath()
 	{
 		return realpath(__DIR__."/../../libs/");
 	}
 	static $PhpsecArray=array(
-			
+
 			"AdvancedPasswordManagement"	=>	"auth/adv_password",
 			"BasicPasswordManagement"	=>	"auth/user",
 			"User"				=>	"auth/user",
@@ -39,7 +39,7 @@ class Autoloader
 	static $FrameworkArray=array(
 			"Controller"					=>	"base/control",
 			"DefaultController"				=>	"base/control",
-			
+
 	);
 	static function autoload($ClassnameWithNamespace)
 	{
@@ -60,10 +60,10 @@ class Autoloader
 				require_once self::phpsecPath()."/".self::$PhpsecArray[$Classname].".php";
 				return true;
 			}
-		}			
+		}
 		return self::GenericAutoload($ClassnameWithNamespace);
 	}
-	
+
 	/**
 	 * This function autoloads models that have the same path as their classname,
 	 * e.g SomeNiceModel would be in model/some/nice/model.php
@@ -86,7 +86,7 @@ class Autoloader
 			require_once $Path;
 			return true;
 		}
-		return false;		
+		return false;
 	}
 }
 spl_autoload_register(__NAMESPACE__."\\Autoloader::autoload");

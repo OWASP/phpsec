@@ -12,9 +12,9 @@ require_once __DIR__ . "/../../../libs/auth/user.php";
 
 class BasicPasswordManagementTest extends \PHPUnit_Framework_TestCase
 {
-	
-	
-	
+
+
+
 	/**
 	 * To check if we can retrieve the static salt.
 	 */
@@ -38,7 +38,7 @@ class BasicPasswordManagementTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	
+
 	/**
 	 * To check if a string as ordered characters.
 	 */
@@ -50,7 +50,7 @@ class BasicPasswordManagementTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	
+
 	/**
 	 * To check if a string as keyboard ordered characters.
 	 */
@@ -62,7 +62,7 @@ class BasicPasswordManagementTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	
+
 	/**
 	 * To check if the string is a phone number.
 	 */
@@ -74,7 +74,7 @@ class BasicPasswordManagementTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	
+
 	/**
 	 * To check if the string contains a phone-pattern.
 	 */
@@ -99,8 +99,8 @@ class BasicPasswordManagementTest extends \PHPUnit_Framework_TestCase
 		);
 	}
 
-	
-	
+
+
 	/**
 	 * Function to check for CORRECT date patterns.
 	 * @dataProvider provideValidDateStrings
@@ -110,8 +110,8 @@ class BasicPasswordManagementTest extends \PHPUnit_Framework_TestCase
 		$this->assertTrue(BasicPasswordManagement::isDate($date));
 	}
 
-	
-	
+
+
 	/**
 	 * Function to check for INCORRECT date patterns.
 	 */
@@ -120,8 +120,8 @@ class BasicPasswordManagementTest extends \PHPUnit_Framework_TestCase
 		$this->assertFalse(BasicPasswordManagement::isDate("rash21-May-rash"));
 	}
 
-	
-	
+
+
 	/**
 	 * To check if the string contains a date.
 	 */
@@ -134,7 +134,7 @@ class BasicPasswordManagementTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	
+
 	/**
 	 * To check if the string contains double words.
 	 */
@@ -146,7 +146,7 @@ class BasicPasswordManagementTest extends \PHPUnit_Framework_TestCase
 		$this->assertFalse(BasicPasswordManagement::containDoubledWords("fishcat"));
 	}
 
-	
+
 
 	/**
 	 * To check if a string contains another string.
@@ -158,7 +158,7 @@ class BasicPasswordManagementTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	
+
 	/**
 	 * To check if we can get the strength of a string.
 	 */
@@ -170,7 +170,7 @@ class BasicPasswordManagementTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	
+
 	/**
 	 * To check if we can generate a random string of given strength.
 	 */
