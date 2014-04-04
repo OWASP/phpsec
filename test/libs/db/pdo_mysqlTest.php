@@ -32,7 +32,7 @@ class Database_pdo_mysql_Test extends \PHPUnit_Framework_TestCase
 	public function tearDown()
 	{
 		$this->database->SQL("DROP TABLE `TEST`");
-		$this->database = NULL;
+		unset($this->database);
 	}
 
 	public function testDatabaseConnection()

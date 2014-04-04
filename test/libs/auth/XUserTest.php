@@ -54,6 +54,8 @@ class XUserTest extends \PHPUnit_Framework_TestCase
 	{
 		$this->xobj->deleteXUser();
 		$this->obj->deleteUser();
+		unset($this->xobj);
+		unset($this->obj);
 	}
 
 

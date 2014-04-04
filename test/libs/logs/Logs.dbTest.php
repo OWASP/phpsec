@@ -26,7 +26,15 @@ class LoggerDbTest extends \PHPUnit_Framework_TestCase
 	{
 		$this->myLogger = new Logger(); //create an instance of the /phpsec/Logger class.
 	}
-
+	
+	/**
+	 * Tears down the fixture, for example, closes a network connection.
+	 * This method is called after a test is executed.
+	 */
+	public function tearDown()
+	{
+		unset($this->myLogger);
+	}
 
 	/**
 	 * Function to test the storage of logs in DB.
