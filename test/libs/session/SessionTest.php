@@ -193,7 +193,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testInactivityTimeout()
 	{
-		time("SET", 1480502880); //set current time to a very far future.
+		time("SET", time() + 86400*1000); //set current time to a very far future.
 		$this->assertTrue($this->session[1]->inactivityTimeout()); //By that time, the session must expire.
 	}
 
@@ -204,7 +204,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testExpireTimeout()
 	{
-		time("SET", 1480502880); //set current time to a very far future.
+		time("SET", time() + 86400*1000); //set current time to a very far future.
 		$this->assertTrue($this->session[2]->expireTimeout()); //By that time, the session must expire.
 	}
 
@@ -273,7 +273,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 		$sessionID1 = $myNewSession->existingSession();
 		$experiment1 = ($sessionID1 == $this->session[0]->getSessionID());	//Since session not expired, the old and the new session, both must be same.
 
-		time("SET", 1380502880);	//set time to some distant future time so that the session will expire
+		time("SET", time() + 86400*100);	//set time to some distant future time so that the session will expire
 		try
 		{
 			$sessionID2 = $myNewSession->existingSession();
