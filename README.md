@@ -1,6 +1,7 @@
 # OWASP PHP Security Project
 
 [![Build Status](https://travis-ci.org/OWASP/phpsec.png?branch=master)](https://travis-ci.org/OWASP/phpsec)
+[![Coverage Status](https://coveralls.io/repos/OWASP/phpsec/badge.png?branch=master)](https://coveralls.io/r/OWASP/phpsec?branch=master)
 
 This is the code and documentation repository for the OWASP PHP Security Project.
 
