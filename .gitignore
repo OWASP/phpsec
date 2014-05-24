@@ -3,3 +3,5 @@ nbproject/
 .project
 .buildpath
 .idea/
+build/
+vendor/
