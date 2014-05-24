@@ -5,3 +5,4 @@ nbproject/
 .idea/
 build/
 vendor/
+config.php
