@@ -15,6 +15,7 @@ before_script:
   - mysql OWASP < SQL/OWASP.sql
   - psql -c 'create database OWASP;' -U postgres
   - composer install --dev --no-interaction
+  - cp libs/config.sample.php libs/config.php
 
 script:
   - mkdir -p build/logs
