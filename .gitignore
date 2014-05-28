@@ -3,3 +3,6 @@ nbproject/
 .project
 .buildpath
 .idea/
+build/
+vendor/
+config.php

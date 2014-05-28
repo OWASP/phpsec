@@ -4,7 +4,7 @@ php:
   - "5.4"
   - "5.3"
   - hhvm
- 
+
 matrix:
     allow_failures:
     - php: hhvm
@@ -13,8 +13,9 @@ before_script:
   - composer self-update
   - mysql -e 'create database OWASP;'
   - mysql OWASP < SQL/OWASP.sql
-  - psql -c 'create database OWASP;' -U postgres
+  - psql -c 'create database "OWASP";' -U postgres
   - composer install --dev --no-interaction
+  - cp libs/config.sample.php libs/config.php
 
 script:
   - mkdir -p build/logs
