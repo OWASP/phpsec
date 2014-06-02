@@ -78,6 +78,12 @@ class Cache extends Header
 		}
 	}
 
+	public static function setNotModified()
+	{
+		if (!Header::isSent())
+			header("Not Modified", true, 304);
+	}
+
 	public static function setEtag($value)
 	{
 		if (!Header::isSent())
@@ -93,5 +99,19 @@ class Cache extends Header
 		return self::setEtag(self::digest($content));
 	}
 
-	
+	public static function checkEtagHit($etag = NULL)
+	{
+		$etagHeader=(isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH']) : false);
+		return $etag == $etagHeader;
+	}
+
+	public static function setEtagAndSupportingHeaders($etag = NULL, $offset = 48 * 60 * 60)
+	{
+		if (!Header::isSent() & !is_null($etag))
+		{
+			self::setEtag($etag);
+			self::setControl(Cache::CONTROL_PUBLIC);
+			self::setExpiration($offset);
+		}
+	}
 }
