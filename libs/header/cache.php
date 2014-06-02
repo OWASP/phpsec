@@ -21,11 +21,18 @@ class Cache extends Header
 	const CONTROL_NO_STORE			=	"no-store";
 	const CONTROL_MUST_REVALIDATE	=	"must-revalidate";
 
+	/**
+	 * Generates hash based on content.
+	 * Uses SHA-1
+	 */
 	public static function digest($content)
 	{
 		return sha1($content);
 	}
 
+	/**
+	 * Sets the `Cache-Control` header
+	 */
 	public static function setControl($value)
 	{
 		if (!Header::isSent())
@@ -36,6 +43,9 @@ class Cache extends Header
 		}
 	}
 
+	/**
+	 * Sets the `Expires` header
+	 */
 	public static function setExpiration($offset)
 	{
 		if (!Header::isSent())
@@ -56,6 +66,7 @@ class Cache extends Header
 	}
 
 	/**
+	 * Sets the `Pragma` header
 	 * Deprecated. Shift to `cache-control`
 	 */
 	public static function setPragma($value)
@@ -68,6 +79,9 @@ class Cache extends Header
 		}
 	}
 
+	/**
+	 * Sets `Cache-Control`,`Pragma` and `Expires` headers to prevent caching
+	 */
 	public static function setNoCache()
 	{
 		if (!Header::isSent())
@@ -78,12 +92,18 @@ class Cache extends Header
 		}
 	}
 
+	/**
+	 * Sets header to return 304 i.e. serve cached content.
+	 */
 	public static function setNotModified()
 	{
 		if (!Header::isSent())
 			header("Not Modified", true, 304);
 	}
 
+	/**
+	 * Sets the `Etag` header
+	 */
 	public static function setEtag($value)
 	{
 		if (!Header::isSent())
@@ -94,17 +114,26 @@ class Cache extends Header
 		}
 	}
 
+	/**
+	 * Sets the `Etag` header by passing content as parameter
+	 */
 	public static function setEtagFromContent($content)
 	{
 		return self::setEtag(self::digest($content));
 	}
 
+	/**
+	 * Checks if `if-none-match` header matches `Etag`
+	 */
 	public static function checkEtagHit($etag = NULL)
 	{
 		$etagHeader=(isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH']) : false);
 		return $etag == $etagHeader;
 	}
 
+	/**
+	 * Sets `Etag`,`Cache-Control`,`Expires` headers
+	 */
 	public static function setEtagAndSupportingHeaders($etag = NULL, $offset = 3600)
 	{
 		if (!Header::isSent() & !is_null($etag))

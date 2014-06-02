@@ -24,12 +24,23 @@ class Header implements HeaderInterface
 			$this->setValue($value);
 	}
 
+	/**
+	 * Generates header object from string
+	 */
 	public static function fromString($headerString)
 	{
 		list($key, $value) = Header::splitHeaderString($headerString);
 		return new static($key, $value);
 	}
 
+	
+	/**
+	 * Splits the header string in `key` and `value` parts.
+	 *
+	 * @param string $headerString
+	 * @return string[] `key` in the first index and `value` in the second.
+	 * @throws Exception\InvalidArgumentException if header does not match with the format ``key:value``
+	 */
 	protected static function splitHeaderString($headerString)
 	{
 		$parts = explode(':', $headerString, 2);
@@ -41,6 +52,9 @@ class Header implements HeaderInterface
 		return $parts;
 	}
 
+	/**
+	 * Validates and sets header key
+	 */
 	protected function setKey($key)
 	{
 		if (!is_string($key) || empty($key))
@@ -69,6 +83,9 @@ class Header implements HeaderInterface
 		return $this->key;
 	}
 
+	/**
+	 * Validates and sets header value
+	 */
 	protected function setValue($value)
 	{
 		$value = (string) $value;
@@ -85,11 +102,19 @@ class Header implements HeaderInterface
 		return $this->value;
 	}
 
+	/**
+	 * Casts key:value pair to a header string
+	 */
 	public function toString()
 	{
 		return $this->getKey() . ': ' . $this->getValue();
 	}
 
+	/**
+	 * Checks if headers have already been sent
+	 * 
+	 * @throws Exception\HeaderException if headers already sent.
+	 */
 	public static function isSent()
 	{
 		if (headers_sent())
