@@ -97,4 +97,9 @@ class Header implements HeaderInterface
 		else
 			return false;
 	}
+
+	public function set()
+	{
+		header($this->toString());
+	}
 }
