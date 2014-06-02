@@ -105,7 +105,7 @@ class Cache extends Header
 		return $etag == $etagHeader;
 	}
 
-	public static function setEtagAndSupportingHeaders($etag = NULL, $offset = 48 * 60 * 60)
+	public static function setEtagAndSupportingHeaders($etag = NULL, $offset = 3600)
 	{
 		if (!Header::isSent() & !is_null($etag))
 		{
