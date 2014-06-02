@@ -3,9 +3,11 @@
 namespace phpsec;
 
 /**
- * Required clasess
+ * Required classes
  */
 require_once(__DIR__ . '/interface.php');
+
+class HeaderException extends \Exception {}
 
 class Header implements HeaderInterface
 {
@@ -86,5 +88,11 @@ class Header implements HeaderInterface
 	public function toString()
 	{
 		return $this->getKey . ': ' . $this->getValue;
+	}
+
+	public static function isSent()
+	{
+		if (headers_sent())
+			throw new HeaderException("Headers already sent.");
 	}
 }
