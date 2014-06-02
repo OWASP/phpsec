@@ -30,7 +30,7 @@ class Cache extends Header
 	{
 		if (!Header::isSent())
 		{
-			$header = new static ("Cache-control", $value);
+			$header = new static ("Cache-Control", $value);
 			$header->set();
 			return $header;
 		}
@@ -40,8 +40,16 @@ class Cache extends Header
 	{
 		if (!Header::isSent())
 		{
-			$date = gmdate ("D, d M Y H:i:s", time() + $offset);
-			$header = new static ("Expires", $date);
+			$header;
+			if (is_string($offset))
+			{
+				$header = new static ("Expires", $offset);
+			}
+			else
+			{
+				$date = gmdate ("D, d M Y H:i:s", time() + $offset);
+				$header = new static ("Expires", $date);
+			}
 			$header->set();
 			return $header;
 		}
@@ -59,6 +67,14 @@ class Cache extends Header
 			return $header;
 		}
 	}
-}
 
-Cache::setControl("max_age=21736");
+	public static function setNoCache()
+	{
+		if (!Header::isSent())
+		{
+			self::setControl(Cache::CONTROL_PRIVATE . ', ' . Cache::CONTROL_NO_CACHE . ', ' . Cache::CONTROL_NO_STORE . ', ' . Cache::CONTROL_MUST_REVALIDATE);
+			self::setPragma(Cache::CONTROL_NO_CACHE);
+			self::setExpiration('0');
+		}
+	}
+}
