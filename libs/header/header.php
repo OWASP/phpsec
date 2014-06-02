@@ -87,7 +87,7 @@ class Header implements HeaderInterface
 
 	public function toString()
 	{
-		return $this->getKey . ': ' . $this->getValue;
+		return $this->getKey() . ': ' . $this->getValue();
 	}
 
 	public static function isSent()
