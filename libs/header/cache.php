@@ -77,4 +77,21 @@ class Cache extends Header
 			self::setExpiration('0');
 		}
 	}
+
+	public static function setEtag($value)
+	{
+		if (!Header::isSent())
+		{
+			$header = new static ("Etag", $value);
+			$header->set();
+			return $header;
+		}
+	}
+
+	public static function setEtagFromContent($content)
+	{
+		return self::setEtag(self::digest($content));
+	}
+
+	
 }
