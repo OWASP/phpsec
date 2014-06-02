@@ -94,5 +94,7 @@ class Header implements HeaderInterface
 	{
 		if (headers_sent())
 			throw new HeaderException("Headers already sent.");
+		else
+			return false;
 	}
 }
