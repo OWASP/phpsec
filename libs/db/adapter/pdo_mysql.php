@@ -31,7 +31,7 @@ class Database_pdo_mysql extends DatabaseModel
 
 		if (count($args) > 1)	//If more than one argument are present, then create a new PDO object
 		{
-			$dbConfig = new DatabaseConfig ('pdo_mysql', $args[0], $args[1], $args[2]);	//get a new DB configuration
+			$dbConfig = new DatabaseConfig ('pdo_mysql', $args[0], $args[1], $args[2],$args[3]);	//get a new DB configuration
 			parent::__construct($dbConfig);		//call the DatabaseModel's constructor to pass the DatabaseConfig object to initialize a new object
 			$this->dbh = new \PDO ("mysql:dbname={$dbConfig->dbname};host={$dbConfig->host};", $dbConfig->username, $dbConfig->password);	//create a new PDO object
 		}
