@@ -41,6 +41,7 @@ class Cache extends Header
 			$header->set();
 			return $header;
 		}
+		return false;
 	}
 
 	/**
@@ -63,6 +64,7 @@ class Cache extends Header
 			$header->set();
 			return $header;
 		}
+		return false;
 	}
 
 	/**
@@ -77,6 +79,7 @@ class Cache extends Header
 			$header->set();
 			return $header;
 		}
+		return false;
 	}
 
 	/**
@@ -89,7 +92,9 @@ class Cache extends Header
 			self::setControl(Cache::CONTROL_PRIVATE . ', ' . Cache::CONTROL_NO_CACHE . ', ' . Cache::CONTROL_NO_STORE . ', ' . Cache::CONTROL_MUST_REVALIDATE);
 			self::setPragma(Cache::CONTROL_NO_CACHE);
 			self::setExpiration('0');
+			return true;
 		}
+		return false;
 	}
 
 	/**
@@ -98,7 +103,11 @@ class Cache extends Header
 	public static function setNotModified()
 	{
 		if (!Header::isSent())
+		{
 			header("Not Modified", true, 304);
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -112,6 +121,7 @@ class Cache extends Header
 			$header->set();
 			return $header;
 		}
+		return false;
 	}
 
 	/**
@@ -141,6 +151,8 @@ class Cache extends Header
 			self::setEtag($etag);
 			self::setControl(Cache::CONTROL_PUBLIC);
 			self::setExpiration($offset);
+			return true;
 		}
+		return false;
 	}
 }
