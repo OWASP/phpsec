@@ -104,8 +104,24 @@ class Cache extends Header
     {
         if (!Header::isSent())
         {
-            header("Not Modified", true, 304);
+            header($_SERVER['SERVER_PROTOCOL'] . ' 304 Not Modified');
             return true;
+        }
+        return false;
+    }
+
+    /**
+     * Sets the Last-Modified header.
+     */
+    public static function setLastModified($time)
+    {
+        if (!Header::isSent())
+        {
+            if (is_numeric($time))
+                $time = gmdate('D, d M Y H:i:s', $time) . ' GMT';
+            $header = new static ("Last-Modified", $time);
+            $header->set();
+            return $header;
         }
         return false;
     }
