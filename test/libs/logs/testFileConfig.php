@@ -10,7 +10,7 @@ namespace phpsec;
  */
 
 return array(
-	"FILENAME" => "myfile.php",
-	"MEDIA" => "FILE",
-	"MODE" => "a",
+    "FILENAME" => "myfile.php",
+    "MEDIA" => "FILE",
+    "MODE" => "a",
 );

@@ -7,20 +7,20 @@ class echofException extends \Exception {}
  */
 function xss_safe($data)
 {
-	if (func_num_args()>1)
-	{
-		$args=func_get_args();
-		$out=array();
-		foreach ($args as $arg)
-			$out[]=xss_safe ($arg);
-		return implode("",$out);
-	}
-	if (defined("ENT_HTML401"))
-		$t=htmlspecialchars($data,ENT_QUOTES | ENT_HTML401,"UTF-8");
-	else
-		$t=htmlspecialchars($data,ENT_QUOTES,"UTF-8");
+    if (func_num_args()>1)
+    {
+        $args=func_get_args();
+        $out=array();
+        foreach ($args as $arg)
+            $out[]=xss_safe ($arg);
+        return implode("",$out);
+    }
+    if (defined("ENT_HTML401"))
+        $t=htmlspecialchars($data,ENT_QUOTES | ENT_HTML401,"UTF-8");
+    else
+        $t=htmlspecialchars($data,ENT_QUOTES,"UTF-8");
 
-	return $t;
+    return $t;
 }
 
 
@@ -33,7 +33,7 @@ function xss_safe($data)
  */
 function exho($data)
 {
-	echo xss_safe($data);
+    echo xss_safe($data);
 }
 /**
  * XSS-safe replacement for echo, with formatting and ability to dump elements and attributes
@@ -42,17 +42,17 @@ function exho($data)
  */
 function echof($string)
 {
-	if (substr_count($string,"?")!==func_num_args()-1)
-		throw new echofException("Number of arguments doesn't match number of ?s in format string.");
-	$out=$string;
-	$args=func_get_args();
-	array_shift($args);
-	foreach ($args as $arg)
-	{
-		$formatPosition=strpos($out,"?");
-		$out=substr($out,0,$formatPosition).xss_safe($arg).substr($out,$formatPosition+1);
-	}
-	echo($out);
+    if (substr_count($string,"?")!==func_num_args()-1)
+        throw new echofException("Number of arguments doesn't match number of ?s in format string.");
+    $out=$string;
+    $args=func_get_args();
+    array_shift($args);
+    foreach ($args as $arg)
+    {
+        $formatPosition=strpos($out,"?");
+        $out=substr($out,0,$formatPosition).xss_safe($arg).substr($out,$formatPosition+1);
+    }
+    echo($out);
 }
 /**
  * Safe printf. Escapes all arguments
@@ -61,14 +61,14 @@ function echof($string)
  */
 function printf($formatString)
 {
-	$args=func_get_args();
-	$flag=0;
-	foreach ($args as &$arg)
-	{
-		if (!$flag++) continue; //skip first arg, format str
-		$arg=xss_safe($arg);
-	}
-	call_user_func_array("\\printf", $args);
+    $args=func_get_args();
+    $flag=0;
+    foreach ($args as &$arg)
+    {
+        if (!$flag++) continue; //skip first arg, format str
+        $arg=xss_safe($arg);
+    }
+    call_user_func_array("\\printf", $args);
 }
 /**
  * Safe vprintf. Escapes all arguments
@@ -78,9 +78,9 @@ function printf($formatString)
  */
 function vprintf($formatString,$args)
 {
-	foreach ($args as &$arg)
-		$arg=xss_safe($arg);
-	call_user_func_array("\\vprintf", array($formatString,$args));
+    foreach ($args as &$arg)
+        $arg=xss_safe($arg);
+    call_user_func_array("\\vprintf", array($formatString,$args));
 }
 
 /**
@@ -90,7 +90,7 @@ function vprintf($formatString,$args)
  */
 function echo_br($data)
 {
-	echo nl2br(xss_safe($data));
+    echo nl2br(xss_safe($data));
 }
 /**
  * exho alias
@@ -99,6 +99,6 @@ function echo_br($data)
  */
 function echos($data)
 {
-	exho($data);
+    exho($data);
 }
 /** @decontaminated_end **/
