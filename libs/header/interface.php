@@ -7,25 +7,25 @@ namespace phpsec;
  */
 interface HeaderInterface
 {
-	/**
-	 * Generates header object from string
-	 */
-	public static function fromString($headerString);
+    /**
+     * Generates header object from string
+     */
+    public static function fromString($headerString);
 
-	/**
-	 * Retrieves header name
-	 */
-	public function getKey();
+    /**
+     * Retrieves header name
+     */
+    public function getKey();
 
-	/**
-	 * Retrieves header value
-	 */
-	public function getValue();
+    /**
+     * Retrieves header value
+     */
+    public function getValue();
 
-	/**
-	 * Returns in the form "key: value"
-	 * 
-	 * @return string
-	 */
-	public function toString();
+    /**
+     * Returns in the form "key: value"
+     * 
+     * @return string
+     */
+    public function toString();
 }
