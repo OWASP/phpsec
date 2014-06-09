@@ -47,6 +47,8 @@ abstract class HttpRequestArray implements \ArrayAccess
 		{
 			if (substr($offset,0,4) === 'HTTP')
 				return new TaintedString($this->data[$offset]);
+			if ($offset == 'SERVER_NAME')
+				return new TaintedString($this->data[$offset]);
 			else
 				return $this->data[$offset];
 		}
@@ -129,9 +131,9 @@ class HttpRequest extends HttpRequestArray
 		if (self::isCLI())
 			return null;
 		if ($QueryString && self::QueryString() )
-			return (self::Protocol()."://".self::ServerName().self::PortReadable().self::Path()."?".self::QueryString());
+			return (self::Protocol()."://".self::Host().self::PortReadable().self::Path()."?".self::QueryString());
 		else
-			return (self::Protocol()."://".self::ServerName().self::PortReadable().self::Path());
+			return (self::Protocol()."://".self::Host().self::PortReadable().self::Path());
 	}
 
 	/**
@@ -195,9 +197,9 @@ class HttpRequest extends HttpRequestArray
 		if (self::isCLI())
 			return self::URL();
 		if (self::isHTTPS())
-			return (self::PROTOCOL_HTTP."://".self::ServerName().self::PortReadable().self::RequestURI());
+			return (self::PROTOCOL_HTTP."://".self::Host().self::PortReadable().self::RequestURI());
 		else
-			return (self::PROTOCOL_HTTPS."://".self::ServerName().self::PortReadable().self::RequestURI());
+			return (self::PROTOCOL_HTTPS."://".self::Host().self::PortReadable().self::RequestURI());
 	}
 
 	/**
