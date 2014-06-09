@@ -16,6 +16,11 @@ abstract class HttpRequestArray implements \ArrayAccess
 {
 	protected $data;
 
+	protected static $tainted = array(
+		'HTTP_*'		=>		'/^HTTP_/',
+		'SERVER_NAME'	=>		'/SERVER_NAME/'
+	);
+
 	public function __construct($data = null)
 	{
 		$this->data = $data;
@@ -45,12 +50,10 @@ abstract class HttpRequestArray implements \ArrayAccess
 		//override them if BaseURL is set (use framework for testing)
 		if (isset($this->data[$offset]))
 		{
-			if (substr($offset,0,4) === 'HTTP')
-				return new TaintedString($this->data[$offset]);
-			if ($offset == 'SERVER_NAME')
-				return new TaintedString($this->data[$offset]);
-			else
-				return $this->data[$offset];
+			foreach (self::$tainted as $pattern)
+				if (preg_match($pattern, $offset))
+					return new TaintedString($this->data[$offset]);
+			return $this->data[$offset];
 		}
 		else
 			return NULL;
