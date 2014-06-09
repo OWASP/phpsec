@@ -106,9 +106,9 @@ class Rand
      * @param int $Length
      * @return String
      */
-    public static function randStr($Length=32)
+    public static function randStr($length=32)
     {
-        return substr(hash("sha512",  Rand::randRange()),0,$Length);
+        return substr(bin2hex(openssl_random_pseudo_bytes($length)), 0, $length);
     }
 }
 
