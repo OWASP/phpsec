@@ -9,7 +9,7 @@ OWASP PHP Security Project is an effort by a group of PHP developers in securing
 
 ## What is PHPSEC?
 
-On top of a collcetion of libraries and tools, PHPSEC contains a sample framework to demonstrate proper usage of the tools and libraries, as well as guidelining new PHP projects. It can also be easily merged with existing PHP code, because it is both decoupled and flexible. Proper usage of PHPSEC will result in the target system being much more secure.
+On top of a collection of libraries and tools, PHPSEC contains a sample framework to demonstrate proper usage of the tools and libraries, as well as guidelining new PHP projects. It can also be easily merged with existing PHP code, because it is both decoupled and flexible. Proper usage of PHPSEC will result in the target system being much more secure.
 
 ## Why PHPSEC?
 
@@ -17,7 +17,7 @@ PHPSEC is suitable for three group of developers:
 
 * Framework developers can use the libraries and tools to strengthen their framework security.
 * PHP application developers can use the library and tools to enhance their application security.
-* Novice PHP developers can use the tools and libraries to create secure applications from scratch
+* Novice PHP developers can use the tools and libraries to create secure applications from scratch.
 
 ## Links
 
