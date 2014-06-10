@@ -626,7 +626,7 @@ class User extends BasicPasswordManagement
 
 
 	/**
- 	 * To get the date when the user account was created. The value returned is the UNIX timestamp.
+ 	 * To get the timestamp of last login by the user. The value returned is the UNIX timestamp.
  	 * @return int
  	 */
  	public function getLastLoginDate()
