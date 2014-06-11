@@ -118,7 +118,7 @@ class Header implements HeaderInterface
     public static function isSent()
     {
         if (headers_sent())
-            throw new HeaderException("Headers already sent.");
+            return true;
         else
             return false;
     }
