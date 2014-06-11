@@ -151,7 +151,7 @@ class Cache extends Header
     /**
      * Checks if `if-none-match` header matches `Etag`
      */
-    public static function checkEtagHit($etag = NULL)
+    public static function doesGivenEtagMatchHttpEtag($etag = NULL)
     {
         $etagHeader=(isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH']) : false);
         return $etag == $etagHeader;
