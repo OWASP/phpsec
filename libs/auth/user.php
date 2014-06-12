@@ -615,10 +615,10 @@ class User extends BasicPasswordManagement
 
 
     /**
-     * To get the date when the user account was created. The value returned is the UNIX timestamp.
+     * To get the timestamp when the user account was created. The value returned is the UNIX timestamp.
      * @return int
      */
-    public function getAccountCreationDate()
+    public function getAccountCreationTimestamp()
     {
         $result = SQL("SELECT `ACCOUNT_CREATED` FROM USER WHERE USERID = ?", array($this->userID));
         return $result[0]['ACCOUNT_CREATED'];
@@ -638,7 +638,7 @@ class User extends BasicPasswordManagement
      * To get the timestamp of last login by the user. The value returned is the UNIX timestamp.
      * @return int
      */
-    public function getLastLoginDate()
+    public function getLastLoginTimestamp()
     {
         $result = SQL("SELECT `LAST_LOGIN` FROM `USER` WHERE `USERID` = ?", array($this->userID));
         return $result[0]['LAST_LOGIN'];
