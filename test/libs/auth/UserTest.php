@@ -50,10 +50,10 @@ class UserTest extends \PHPUnit_Framework_TestCase
     /**
      * To check the account creation date.
      */
-    public function testGetAccountCreationDate()
+    public function testGetAccountCreationTimestamp()
     {
         $currentTime = time("SYS"); //get current time.
-        $creationTime = $this->obj->getAccountCreationDate();
+        $creationTime = $this->obj->getAccountCreationTimestamp();
 
         //Since the account was created moments ago. The difference must not be greater than rougly 5 seconds
         $this->assertTrue( (($currentTime - $creationTime) < 5) && (strlen((string)$creationTime) == 10) );
