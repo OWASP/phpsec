@@ -59,6 +59,19 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue( (($currentTime - $creationTime) < 5) && (strlen((string)$creationTime) == 10) );
     }
 
+    /**
+     * To check the last login date.
+     */
+    public function testGetLastLoginTimestamp()
+    {
+        $currentTime = time("SYS"); //get current time.
+        $loginTime = $this->obj->getLastLoginTimestamp();
+
+        //Since the account was accessed moments ago. The difference must not be greater than rougly 5 seconds
+        $this->assertTrue( (($currentTime - $loginTime) < 5) && (strlen((string)$loginTime) == 10) );
+    }
+
+
 
 
     /**
