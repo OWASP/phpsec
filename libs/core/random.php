@@ -108,7 +108,18 @@ class Rand
      */
     public static function randStr($length=32)
     {
-        return substr(bin2hex(openssl_random_pseudo_bytes($length)), 0, $length);
+        if (function_exists("openssl_random_pseudo_bytes"))
+        {
+            return substr(bin2hex(openssl_random_pseudo_bytes($length)), 0, $length);
+        }
+        else
+        {
+            $characters = '0123456789abcdefghijklmnopqrstuvwxyz';
+            $str = '';
+            for ($i=0; $i < $length; $i++)
+                $str .= $characters[mt_rand(0, strlen($characters)-1)];
+            return $str;
+        }    
     }
 }
 
