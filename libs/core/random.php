@@ -112,14 +112,21 @@ class Rand
         {
             return substr(bin2hex(openssl_random_pseudo_bytes($length)), 0, $length);
         }
-        else
+
+        if (function_exists('mcrypt_create_iv'))
         {
-            $characters = '0123456789abcdefghijklmnopqrstuvwxyz';
-            $str = '';
-            for ($i=0; $i < $length; $i++)
-                $str .= $characters[mt_rand(0, strlen($characters)-1)];
-            return $str;
-        }    
+            return substr(bin2hex(mcrypt_create_iv($length, MCRYPT_DEV_URANDOM)), 0, $length);
+        }
+
+        $sha = ''; $rnd = '';
+        for ($i = 0; $i < $length; $i++)
+        {
+            $sha = hash('sha256', $sha.mt_rand());
+            $char = mt_rand(0,62);
+            $rnd .= $sha[$char];
+        }
+
+        return $rnd;
     }
 }
 
