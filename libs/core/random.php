@@ -108,11 +108,13 @@ class Rand
      */
     public static function randStr($length=32)
     {
+        /* Use `openssl_random_psuedo_bytes` if available; PHP5 >= 5.3.0 */
         if (function_exists("openssl_random_pseudo_bytes"))
         {
             return substr(bin2hex(openssl_random_pseudo_bytes($length)), 0, $length);
         }
 
+        /* Fall back to `mcrypt_create_iv`; PHP4, PHP5 */
         if (function_exists('mcrypt_create_iv'))
         {
             return substr(bin2hex(mcrypt_create_iv($length, MCRYPT_DEV_URANDOM)), 0, $length);
