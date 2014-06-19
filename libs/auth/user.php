@@ -30,6 +30,12 @@ class BasicPasswordManagement
      */
     public static $passwordStrength = 0.5;
 
+    protected static $keyboardSets = array(
+        'qwerty'    =>      '1234567890qwertyuiopasdfghjklzxcvbnm',
+        'azerty'    =>      '1234567890azertyuiopqsdfghjklmwxcvbn',
+        'qwertz'    =>      '1234567890qwertzuiopasdfghjklyxcvbnm',
+    );
+
 
 
     /**
@@ -141,13 +147,18 @@ class BasicPasswordManagement
         $j = strlen($string);
 
         //group all the characters into length 1, and calculate their positions. If the positions match with the value $keyboardSet, then they contain keyboard ordered characters.
-        $str = implode('', array_map(function($m) use (&$i, &$j)
+        foreach (static::$keyboardSets as $set)
         {
-            $keyboardSet="1234567890qwertyuiopasdfghjklzxcvbnm";
-            return ((strpos($keyboardSet,$m[0]) + $j--) ) . ((strpos($keyboardSet,$m[0]) + $i++) );
-        }, str_split($string, 1)));
+            $str = implode('', array_map(function($m) use (&$i, &$j, $set)
+            {
+                return ((strpos($set,$m[0]) + $j--) ) . ((strpos($set,$m[0]) + $i++) );
+            }, str_split($string, 1)));
 
-        return \preg_match('#(..)(..\1){' . ($length - 1) . '}#', $str) == true;
+            if (\preg_match('#(..)(..\1){' . ($length - 1) . '}#', $str) == true)
+                return true;
+        }
+
+        return false;
     }
 
 
