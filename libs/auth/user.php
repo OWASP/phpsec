@@ -34,6 +34,7 @@ class BasicPasswordManagement
         'qwerty'    =>      '1234567890qwertyuiopasdfghjklzxcvbnm',
         'azerty'    =>      '1234567890azertyuiopqsdfghjklmwxcvbn',
         'qwertz'    =>      '1234567890qwertzuiopasdfghjklyxcvbnm',
+        'dvorak'    =>      '1234567890pyfgcrlaoeuidhtnsqjkxbmwvz'
     );
 
 
