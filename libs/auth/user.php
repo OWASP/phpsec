@@ -30,6 +30,11 @@ class BasicPasswordManagement
      */
     public static $passwordStrength = 0.5;
 
+
+    /**
+     * Set of supported keyboard layouts for password strength detection
+     * @var array
+     */
     protected static $keyboardSets = array(
         'qwerty'    =>      '1234567890qwertyuiopasdfghjklzxcvbnm',
         'azerty'    =>      '1234567890azertyuiopqsdfghjklmwxcvbn',
