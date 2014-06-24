@@ -33,7 +33,7 @@ class Header implements HeaderInterface
         return new static($key, $value);
     }
 
-    
+
     /**
      * Splits the header string in `key` and `value` parts.
      *
@@ -75,7 +75,6 @@ class Header implements HeaderInterface
             throw new Exception\InvalidArgumentException('Header name must be a valid RFC 2616 (section 4.2) field-name.');
 
         $this->key = $key;
-        return $this;
     }
 
     public function getKey()
@@ -94,7 +93,6 @@ class Header implements HeaderInterface
             $value = '';
 
         $this->value = $value;
-        return $this;
     }
 
     public function getValue()
@@ -112,7 +110,7 @@ class Header implements HeaderInterface
 
     /**
      * Checks if headers have already been sent
-     * 
+     *
      * @throws Exception\HeaderException if headers already sent.
      */
     public static function isSent()
