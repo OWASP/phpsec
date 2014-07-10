@@ -6,3 +6,4 @@ nbproject/
 build/
 vendor/
 config.php
+libs/core/i18n/cache/*.php
