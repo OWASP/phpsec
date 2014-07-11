@@ -33,4 +33,17 @@ class i18n
         if ($className != NULL)
             $this->className = $className;
     }
+
+    protected function compile($config, $prefix = '')
+    {
+        $code = '';
+        foreach ($config as $key => $value)
+        {
+            if (is_array($value))
+                $code .= $this->compile($value, $prefix . $key . $this->sectionSeperator);
+            else
+                $code .= 'const ' . $prefix . $key . ' = \'' . str_replace('\'', '\\\'', $value) . "';\n";
+        }
+        return $code;
+    }
 }
