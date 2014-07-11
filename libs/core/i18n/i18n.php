@@ -63,6 +63,9 @@ class i18n
 
         $this->userLangs = array_unique($this->userLangs);
 
+        foreach ($this->userLangs as $key => $value)
+            $this->userLangs[$key] = preg_replace('/[^a-zA-Z0-9_-]/', '', $value); // only allow a-z, A-Z and 0-9
+
         $this->appliedLang = NULL;
 
         foreach ($this->userLangs as $lang)
