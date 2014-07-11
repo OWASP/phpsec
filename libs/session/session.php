@@ -179,6 +179,11 @@ class Session
         $this->session = $sessionID;
         $this->userID = $result[0]['USERID'];
 
+        $result = SQL("SELECT `KEY`, `VALUE` FROM SESSION_DATA WHERE `SESSION_ID` = ?", array($this->session));
+        foreach ($result as $arr) {
+            $_SESSION[$arr['KEY']] = $arr['VALUE'];
+        }
+
         //check if the session ID's have expired
         if ($this->inactivityTimeout() || $this->expireTimeout())
         {
@@ -254,6 +259,9 @@ class Session
         {
             SQL("INSERT INTO SESSION_DATA (`SESSION_ID`, `KEY`, `VALUE`) VALUES (?, ?, ?)", array($this->session, $key, $value));
         }
+
+        // Store values in global session vars for easy retrieval
+        $_SESSION[$key] = $value;
     }
 
 
