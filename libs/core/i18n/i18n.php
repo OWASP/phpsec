@@ -16,6 +16,16 @@ class i18n
 
     protected $cachePath = '/cache/';
 
+    protected $sectionSeperator = '_';
+
+    protected $userLangs = array();
+
+    protected $appliedLang = NULL;
+
+    protected $langFilePath = NULL;
+
+    protected $cacheFilePath = NULL;
+
     public function __construct($filePath = NULL, $cachePath = NULL, $defaultLang = NULL, $className = NULL)
     {
         $this->filePath = $this->basePath . $this->filePath;
@@ -32,6 +42,54 @@ class i18n
 
         if ($className != NULL)
             $this->className = $className;
+
+        $this->init();
+    }
+
+    public function init()
+    {
+        $this->userLangs = array();
+
+        if ($this->forcedLang != NULL)
+            $this->userLangs[] = $this->forcedLang;
+
+        if (isset($_SESSION['lang']) && is_string($_SESSION['lang']))
+            $this->userLangs[] = $_SESSION['lang'];
+
+        $this->userLangs[] = $this->defaultLang;
+
+        $this->userLangs = array_unique($this->userLangs);
+
+        $this->appliedLang = NULL;
+
+        foreach ($this->userLangs as $lang)
+        {
+            $this->langFilePath = str_replace('{LANGUAGE}', $lang, $this->filePath);
+            if (file_exists($this->langFilePath)) {
+                $this->appliedLang = $lang;
+                break;
+            }
+        }
+        if ($this->appliedLang == NULL)
+            throw new \Exception('No language file was found.');
+
+        $this->cacheFilePath = $this->cachePath . '/' . md5_file($this->langFilePath) . '_' . $this->appliedLang . '.cache.php';
+
+        if (!file_exists($this->cacheFilePath) || filemtime($this->cacheFilePath) < filemtime($this->langFilePath))
+        {
+            $config = parse_ini_file($this->langFilePath, true);
+
+            $compiled = "<?php class " . $this->className . " {\n";
+            $compiled .= $this->compile($config);
+            $compiled .= 'public static function __callStatic($string, $args) {' . "\n";
+            $compiled .= 'vprintf(constant("self::" . $string), $args);' . "\n";
+            $compiled .= "}\n}";
+
+            file_put_contents($this->cacheFilePath, $compiled);
+            chmod($this->cacheFilePath, 0644);
+        }
+
+        require_once $this->cacheFilePath;
     }
 
     protected function compile($config, $prefix = '')
