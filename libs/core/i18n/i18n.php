@@ -53,6 +53,9 @@ class i18n
         if ($this->forcedLang != NULL)
             $this->userLangs[] = $this->forcedLang;
 
+        if (isset($_GET['lang']) && is_string($_GET['lang']))
+            $this->userLangs[] = $_GET['lang'];
+
         if (isset($_SESSION['lang']) && is_string($_SESSION['lang']))
             $this->userLangs[] = $_SESSION['lang'];
 
