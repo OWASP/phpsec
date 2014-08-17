@@ -2,6 +2,8 @@
 
 namespace phpsec;
 
+require __DIR__ . '/../../core/random.php';
+
 class CSRFException extends \Exception {}
 
 class CSRF
@@ -45,10 +47,12 @@ class CSRF
      */
     public function verifyRequest()
     {
-        if (!isset($_POST[self::$namespace]) || !$this->isValidToken($_POST[self::$namespace]))
-        {
+        $check = !isset($_POST[self::$namespace]) || !$this->isValidToken($_POST[self::$namespace]);
+
+        $this->refreshToken();
+
+        if ($check)
             throw new CSRFException("CSRF Validation Failed");
-        }
         else
             return true;
     }
@@ -62,7 +66,7 @@ class CSRF
 
         if ($token === false)
         {
-            $token = md5(uniqid(rand(), TRUE));
+            $token = Rand::randStr(32);
             $this->writeTokenToSession($token);
         }
     }
@@ -89,5 +93,15 @@ class CSRF
     private function writeTokenToSession($token)
     {
         $_SESSION[self::$namespace] = $token;
+    }
+
+    /**
+     * Refresh token stored in session
+     */
+    private function refreshToken()
+    {
+        unset($_SESSION[self::$namespace]);
+
+        $this->setToken();
     }
 }
