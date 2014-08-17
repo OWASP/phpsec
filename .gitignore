@@ -7,3 +7,4 @@ build/
 vendor/
 config.php
 myfile.php
+libs/core/i18n/cache/*.php
