@@ -3,7 +3,7 @@
 ##Form
 
 ```php
-require 'libs/form/csrf.php';
+require 'libs/form/csrf/csrf.php';
 $csrf = new phpsec\CSRF();
 ```
 
@@ -17,7 +17,7 @@ $csrf = new phpsec\CSRF();
 ##Validation
 
 ```php
-require 'libs/form/csrf.php';
+require 'libs/form/csrf/csrf.php';
 $csrf = new phpsec\CSRF();
 if ($csrf->verifyRequest() === true)
 {
