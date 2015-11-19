@@ -44,8 +44,12 @@ final class Rand
      * @param int $max
      * @return number
      */
-    public static function randRange($min = 0, $max = PHP_INT_MAX)
+    public static function randRange($min = 0, $max = null)
     {
+        if (null === $max) {
+            $max = PHP_INT_MAX;
+        }
+
         return random_int($min, $max);
     }
 
