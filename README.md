@@ -7,6 +7,12 @@ This is the code and documentation repository for the OWASP PHP Security Project
 
 OWASP PHP Security Project is an effort by a group of PHP developers in securing PHP web applications, using a collection of decoupled flexible secure PHP libraries, as well as a collection of PHP tools.
 
+# Warning: Immature code base
+
+This project recently didn't receive much attention from developers, there are known bugs and security problems.
+
+Using this project probably isn't advisable for your production code.
+
 ## What is PHPSEC?
 
 On top of a collection of libraries and tools, PHPSEC contains a sample framework to demonstrate proper usage of the tools and libraries, as well as guidelining new PHP projects. It can also be easily merged with existing PHP code, because it is both decoupled and flexible. Proper usage of PHPSEC will result in the target system being much more secure.
