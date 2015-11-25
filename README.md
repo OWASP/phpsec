@@ -1,4 +1,4 @@
-# OWASP PHP Security Project
+# ABANDONED: OWASP PHP Security Project
 
 The OWASP PHP Security Project was an effort by a group of PHP developers to securing PHP web applications, using a collection of decoupled flexible secure PHP libraries, as well as a collection of PHP tools.
 
