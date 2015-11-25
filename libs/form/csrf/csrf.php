@@ -30,7 +30,7 @@ class CSRF
      */
     public function isValidToken($token)
     {
-        return ($token === $this->getToken());
+        return hash_equals($token, $this->getToken());
     }
 
     /**

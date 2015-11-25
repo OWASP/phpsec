@@ -1,5 +1,8 @@
 {   
 	"require-dev": {
         "satooshi/php-coveralls": ">=0.6"
-    }
+    },
+	"require": {
+		"paragonie/random_compat": "^1.1"
+	}
 }
