@@ -1,29 +1,12 @@
 # OWASP PHP Security Project
 
-[![Build Status](https://travis-ci.org/OWASP/phpsec.png?branch=master)](https://travis-ci.org/OWASP/phpsec)
-[![Coverage Status](https://coveralls.io/repos/OWASP/phpsec/badge.png?branch=master)](https://coveralls.io/r/OWASP/phpsec?branch=master)
+The OWASP PHP Security Project was an effort by a group of PHP developers to securing PHP web applications, using a collection of decoupled flexible secure PHP libraries, as well as a collection of PHP tools.
 
-This is the code and documentation repository for the OWASP PHP Security Project.
+Unfortunately, due to a number of circumstances, the project did not manage to meet these objectives.
 
-OWASP PHP Security Project is an effort by a group of PHP developers in securing PHP web applications, using a collection of decoupled flexible secure PHP libraries, as well as a collection of PHP tools.
+Because the code base that was under development was full of serious security issues, the decision was made to delete this repository. The hope is that this will prevent developers from using the code or attempting to learn from it.
 
-# Warning: Immature code base
-
-This project recently didn't receive much attention from developers, there are known bugs and security problems.
-
-Using this project probably isn't advisable for your production code.
-
-## What is PHPSEC?
-
-On top of a collection of libraries and tools, PHPSEC contains a sample framework to demonstrate proper usage of the tools and libraries, as well as guidelining new PHP projects. It can also be easily merged with existing PHP code, because it is both decoupled and flexible. Proper usage of PHPSEC will result in the target system being much more secure.
-
-## Why PHPSEC?
-
-PHPSEC is suitable for three group of developers:
-
-* Framework developers can use the libraries and tools to strengthen their framework security.
-* PHP application developers can use the library and tools to enhance their application security.
-* Novice PHP developers can use the tools and libraries to create secure applications from scratch.
+If you really do need to retrieve any of the code that once lived here, you can use the repository history to find it. However, we strongly recommend that you seek an alternative.
 
 ## Links
 
