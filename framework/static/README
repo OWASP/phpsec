@@ -1,6 +1,0 @@
-This folder should contain the static content of the application,
-i.e css, javascript, images, downloadable contents which are
-fully static (no generated content, no access control).
-You should put content that needs access control (e.g profile images,
-confidential downlodable files, etc.) in another folder and
-use DownloadManager class to serve them after access control.
