@@ -1,4 +1,9 @@
 <?php
+
+IMPORTANT! Do not use this code. Static IVs and static keys are highly insecure. Also do not unserialize trusted objects
+Keys should be generated using secure random, and so should IVs.
+See https://gist.github.com/paragonie-scott/91893fdb18ee4d1a1b95
+
 namespace phpsec;
 
 
