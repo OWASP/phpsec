@@ -1,5 +1,7 @@
 # ABANDONED: OWASP PHP Security Project
 
+## You can still find the [old source tree](https://github.com/OWASP/phpsec/tree/1999edc10a3b755ff2b17bb78376bd53dd40d192), but please be careful. There are many [known issues](https://github.com/OWASP/phpsec/issues).
+
 The OWASP PHP Security Project was an effort by a group of PHP developers to help secure PHP web applications. The aim was to provide a collection of decoupled, flexible, secure PHP libraries, as well as a collection of PHP tools.
 
 Unfortunately, due to a number of circumstances, the project did not manage to meet these objectives.
